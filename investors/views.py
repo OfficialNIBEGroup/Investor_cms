@@ -25,13 +25,85 @@ from .models import (
     AuditLog,
 )
 
-def log_audit(request, title, section, action, document_id=None):
-    """Save an audit log entry."""
+AUDIT_ACTION_MAP = {
+    "created": "uploaded",
+    "create": "uploaded",
+    "upload": "uploaded",
+    "uploaded": "uploaded",
+    "updated": "edited",
+    "update": "edited",
+    "edit": "edited",
+    "edited": "edited",
+    "deleted": "deleted",
+    "delete": "deleted",
+}
+
+
+def normalize_audit_action(action):
+    """Map free-form action labels to AuditLog choices."""
+    key = (action or "").strip().lower()
+    return AUDIT_ACTION_MAP.get(key, key or "uploaded")
+
+
+def snapshot_document(obj):
+    """Capture a comparable dict of document field values."""
+    skip = {"id", "created_at", "updated_at", "display_order", "published"}
+    data = {}
+    for field in obj._meta.fields:
+        name = field.name
+        if name in skip:
+            continue
+        value = getattr(obj, name)
+        if name == "pdf_file":
+            data[name] = getattr(value, "name", "") if value else ""
+            continue
+        if hasattr(value, "isoformat"):
+            value = value.isoformat()
+        elif value is None:
+            value = ""
+        else:
+            value = str(value).strip()
+        data[name] = value
+    return data
+
+
+def describe_document_changes(old, new, pdf_replaced=False):
+    """Build a short human-readable summary of what changed."""
+    changes = []
+    keys = list(old.keys())
+    for key in new.keys():
+        if key not in keys:
+            keys.append(key)
+
+    for key in keys:
+        if key == "pdf_file":
+            continue
+        before = old.get(key, "")
+        after = new.get(key, "")
+        if before == after:
+            continue
+        label = key.replace("_", " ").title()
+        if before in ("", None) and after:
+            changes.append(f"{label} set to '{after}'")
+        elif after in ("", None) and before:
+            changes.append(f"{label} cleared (was '{before}')")
+        else:
+            changes.append(f"{label} changed from '{before}' to '{after}'")
+
+    if pdf_replaced:
+        changes.append("PDF file replaced")
+
+    return "; ".join(changes) if changes else "Document details updated"
+
+
+def log_audit(request, title, section, action, document_id=None, details=""):
+    """Save an audit log entry with a normalized action."""
     try:
         AuditLog.objects.create(
             document_title=title or "Untitled",
             section=section or "",
-            action=action,
+            action=normalize_audit_action(action),
+            details=details or "",
             performed_by=request.user.username if request.user.is_authenticated else "System",
             document_id=document_id,
         )
@@ -1204,22 +1276,30 @@ def update_investor_document(request):
 
     try:
         document_id = int(document_id)
+        obj = None
+        old_snapshot = {}
+
+        def begin_update(model):
+            nonlocal old_snapshot
+            document = model.objects.get(id=document_id)
+            old_snapshot = snapshot_document(document)
+            return document
 
         # -------------------------------------------------------
         # Helper to update common fields
         # -------------------------------------------------------
-        def update_common(obj):
-            obj.title = title
-            obj.external_url = external_url
+        def update_common(document):
+            document.title = title
+            document.external_url = external_url
             if pdf_file:
-                obj.pdf_file = pdf_file
-            obj.save()
+                document.pdf_file = pdf_file
+            document.save()
 
         # -------------------------------------------------------
         # ANNUAL REPORT
         # -------------------------------------------------------
         if section == "annual_report":
-            obj = AnnualReport.objects.get(id=document_id)
+            obj = begin_update(AnnualReport)
             obj.financial_year = request.POST.get("financial_year", "").strip()
             update_common(obj)
 
@@ -1227,7 +1307,7 @@ def update_investor_document(request):
         # FINANCIAL RESULT
         # -------------------------------------------------------
         elif section == "financial_result":
-            obj = FinancialResult.objects.get(id=document_id)
+            obj = begin_update(FinancialResult)
             obj.financial_year = request.POST.get("financial_year", "").strip()
             obj.quarter = request.POST.get("quarter", "").strip()
             release = request.POST.get("release_date") or None
@@ -1238,7 +1318,7 @@ def update_investor_document(request):
         # ANNUAL RETURN
         # -------------------------------------------------------
         elif section == "annual_return":
-            obj = AnnualReturn.objects.get(id=document_id)
+            obj = begin_update(AnnualReturn)
             obj.financial_year = request.POST.get("financial_year", "").strip()
             update_common(obj)
 
@@ -1246,7 +1326,7 @@ def update_investor_document(request):
         # CORPORATE GOVERNANCE
         # -------------------------------------------------------
         elif section == "corporate_governance":
-            obj = CorporateGovernance.objects.get(id=document_id)
+            obj = begin_update(CorporateGovernance)
             obj.financial_year = request.POST.get("financial_year", "").strip()
             obj.quarter = request.POST.get("quarter", "").strip()
             update_common(obj)
@@ -1255,7 +1335,7 @@ def update_investor_document(request):
         # SHAREHOLDING PATTERN
         # -------------------------------------------------------
         elif section == "shareholding_pattern":
-            obj = ShareholdingPattern.objects.get(id=document_id)
+            obj = begin_update(ShareholdingPattern)
             obj.financial_year = request.POST.get("financial_year", "").strip()
             obj.quarter = request.POST.get("quarter", "").strip()
             update_common(obj)
@@ -1264,7 +1344,7 @@ def update_investor_document(request):
         # SHAREHOLDER NOTICE
         # -------------------------------------------------------
         elif section == "shareholder_notice":
-            obj = ShareholderNotice.objects.get(id=document_id)
+            obj = begin_update(ShareholderNotice)
             obj.financial_year = request.POST.get("financial_year", "").strip()
             obj.notice_type = request.POST.get("notice_type", "").strip()
             obj.disclosure_date = request.POST.get("disclosure_date") or None
@@ -1275,7 +1355,7 @@ def update_investor_document(request):
         # NEWSPAPER PUBLICATION
         # -------------------------------------------------------
         elif section == "newspaper_publication":
-            obj = NewspaperPublication.objects.get(id=document_id)
+            obj = begin_update(NewspaperPublication)
             obj.financial_year = request.POST.get("financial_year", "").strip()
             obj.disclosure_date = request.POST.get("disclosure_date") or None
             update_common(obj)
@@ -1284,7 +1364,7 @@ def update_investor_document(request):
         # STOCK EXCHANGE DISCLOSURE
         # -------------------------------------------------------
         elif section == "stock_exchange_disclosure":
-            obj = StockExchangeDisclosure.objects.get(id=document_id)
+            obj = begin_update(StockExchangeDisclosure)
             obj.financial_year = request.POST.get("financial_year", "").strip()
             obj.disclosure_date = request.POST.get("disclosure_date") or None
             update_common(obj)
@@ -1293,7 +1373,7 @@ def update_investor_document(request):
         # SEBI DOCUMENT
         # -------------------------------------------------------
         elif section == "sebi_document":
-            obj = SEBIDocument.objects.get(id=document_id)
+            obj = begin_update(SEBIDocument)
             obj.category = request.POST.get("category", "").strip()
             update_common(obj)
 
@@ -1301,7 +1381,7 @@ def update_investor_document(request):
         # INVESTOR FORM
         # -------------------------------------------------------
         elif section == "investor_form":
-            obj = InvestorForm.objects.get(id=document_id)
+            obj = begin_update(InvestorForm)
             obj.category = request.POST.get("category", "").strip()
             obj.description = request.POST.get("description", "").strip()
             update_common(obj)
@@ -1310,7 +1390,7 @@ def update_investor_document(request):
         # TAX DECLARATION
         # -------------------------------------------------------
         elif section == "tax_declaration":
-            obj = TaxDeclaration.objects.get(id=document_id)
+            obj = begin_update(TaxDeclaration)
             obj.applicable_to = request.POST.get("applicable_to", "").strip()
             obj.description = request.POST.get("description", "").strip()
             update_common(obj)
@@ -1319,7 +1399,7 @@ def update_investor_document(request):
         # UNCLAIMED DIVIDEND
         # -------------------------------------------------------
         elif section == "unclaimed_dividend":
-            obj = UnclaimedDividend.objects.get(id=document_id)
+            obj = begin_update(UnclaimedDividend)
             obj.financial_year = request.POST.get("financial_year", "").strip()
             obj.dividend_declaration_date = request.POST.get("dividend_declaration_date") or None
             obj.dividend_type = request.POST.get("dividend_type", "").strip()
@@ -1330,7 +1410,7 @@ def update_investor_document(request):
         # SUBSIDIARY FINANCIAL
         # -------------------------------------------------------
         elif section == "subsidiary_financial":
-            obj = SubsidiaryFinancial.objects.get(id=document_id)
+            obj = begin_update(SubsidiaryFinancial)
             obj.financial_year = request.POST.get("financial_year", "").strip()
             obj.company_name = request.POST.get("company_name", "").strip()
             obj.financial_type = request.POST.get("financial_type", "").strip()
@@ -1342,13 +1422,18 @@ def update_investor_document(request):
                 status=400
             )
 
-                # Log the update
+        details = describe_document_changes(
+            old_snapshot,
+            snapshot_document(obj) if obj else {},
+            pdf_replaced=bool(pdf_file),
+        )
         log_audit(
             request,
             title=title,
             section=section,
-            action="Updated",
+            action="edited",
             document_id=document_id,
+            details=details,
         )
 
         return JsonResponse({
@@ -2100,13 +2185,13 @@ def upload_investor_document(request):
                 status=400
             )
 
-                # Log the upload
         log_audit(
             request,
             title=title,
             section=effective_section,
-            action="Created",
-            document_id=None,   # you can pass the new object's id if you capture it
+            action="uploaded",
+            document_id=None,
+            details="New document uploaded",
         )
 
         return JsonResponse(
@@ -2253,13 +2338,13 @@ def delete_investor_document(request):
         # Capture title before deleting
         doc_title = getattr(obj, "title", "Untitled")
 
-        # Audit log
         log_audit(
             request,
             title=doc_title,
             section=section,
-            action="Deleted",
+            action="deleted",
             document_id=document_id,
+            details="Document deleted",
         )
 
         obj.delete()
@@ -2637,7 +2722,8 @@ def audit_log_api(request):
             "id": log.id,
             "document_title": log.document_title,
             "section": log.section,
-            "action": log.action,
+            "action": normalize_audit_action(log.action),
+            "details": log.details or "",
             "performed_by": log.performed_by,
             "created_at": log.created_at.strftime("%d-%m-%Y %H:%M"),
         })
