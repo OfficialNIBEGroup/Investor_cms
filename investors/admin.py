@@ -406,6 +406,7 @@ class AuditLogAdmin(admin.ModelAdmin):
         "document_title",
         "section",
         "action",
+        "details",
         "performed_by",
         "created_at",
     )
@@ -416,6 +417,7 @@ class AuditLogAdmin(admin.ModelAdmin):
     search_fields = (
         "document_title",
         "performed_by",
+        "details",
     )
     ordering = (
         "-created_at",

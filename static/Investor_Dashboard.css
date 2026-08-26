@@ -1427,6 +1427,18 @@ a.recent-doc-title:hover {
     background: #FEF3C7;
 }
 
+.recent-doc-activity.deleted {
+    color: #B91C1C;
+    background: #FEE2E2;
+}
+
+.recent-doc-details {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #475569;
+    line-height: 1.4;
+}
+
 .recent-loading,
 .recent-error {
     padding: 28px 16px;

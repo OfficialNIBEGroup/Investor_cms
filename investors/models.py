@@ -223,6 +223,7 @@ class AuditLog(models.Model):
     document_title = models.CharField(max_length=255)
     section = models.CharField(max_length=100)
     action = models.CharField(max_length=20, choices=ACTION_CHOICES)
+    details = models.TextField(blank=True, default="")
     performed_by = models.CharField(max_length=150)
     document_id = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
