@@ -1,0 +1,61 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NIBE | Investor Document Portal{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{% static 'Nibe Limited Logo/NIBE Group Logo.png' %}">
+    <link rel="stylesheet" href="{% static 'Investor_Login.css' %}">
+</head>
+<body>
+<div class="login-wrapper">
+
+    <aside class="login-brand-panel">
+        <div class="brand-panel-top">
+            <div class="logo-text">
+                <div class="logo-mark">NIBE</div>
+                <div class="logo-brand">LIMITED</div>
+            </div>
+            <div class="logo-sub">Investor Document Portal</div>
+        </div>
+
+        <div class="brand-panel-middle">
+            <h1>{% block brand_headline %}Welcome to the<br>Investor Document Portal{% endblock %}</h1>
+            <p>{% block brand_copy %}Securely access annual reports, financial results, regulatory filings and corporate announcements — all in one place.{% endblock %}</p>
+
+            <div class="brand-feature-list">
+                <div class="brand-feature">
+                    <span class="brand-feature-icon">🛡</span>
+                    <span>Enterprise-grade security</span>
+                </div>
+                <div class="brand-feature">
+                    <span class="brand-feature-icon">📁</span>
+                    <span>Documents across all investor categories</span>
+                </div>
+                <div class="brand-feature">
+                    <span class="brand-feature-icon">🔔</span>
+                    <span>Real-time announcements &amp; filings</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="brand-panel-bottom">
+            <span>© 2026 NIBE Limited. All rights reserved.</span>
+        </div>
+
+        <div class="brand-glow"></div>
+    </aside>
+
+    <main class="login-form-panel">
+        {% block auth_card %}{% endblock %}
+
+        <p class="login-support-text">
+            Need help accessing your account? <a href="#">Contact Investor Relations</a>
+        </p>
+    </main>
+
+</div>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

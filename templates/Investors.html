@@ -13,8 +13,6 @@
     <link rel="icon" type="image/png"
       href="{% static 'Nibe Limited Logo/NIBE Group Logo.png' %}">
     <link rel="stylesheet" href="{% static 'Style.css' %}">
-    <link rel="icon" type="image/png" href="{% static 'Nibe Limited Logo/NIBE Group Logo.png' %}">
-    <script src="{% static 'image-perf.js' %}" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
@@ -25,7 +23,7 @@
     <header>
         <nav class="navbar">
             <div class="logo">
-                <img src="Nibe Limited Logo/NIBE Group Logo.png" alt="NIBE Logo" fetchpriority="high" decoding="async"
+                <img src="{% static 'Nibe Limited Logo/NIBE Group Logo.png' %}" alt="NIBE Logo" fetchpriority="high" decoding="async"
                     loading="eager">
             </div>
 
@@ -398,7 +396,7 @@
 
                 <!-- Annual Returns -->
 
-                <div id="AnnualReturns" class="tab-content active-content">
+                <div id="AnnualReturns" class="tab-content">
 
                     <h2>Annual Returns</h2>
 
@@ -1507,7 +1505,7 @@
 
             <div class="footer-logo">
 
-                <img src="Nibe Limited Logo/Nibe Limited Logo2.png" alt="NIBE Limited">
+                <img src="{% static 'Nibe Limited Logo/Nibe Limited Logo2.png' %}" alt="NIBE Limited">
 
             </div>
 
