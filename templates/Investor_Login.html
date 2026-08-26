@@ -1,0 +1,183 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+     <link rel="icon" type="image/png" href="{% static 'Nibe Limited Logo/NIBE Group Logo.png' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>NIBE | Investor Document Portal - Sign In</title>
+
+    <!-- Login CSS -->
+    <link rel="stylesheet" href="{% static 'Investor_Login.css' %}">
+
+     <!-- Dashboard CSS -->
+    <link rel="stylesheet" href="{% static 'Investor_Dashboard_Login.css' %}">
+    <!-- If testing locally without Django, uncomment next line and comment the static one:
+    <link rel="stylesheet" href="Investor_Dashboard.css">
+    -->
+</head>
+
+<body>
+
+<div class="login-wrapper">
+
+    <!-- =====================================================
+         LEFT PANEL – Brand / Navy (matches sidebar style)
+    ====================================================== -->
+
+    <aside class="login-brand-panel">
+
+        <div class="brand-panel-top">
+            <div class="logo-text">
+                <div class="logo-mark">NIBE</div>
+                <div class="logo-brand">LIMITED</div>
+            </div>
+            <div class="logo-sub">Investor Document Portal</div>
+        </div>
+
+        <div class="brand-panel-middle">
+            <h1>Welcome to the<br>Investor Document Portal</h1>
+            <p>Securely access annual reports, financial results, regulatory filings and corporate announcements — all in one place.</p>
+
+            <div class="brand-feature-list">
+                <div class="brand-feature">
+                    <span class="brand-feature-icon">🛡</span>
+                    <span>Enterprise-grade security</span>
+                </div>
+                <div class="brand-feature">
+                    <span class="brand-feature-icon">📁</span>
+                    <span>128+ documents across all categories</span>
+                </div>
+                <div class="brand-feature">
+                    <span class="brand-feature-icon">🔔</span>
+                    <span>Real-time announcements & filings</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="brand-panel-bottom">
+            <span>© 2026 NIBE Limited. All rights reserved.</span>
+        </div>
+
+        <div class="brand-glow"></div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         RIGHT PANEL – Login Form
+    ====================================================== -->
+
+    <main class="login-form-panel">
+
+        <div class="login-card">
+
+            <div class="login-card-header">
+                <span class="welcome-label">SIGN IN</span>
+                <h2>Welcome back</h2>
+                <p>Enter your credentials to access your investor dashboard.</p>
+            </div>
+
+                {% if error %}
+                <script>
+                    alert("{{ error|escapejs }}");
+                </script>
+                {% endif %}
+
+            <form class="login-form" method="POST" autocomplete="off">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    
+                    <label>Employee ID <span>*</span></label>
+
+                                <div class="input-with-icon">
+                                    <span class="input-icon">👤</span>
+
+                                    <input
+                                        type="text"
+                                        name="username"
+                                        placeholder="NL0000"
+                                        autocomplete="off"
+                                        value="{{ remembered_username|default:'' }}"
+                                        required>
+                                </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Password <span>*</span></label>
+
+                        <div class="input-with-icon">
+
+                            <span class="input-icon">🔒</span>
+
+                            <input
+                                type="password"
+                                name="password"
+                                id="passwordField"
+                                autocomplete="new-password"
+                                placeholder="Enter your password"
+                                required
+                            >
+
+                            <button
+                                type="button"
+                                class="toggle-password"
+                                onclick="togglePassword()"
+                                aria-label="Show or hide password"
+                            >
+                                👁
+                            </button>
+
+                        </div>
+                    </div>
+                </div>
+            <br>
+                <div class="form-row-between">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="remember_me" id="rememberMe">
+                        <span>Remember me</span>
+                    </label>
+                   <a href="{% url 'password_reset' %}" class="forgot-link">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="primary-button login-submit">Sign In →</button>
+
+              
+            </form>
+
+            <div class="login-footer-note">
+                <span class="secure-icon">✓</span>
+                <span>Your data is protected with enterprise-grade security.</span>
+            </div>
+
+        </div>
+
+        <p class="login-support-text">
+            Need help accessing your account? <a href="#">Contact Investor Relations</a>
+        </p>
+
+    </main>
+
+</div>
+
+
+<script>
+
+function togglePassword() {
+
+    const field = document.getElementById("passwordField");
+
+    if (field.type === "password") {
+        field.type = "text";
+    } else {
+        field.type = "password";
+    }
+}
+
+</script>
+
+</body>
+</html>

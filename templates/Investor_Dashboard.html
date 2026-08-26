@@ -1,0 +1,4173 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <link rel="icon"
+          type="image/png"
+          href="{% static 'Nibe Limited Logo/NIBE Group Logo.png' %}">
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>NIBE | Investor Document Portal</title>
+
+    <link rel="stylesheet"
+          href="{% static 'Investor_Dashboard.css' %}">
+
+</head>
+
+
+<body>
+
+
+<div class="dashboard-wrapper">
+
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-logo">
+
+            <div class="logo-text">
+
+                <div class="logo-mark">
+                    NIBE
+                </div>
+
+                <div class="logo-brand">
+                    LIMITED
+                </div>
+
+            </div>
+
+            <div class="logo-sub">
+                Investor Document Portal
+            </div>
+
+        </div>
+
+
+        <!-- NAVIGATION -->
+
+        <nav class="sidebar-navigation">
+
+
+            <a href="#"
+               class="menu-item active"
+               onclick="showDashboard(event)">
+
+                <span class="menu-icon">⌂</span>
+
+                <span>
+                    Dashboard
+                </span>
+
+            </a>
+
+
+            <a href="#"
+               class="menu-item"
+               onclick="showDocuments(event)">
+
+                <span class="menu-icon">▤</span>
+
+                <span>
+                    Documents
+                </span>
+
+            </a>
+
+
+            <a href="#"
+               class="menu-item"
+               onclick="showUpload(event)">
+
+                <span class="menu-icon">🢁</span>
+
+                <span>
+                    Upload Document
+                </span>
+
+            </a>
+
+
+
+            <div class="sidebar-divider"></div>
+
+
+            <a href="#"
+               class="menu-item">
+
+                <span class="menu-icon">?</span>
+
+                <span>
+                    Help & Support
+                </span>
+
+            </a>
+
+
+            <a href="#"
+               class="menu-item">
+
+                <span class="menu-icon">⚙</span>
+
+                <span>
+                    Settings
+                </span>
+
+            </a>
+
+        </nav>
+
+
+        <!-- SECURE ACCESS -->
+
+        <div class="sidebar-secure">
+
+            <div class="secure-icon">
+                ✓
+            </div>
+
+            <div class="secure-text">
+
+                <strong>
+                    Secure Access
+                </strong>
+
+                <span>
+                    Your data is protected with<br>
+                    enterprise-grade security.
+                </span>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
+
+    <main class="main-content">
+
+
+        <!-- =================================================
+             TOP HEADER
+        ================================================== -->
+
+        <header class="top-header">
+
+            <div class="header-left">
+
+                <button
+                    class="mobile-menu-button"
+                    onclick="toggleSidebar()">
+
+                    ☰
+
+                </button>
+
+
+                <h1>
+
+                    Welcome back,
+
+                    <span class="muted">
+                        Investor Relations
+                    </span>
+
+                </h1>
+
+            </div>
+
+
+            <div class="header-right">
+
+                <a
+                    href="{% url 'dashboard_logout' %}"
+                    class="logout-btn">
+
+                    Log out
+
+                </a>
+
+
+                <div class="header-avatar">
+                    IR
+                </div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- =================================================
+             DASHBOARD PAGE
+        ================================================== -->
+
+        <section
+            id="dashboardPage"
+            class="page-section">
+
+
+            <!-- =================================================
+                 DASHBOARD INTRO
+            ================================================== -->
+
+            <div class="dashboard-intro">
+
+                <div>
+
+                    <span class="welcome-label">
+                        INVESTOR DOCUMENT PORTAL
+                    </span>
+
+                    <h2>
+                        Investor Document Dashboard
+                    </h2>
+
+                    <p>
+                        Manage all investor documents across
+                        the NIBE Limited investor relations portal.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+<!-- =====================================================
+     INVESTOR DOCUMENT SECTIONS
+====================================================== -->
+
+<div class="section-overview-card">
+
+    <div class="section-overview-header">
+
+        <div>
+            <span class="welcome-label">
+                DOCUMENT LIBRARY
+            </span>
+
+        </div>
+
+    </div>
+
+
+<div class="document-section-grid">
+
+    <!-- 1. Annual Report -->
+    <div class="document-section-card">
+
+        <div class="section-card-icon">
+            📄
+        </div>
+
+        <div class="section-card-content">
+
+            <h3>
+                Annual Report
+            </h3>
+
+            <strong id="countAnnualReports">
+                0
+            </strong>
+
+            <span>
+                Documents
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- 2. Financial Results -->
+    <div class="document-section-card">
+
+        <div class="section-card-icon">
+            📊
+        </div>
+
+        <div class="section-card-content">
+
+            <h3>
+                Financial Results
+            </h3>
+
+            <strong id="countFinancialResults">
+                0
+            </strong>
+
+            <span>
+                Documents
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- 3. Annual Returns -->
+    <div class="document-section-card">
+
+        <div class="section-card-icon">
+            📄
+        </div>
+
+        <div class="section-card-content">
+
+            <h3>
+                Annual Returns
+            </h3>
+
+            <strong id="countAnnualReturns">
+                0
+            </strong>
+
+            <span>
+                Documents
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- 4. Corporate Announcements -->
+    <div class="document-section-card">
+
+        <div class="section-card-icon">
+            📢
+        </div>
+
+        <div class="section-card-content">
+
+            <h3>
+                Corporate Announcements
+            </h3>
+
+            <strong id="countCorporateAnnouncements">
+                0
+            </strong>
+
+            <span>
+                Documents
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- 5. Corporate Governance -->
+    <div class="document-section-card">
+
+        <div class="section-card-icon">
+            🏛
+        </div>
+
+        <div class="section-card-content">
+
+            <h3>
+                Corporate Governance
+            </h3>
+
+            <strong id="countCorporateGovernance">
+                0
+            </strong>
+
+            <span>
+                Documents
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- 6. Shareholding Pattern -->
+    <div class="document-section-card">
+
+        <div class="section-card-icon">
+            📈
+        </div>
+
+        <div class="section-card-content">
+
+            <h3>
+                Shareholding Pattern
+            </h3>
+
+            <strong id="countShareholdingPattern">
+                0
+            </strong>
+
+            <span>
+                Documents
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- 7. Disclosure under Regulations 46 of SEBI LODR -->
+    <div class="document-section-card">
+
+        <div class="section-card-icon">
+            ⚖
+        </div>
+
+        <div class="section-card-content">
+
+            <h3>
+                Disclosure under Regulations</br> 46 of SEBI LODR
+            </h3>
+
+            <strong id="countSebiLodr">
+                0
+            </strong>
+
+            <span>
+                Documents
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- 8. Investor Forms & Declaration -->
+    <div class="document-section-card">
+
+        <div class="section-card-icon">
+            📋
+        </div>
+
+        <div class="section-card-content">
+
+            <h3>
+                Investor Forms & Declaration
+            </h3>
+
+            <strong id="countInvestorFormsDeclaration">
+                0
+            </strong>
+
+            <span>
+                Documents
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- 9. Subsidiary Financial -->
+    <div class="document-section-card">
+
+        <div class="section-card-icon">
+            🏢
+        </div>
+
+        <div class="section-card-content">
+
+            <h3>
+                Subsidiary Financial
+            </h3>
+
+            <strong id="countSubsidiaryFinancial">
+                0
+            </strong>
+
+            <span>
+                Documents
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+            <!-- =================================================
+                 MAIN DASHBOARD GRID
+            ================================================== -->
+
+            <div class="dashboard-grid">
+
+
+                <!-- =================================================
+                     DOCUMENTS
+                ================================================== -->
+
+                <div class="dashboard-card recent-documents">
+
+
+                    <div class="card-header">
+
+                        <div class="card-header-left">
+
+                            <div class="card-header-icon">
+                                📄
+                            </div>
+
+                            <div>
+
+                                <h3>
+                                    Recent Documents
+                                </h3>
+
+                            </div>
+
+                        </div>
+
+
+                        <button
+                            class="view-all-btn"
+                            onclick="showDocuments(event)">
+
+                            View all documents →
+
+                        </button>
+
+                    </div>
+
+
+                    <!-- List of recent documents (populated by JS) -->
+                    <div id="recentDocumentsList" class="recent-documents-list"></div>
+
+
+                    <!-- Shown only when there are no documents -->
+                    <div id="recentDocumentsEmpty" class="empty-state">
+
+                        <div class="empty-icon-wrap">
+
+                            <span class="empty-folder">
+                                📁
+                            </span>
+
+                            <span class="empty-check">
+                                ✓
+                            </span>
+
+                        </div>
+
+                        <h4>
+                            No recent documents
+                        </h4>
+
+                        <p>
+                            Upload or select documents to see them here.
+                        </p>
+
+                        <button
+                            class="soft-button"
+                            onclick="showDocuments(event)">
+
+                            📁 Browse Documents
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     DOCUMENT SUMMARY
+                ================================================== -->
+
+                <div class="dashboard-card summary-card">
+
+
+                    <div class="card-header">
+
+                        <div class="card-header-left">
+
+                            <div class="card-header-icon">
+                                ◔
+                            </div>
+
+
+                            <div>
+
+                                <h3>
+                                    Document Summary
+                                </h3>
+
+                                <p>
+                                    Overview of your document library
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="summary-content">
+
+
+                        <!-- =================================================
+                             TOTAL
+                        ================================================== -->
+
+                        <div class="summary-total">
+
+                            <div class="summary-total-icon">
+                                📁
+                            </div>
+
+
+                            <div>
+
+                                <span>
+                                    Total Documents
+                                </span>
+
+                                <strong id="summaryTotal">
+                                    0
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- =================================================
+                             DONUT + 13 SECTION COUNTS
+                        ================================================== -->
+
+                        <div class="summary-main">
+
+
+                            <!-- DONUT -->
+
+                            <div class="donut-wrap">
+
+
+                                <svg
+                                    id="summaryDonut"
+                                    class="donut-svg"
+                                    viewBox="0 0 36 36">
+
+                                    <circle
+                                        cx="18"
+                                        cy="18"
+                                        r="15.5"
+                                        fill="none"
+                                        stroke="#e7edf4"
+                                        stroke-width="4.5">
+                                    </circle>
+
+
+                                    <circle
+                                        id="donutSegment1"
+                                        cx="18"
+                                        cy="18"
+                                        r="15.5"
+                                        fill="none"
+                                        stroke="#38bdf8"
+                                        stroke-width="4.5"
+                                        stroke-dasharray="0 100"
+                                        stroke-dashoffset="0">
+                                    </circle>
+
+
+                                    <circle
+                                        id="donutSegment2"
+                                        cx="18"
+                                        cy="18"
+                                        r="15.5"
+                                        fill="none"
+                                        stroke="#a78bfa"
+                                        stroke-width="4.5"
+                                        stroke-dasharray="0 100"
+                                        stroke-dashoffset="0">
+                                    </circle>
+
+
+                                    <circle
+                                        id="donutSegment3"
+                                        cx="18"
+                                        cy="18"
+                                        r="15.5"
+                                        fill="none"
+                                        stroke="#818cf8"
+                                        stroke-width="4.5"
+                                        stroke-dasharray="0 100"
+                                        stroke-dashoffset="0">
+                                    </circle>
+
+
+                                    <circle
+                                        id="donutSegment4"
+                                        cx="18"
+                                        cy="18"
+                                        r="15.5"
+                                        fill="none"
+                                        stroke="#34d399"
+                                        stroke-width="4.5"
+                                        stroke-dasharray="0 100"
+                                        stroke-dashoffset="0">
+                                    </circle>
+
+
+                                    <circle
+                                        id="donutSegment5"
+                                        cx="18"
+                                        cy="18"
+                                        r="15.5"
+                                        fill="none"
+                                        stroke="#2dd4bf"
+                                        stroke-width="4.5"
+                                        stroke-dasharray="0 100"
+                                        stroke-dashoffset="0">
+                                    </circle>
+
+
+                                    <circle
+                                        id="donutSegment6"
+                                        cx="18"
+                                        cy="18"
+                                        r="15.5"
+                                        fill="none"
+                                        stroke="#60a5fa"
+                                        stroke-width="4.5"
+                                        stroke-dasharray="0 100"
+                                        stroke-dashoffset="0">
+                                    </circle>
+
+
+                                    <circle
+                                        id="donutSegment7"
+                                        cx="18"
+                                        cy="18"
+                                        r="15.5"
+                                        fill="none"
+                                        stroke="#f59e0b"
+                                        stroke-width="4.5"
+                                        stroke-dasharray="0 100"
+                                        stroke-dashoffset="0">
+                                    </circle>
+
+
+                                    <circle
+                                        id="donutSegment8"
+                                        cx="18"
+                                        cy="18"
+                                        r="15.5"
+                                        fill="none"
+                                        stroke="#fb7185"
+                                        stroke-width="4.5"
+                                        stroke-dasharray="0 100"
+                                        stroke-dashoffset="0">
+                                    </circle>
+
+
+                                    <circle
+                                        id="donutSegment9"
+                                        cx="18"
+                                        cy="18"
+                                        r="15.5"
+                                        fill="none"
+                                        stroke="#c084fc"
+                                        stroke-width="4.5"
+                                        stroke-dasharray="0 100"
+                                        stroke-dashoffset="0">
+                                    </circle>
+
+
+                                    <circle
+                                        id="donutSegment10"
+                                        cx="18"
+                                        cy="18"
+                                        r="15.5"
+                                        fill="none"
+                                        stroke="#22c55e"
+                                        stroke-width="4.5"
+                                        stroke-dasharray="0 100"
+                                        stroke-dashoffset="0">
+                                    </circle>
+
+
+                                    <circle
+                                        id="donutSegment11"
+                                        cx="18"
+                                        cy="18"
+                                        r="15.5"
+                                        fill="none"
+                                        stroke="#14b8a6"
+                                        stroke-width="4.5"
+                                        stroke-dasharray="0 100"
+                                        stroke-dashoffset="0">
+                                    </circle>
+
+
+                                    <circle
+                                        id="donutSegment12"
+                                        cx="18"
+                                        cy="18"
+                                        r="15.5"
+                                        fill="none"
+                                        stroke="#6366f1"
+                                        stroke-width="4.5"
+                                        stroke-dasharray="0 100"
+                                        stroke-dashoffset="0">
+                                    </circle>
+
+
+                                    <circle
+                                        id="donutSegment13"
+                                        cx="18"
+                                        cy="18"
+                                        r="15.5"
+                                        fill="none"
+                                        stroke="#0ea5e9"
+                                        stroke-width="4.5"
+                                        stroke-dasharray="0 100"
+                                        stroke-dashoffset="0">
+                                    </circle>
+
+                                </svg>
+
+
+                                <div class="donut-center">
+
+                                    <strong id="donutTotal">
+                                        0
+                                    </strong>
+
+                                    <span>
+                                        Total
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- =================================================
+                                 ALL 13 SECTIONS
+                            ================================================== -->
+
+                            <div
+                                id="sectionSummaryGrid"
+                                class="section-summary-grid">
+
+
+                                <!-- Filled automatically by JavaScript -->
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- DOWNLOAD -->
+
+                        <div class="summary-download">
+                                <button
+                                    type="button"
+                                    id="downloadSummaryBtn"
+                                    class="soft-button summary-download-button">
+                                    ↓ Download Summary Report
+                                </button>
+                            </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 QUICK ACTIONS
+            ================================================== -->
+
+            <div class="dashboard-card quick-actions">
+
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h3>
+                            Quick Actions
+                        </h3>
+
+                        <p>
+                            Frequently used document management actions
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="quick-action-grid">
+
+
+                    <!-- UPLOAD -->
+
+                    <button
+                        onclick="showUpload(event)"
+                        class="quick-action">
+
+
+                        <div class="quick-action-icon">
+                            🢁
+                        </div>
+
+
+                        <div>
+
+                            <strong>
+                                Upload Document
+                            </strong>
+
+                            <span>
+                                Add a new investor document
+                            </span>
+
+                        </div>
+
+                    </button>
+
+
+
+                    <!-- DOCUMENTS -->
+
+                    <button
+                        onclick="showDocuments(event)"
+                        class="quick-action">
+
+
+                        <div class="quick-action-icon">
+                            ▤
+                        </div>
+
+
+                        <div>
+
+                            <strong>
+                                View Documents
+                            </strong>
+
+                            <span>
+                                Browse uploaded documents
+                            </span>
+
+                        </div>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =====================================================
+             UPLOAD PAGE
+        ====================================================== -->
+
+        <section
+            id="uploadPage"
+            class="page-section hidden">
+
+
+            <div class="page-heading">
+
+                <div>
+
+                    <span class="welcome-label">
+                        DOCUMENT MANAGEMENT
+                    </span>
+
+                    <h2>
+                        Upload New Document
+                    </h2>
+
+                    <p>
+                        Add a document to the NIBE Investor Relations portal.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="upload-card">
+
+
+                <form
+                    id="documentUploadForm"
+                    enctype="multipart/form-data">
+
+
+                    <div class="upload-card-header">
+
+                        <div class="upload-header-icon">
+                            🢁
+                        </div>
+
+                        <div>
+
+                            <h3>
+                                Document Information
+                            </h3>
+
+                            <p>
+                                Enter the document details below.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="form-grid">
+
+
+                            <div class="form-group full-width">
+
+                                <label for="section">
+
+                                    Section
+
+                                    <span>*</span>
+
+                                </label>
+
+                        <select
+                            id="section"
+                            name="section"
+                            required>
+
+                            <option value="">
+                                Select Section
+                            </option>
+
+                            <!-- 1. Annual Report -->
+                            <option value="annual_report">
+                                Annual Report
+                            </option>
+
+                            <!-- 2. Financial Results -->
+                            <option value="financial_result">
+                                Financial Results
+                            </option>
+
+                            <!-- 3. Annual Returns -->
+                            <option value="annual_return">
+                                Annual Returns
+                            </option>
+
+                            <!-- 4. Corporate Announcements -->
+                            <option value="corporate_announcements">
+                                Corporate Announcements
+                            </option>
+
+                            <!-- 5. Corporate Governance -->
+                            <option value="corporate_governance">
+                                Corporate Governance
+                            </option>
+
+                            <!-- 6. Shareholding Pattern -->
+                            <option value="shareholding_pattern">
+                                Shareholding Pattern
+                            </option>
+
+                            <!-- 7. SEBI LODR -->
+                            <option value="sebi_document">
+                                Disclosure under Regulations 46 of SEBI LODR
+                            </option>
+
+                            <!-- 8. Investor Forms & Declaration -->
+                            <option value="investor_form">
+                                Investor Forms & Declaration
+                            </option>
+
+                            <!-- 9. Subsidiary Financial -->
+                            <option value="subsidiary_financial">
+                                Subsidiary Financial
+                            </option>
+
+                        </select>
+
+                            </div>
+                            <div
+                                id="subsectionField"
+                                class="form-group full-width"
+                                style="display: none;">
+
+                                <label for="subsection">
+
+                                    Subsection
+
+                                    <span>*</span>
+
+                                </label>
+
+                                <select
+                                    id="subsection"
+                                    name="subsection"
+                                >
+
+                                    <option value="">
+                                        Select Subsection
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                        <div
+                            id="dynamicFields"
+                            class="dynamic-fields full-width">
+                        </div>
+
+
+
+                        <div class="form-group full-width">
+
+                            <label>
+
+                                Upload Document
+
+                                <span>*</span>
+
+                            </label>
+
+
+                            <div
+                                class="upload-dropzone"
+                                id="dropZone">
+
+
+                                <div class="upload-file-icon">
+                                    📄
+                                </div>
+
+
+                                <h4>
+                                    Drag & Drop your PDF here
+                                </h4>
+
+
+                                <p>
+
+                                    or
+
+                                    <label
+                                        for="documentFile"
+                                        class="browse-link">
+
+                                        Browse Files
+
+                                    </label>
+
+                                </p>
+
+
+                                <small>
+                                    Supported format: PDF
+                                </small>
+
+
+                                <input
+                                    type="file"
+                                    id="documentFile"
+                                    name="pdf_file"
+                                    accept=".pdf"
+                                    hidden>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="form-group full-width">
+
+                            <label for="external_url">
+                                External URL
+                            </label>
+
+
+                            <input
+                                type="url"
+                                id="external_url"
+                                name="external_url"
+                                placeholder="https://example.com/document">
+
+
+                            <small>
+                                Use this only if the document is hosted
+                                on an external website.
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="form-actions">
+
+                        <button
+                            type="button"
+                            class="secondary-button"
+                            id="cancelUploadButton">
+
+                            Cancel
+
+                        </button>
+
+
+                        <button
+                            type="submit"
+                            class="primary-button"
+                            id="uploadDocumentButton">
+
+                            ↑ Upload Document
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =====================================================
+             DOCUMENTS PAGE
+        ====================================================== -->
+
+        <section
+            id="documentsPage"
+            class="page-section hidden">
+
+
+            <div class="page-heading">
+
+
+                <div>
+
+                    <span class="welcome-label">
+                        DOCUMENT MANAGEMENT
+                    </span>
+
+                    <h2>
+                        All Documents
+                    </h2>
+
+                    <p>
+                        View documents added to the investor portal.
+                    </p>
+
+                </div>
+
+
+                <button
+                    class="primary-button"
+                    onclick="showUpload(event)">
+
+                    ＋ Upload Document
+
+                </button>
+
+            </div>
+
+
+
+            <div class="dashboard-card documents-table-card">
+
+
+                <div class="search-row">
+
+
+                    <input
+                        type="text"
+                        id="documentSearch"
+                        placeholder="Search documents...">
+
+
+                    <select
+                        id="documentSectionFilter">
+
+                        <option value="all">
+                            All Sections
+                        </option>
+
+                        <option value="annual_report">
+                            Annual Report
+                        </option>
+
+                        <option value="financial_result">
+                            Financial Results
+                        </option>
+
+                        <option value="annual_return">
+                            Annual Returns
+                        </option>
+
+                        <option value="corporate_announcements">
+                            Corporate Announcements
+                        </option>
+
+                        <option value="corporate_governance">
+                            Corporate Governance
+                        </option>
+
+                        <option value="shareholding_pattern">
+                            Shareholding Pattern
+                        </option>
+
+                        <option value="sebi_document">
+                            Disclosure under Regulations 46 of SEBI LODR
+                        </option>
+
+                        <option value="investor_form">
+                            Investor Forms & Declaration
+                        </option>
+
+                        <option value="subsidiary_financial">
+                            Subsidiary Financial
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+
+                <div class="table-container">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+
+                                <th>
+                                    Document
+                                </th>
+
+                                <th>
+                                    Section
+                                </th>
+
+                                <th>
+                                    Financial Year
+                                </th>
+
+                                <th>
+                                    Date
+                                </th>
+
+                                <th>
+                                    Actions
+                                </th>
+
+                            </tr>
+                        </thead>
+
+
+                        <tbody id="documentsTableBody">
+
+                            <tr>
+
+                                <td
+                                    colspan="5"
+                                    class="table-empty">
+
+                                    Loading documents...
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+<!-- =====================================================
+     EDIT DOCUMENT MODAL
+====================================================== -->
+<div class="modal-overlay" id="editModalOverlay">
+    <div class="edit-modal">
+
+        <div class="edit-modal-header">
+            <h3>Edit Document</h3>
+            <button class="modal-close-btn" onclick="closeEditModal()">×</button>
+        </div>
+
+        <form id="editDocumentForm" enctype="multipart/form-data">
+
+            <div class="edit-modal-body">
+
+                <input type="hidden" id="edit_document_id" name="document_id">
+                <input type="hidden" id="edit_section" name="section">
+
+                <div class="form-group full-width">
+                    <label>Section</label>
+                    <input type="text" id="edit_section_display" readonly
+                           style="background:#f1f5f9; cursor:not-allowed;">
+                </div>
+
+                <div id="editDynamicFields" class="dynamic-fields full-width">
+                    <!-- Fields will be injected by JavaScript -->
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Replace PDF (optional)</label>
+                    <input type="file" id="edit_pdf_file" name="pdf_file" accept=".pdf">
+                    <small>Leave empty to keep the current file</small>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="edit_external_url">External URL</label>
+                    <input type="url" id="edit_external_url" name="external_url"
+                           placeholder="https://example.com/document">
+                </div>
+
+            </div>
+
+            <div class="edit-modal-footer">
+                <button type="button" class="secondary-button" onclick="closeEditModal()">
+                    Cancel
+                </button>
+                <button type="submit" class="primary-button" id="saveEditButton">
+                    Save Changes
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================== -->
+
+<script>
+
+    /* =========================================================
+   EDIT DOCUMENT
+========================================================= */
+
+async function openEditModal(documentId, section) {
+
+    const overlay = document.getElementById("editModalOverlay");
+    const form = document.getElementById("editDocumentForm");
+    const dynamicFields = document.getElementById("editDynamicFields");
+
+    // Reset
+    form.reset();
+    dynamicFields.innerHTML = "";
+
+    document.getElementById("edit_document_id").value = documentId;
+    document.getElementById("edit_section").value = section;
+    document.getElementById("edit_section_display").value = getSectionDisplayName(section);
+
+    try {
+        const response = await fetch(
+            `{% url 'edit_investor_document' document_id=0 section='section' %}`
+                .replace("0", documentId)
+                .replace("section", section),
+            {
+                method: "GET",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Accept": "application/json"
+                }
+            }
+        );
+
+        // Note: If your URL pattern is different, adjust the fetch URL.
+        // Alternative simple way if you have a different URL:
+        // const response = await fetch(`/api/edit-document/${documentId}/${section}/`);
+
+        const result = await response.json();
+
+        if (!result.success) {
+            alert(result.message || "Could not load document.");
+            return;
+        }
+
+        const doc = result.document;
+
+        // Build fields based on section (reuse the same logic as upload)
+        buildEditFields(section, doc);
+
+        // Fill common fields
+        if (doc.external_url) {
+            document.getElementById("edit_external_url").value = doc.external_url;
+        }
+
+        overlay.classList.add("active");
+
+    } catch (error) {
+        console.error(error);
+        alert("Failed to load document data.");
+    }
+}
+
+function closeEditModal() {
+    document.getElementById("editModalOverlay").classList.remove("active");
+}
+
+function buildEditFields(section, doc) {
+
+    const container = document.getElementById("editDynamicFields");
+    container.innerHTML = "";
+
+    // Title is always present
+    container.appendChild(createField("Document Title", "title", "text", true));
+    document.getElementById("title").value = doc.title || "";
+
+    if (section === "annual_report" || section === "annual_return") {
+        container.appendChild(createSelect("Financial Year", "financial_year", financialYearOptions, true));
+        document.getElementById("financial_year").value = doc.financial_year || "";
+    }
+    else if (section === "financial_result") {
+        container.appendChild(createSelect("Financial Year", "financial_year", financialYearOptions, true));
+        container.appendChild(createSelect("Quarter", "quarter", [
+            {value:"Q1",label:"Q1"},{value:"Q2",label:"Q2"},
+            {value:"Q3",label:"Q3"},{value:"Q4",label:"Q4"},
+            {value:"Annual",label:"Annual"}
+        ], true));
+        container.appendChild(createField("Release Date", "release_date", "date"));
+        document.getElementById("financial_year").value = doc.financial_year || "";
+        document.getElementById("quarter").value = doc.quarter || "";
+        if (doc.release_date) document.getElementById("release_date").value = doc.release_date;
+    }
+    else if (section === "corporate_governance" || section === "shareholding_pattern") {
+        container.appendChild(createSelect("Financial Year", "financial_year", financialYearOptions, true));
+        if (section === "shareholding_pattern") {
+            container.appendChild(createSelect("Quarter", "quarter", [
+                {value:"Q1",label:"Q1"},{value:"Q2",label:"Q2"},
+                {value:"Q3",label:"Q3"},{value:"Q4",label:"Q4"},
+                {value:"Annual",label:"Annual"}
+            ], true));
+            document.getElementById("quarter").value = doc.quarter || "";
+        }
+        document.getElementById("financial_year").value = doc.financial_year || "";
+    }
+    else if (section === "shareholder_notice") {
+        container.appendChild(createSelect("Financial Year", "financial_year", financialYearOptions, true));
+        container.appendChild(createField("Notice Type", "notice_type"));
+        container.appendChild(createField("Disclosure Date", "disclosure_date", "date"));
+        container.appendChild(createField("Meeting Date", "meeting_date", "date"));
+        document.getElementById("financial_year").value = doc.financial_year || "";
+        document.getElementById("notice_type").value = doc.notice_type || "";
+        if (doc.disclosure_date) document.getElementById("disclosure_date").value = doc.disclosure_date;
+        if (doc.meeting_date) document.getElementById("meeting_date").value = doc.meeting_date;
+    }
+    else if (section === "newspaper_publication" || section === "stock_exchange_disclosure") {
+        container.appendChild(createSelect("Financial Year", "financial_year", financialYearOptions, true));
+        container.appendChild(createField("Disclosure Date", "disclosure_date", "date"));
+        document.getElementById("financial_year").value = doc.financial_year || "";
+        if (doc.disclosure_date) document.getElementById("disclosure_date").value = doc.disclosure_date;
+    }
+    else if (section === "sebi_document") {
+        container.appendChild(createSelect("Category", "category", [
+            {value:"corporate_documents",label:"Corporate Documents"},
+            {value:"board_of_directors",label:"Board of Directors"},
+            {value:"board_committees",label:"Committee of Board of Directors"},
+            {value:"codes_policies",label:"Codes and Policies"},
+            {value:"investor_grievances",label:"Investor Grievance"}
+        ], true));
+        document.getElementById("category").value = doc.category || "";
+    }
+    else if (section === "investor_form") {
+        container.appendChild(createSelect("Form Type", "category", [
+            {value:"kyc_nomination",label:"KYC and Nomination Form"},
+            {value:"tax_declaration",label:"Tax Declaration for Dividend TDS Related"},
+            {value:"unclaimed_dividend",label:"Unpaid or Unclaimed Dividend Details"}
+        ], true));
+        container.appendChild(createField("Description", "description"));
+        document.getElementById("category").value = doc.category || "";
+        document.getElementById("description").value = doc.description || "";
+    }
+    else if (section === "subsidiary_financial") {
+        container.appendChild(createSelect("Financial Year", "financial_year", financialYearOptions, true));
+        container.appendChild(createField("Company Name", "company_name", "text", true));
+        container.appendChild(createField("Financial Type", "financial_type"));
+        document.getElementById("financial_year").value = doc.financial_year || "";
+        document.getElementById("company_name").value = doc.company_name || "";
+        document.getElementById("financial_type").value = doc.financial_type || "";
+    }
+}
+
+/* Submit Edit Form */
+document.getElementById("editDocumentForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const btn = document.getElementById("saveEditButton");
+    btn.disabled = true;
+    btn.textContent = "Saving...";
+
+    const formData = new FormData(this);
+    const csrfToken = getCookie("csrftoken");
+
+    try {
+        const response = await fetch("{% url 'update_investor_document' %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": csrfToken,
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert(data.message);
+            closeEditModal();
+            loadDocuments();
+            loadDashboardStatistics();
+            loadRecentDocuments();
+        } else {
+            alert(data.message || "Update failed.");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("An error occurred while updating.");
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "Save Changes";
+    }
+});
+
+/* =========================================================
+   DELETE DOCUMENT
+========================================================= */
+
+async function deleteDocument(documentId, section) {
+
+    if (!confirm("Are you sure you want to delete this document?\nThis action cannot be undone.")) {
+        return;
+    }
+
+    const csrfToken = getCookie("csrftoken");
+
+    try {
+        const response = await fetch("{% url 'delete_investor_document' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken,
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: JSON.stringify({
+                document_id: documentId,
+                section: section
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert(data.message || "Document deleted successfully.");
+            loadDocuments();
+            loadDashboardStatistics();
+            loadRecentDocuments();
+        } else {
+            alert(data.message || "Delete failed.");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("An error occurred while deleting.");
+    }
+}
+
+/* =========================================================
+   13 INVESTOR DOCUMENT SECTIONS
+========================================================= */
+
+/* =========================================================
+   9 MAIN INVESTOR DOCUMENT SECTIONS
+   Exact same hierarchy as public Investor page
+========================================================= */
+
+
+/* =========================================================
+   FINANCIAL YEAR OPTIONS (used by upload + edit forms)
+========================================================= */
+const financialYearOptions = [
+    { value: "2027-28", label: "Financial Year 2027-28" },
+    { value: "2026-27", label: "Financial Year 2026-27" },
+    { value: "2025-26", label: "Financial Year 2025-26" },
+    { value: "2024-25", label: "Financial Year 2024-25" },
+    { value: "2023-24", label: "Financial Year 2023-24" },
+    { value: "2022-23", label: "Financial Year 2022-23" }
+];
+
+const investorSections = [
+
+    {
+        key: "annual_report",
+        name: "Annual Report"
+    },
+
+    {
+        key: "financial_result",
+        name: "Financial Results"
+    },
+
+    {
+        key: "annual_return",
+        name: "Annual Returns"
+    },
+
+    {
+        key: "corporate_announcements",
+        name: "Corporate Announcements",
+
+        children: [
+            {
+                key: "shareholder_notice",
+                name: "Notice to Stakeholder"
+            },
+
+            {
+                key: "newspaper_publication",
+                name: "Newspaper Publication",
+
+                children: [
+                    {
+                        key: "2026-27",
+                        name: "Financial Year 2026-27"
+                    },
+                    {
+                        key: "2025-26",
+                        name: "Financial Year 2025-26"
+                    }
+                ]
+            },
+
+            {
+                key: "stock_exchange_disclosure",
+                name: "Stock Exchange Disclosure",
+
+                children: [
+                    {
+                        key: "2026-27",
+                        name: "Financial Year 2026-27"
+                    },
+                    {
+                        key: "2025-26",
+                        name: "Financial Year 2025-26"
+                    }
+                ]
+            }
+        ]
+    },
+
+    {
+        key: "corporate_governance",
+        name: "Corporate Governance",
+
+        children: [
+            {
+                key: "2026-27",
+                name: "Financial Year 2026-27"
+            },
+            {
+                key: "2025-26",
+                name: "Financial Year 2025-26"
+            }
+        ]
+    },
+
+    {
+        key: "shareholding_pattern",
+        name: "Shareholding Pattern",
+
+        children: [
+            {
+                key: "2026-27",
+                name: "Financial Year 2026-27"
+            },
+            {
+                key: "2025-26",
+                name: "Financial Year 2025-26"
+            }
+        ]
+    },
+
+    {
+        key: "sebi_document",
+        name: "Disclosure under Regulations 46 of SEBI LODR",
+
+        children: [
+            {
+                key: "corporate_documents",
+                name: "Corporate Documents"
+            },
+            {
+                key: "board_of_directors",
+                name: "Board of Directors"
+            },
+            {
+                key: "board_committees",
+                name: "Committee of Board of Directors"
+            },
+            {
+                key: "codes_policies",
+                name: "Codes and Policies"
+            },
+            {
+                key: "investor_grievances",
+                name: "Investor Grievance"
+            }
+        ]
+    },
+
+    {
+        key: "investor_form",
+        name: "Investor Forms & Declaration",
+
+        children: [
+            {
+                key: "kyc_nomination",
+                name: "KYC and Nomination Form"
+            },
+            {
+                key: "tax_declaration",
+                name: "Tax Declaration for Dividend TDS Related"
+            },
+            {
+                key: "unclaimed_dividend",
+                name: "Unpaid or Unclaimed Dividend Details"
+            }
+        ]
+    },
+
+    {
+        key: "subsidiary_financial",
+        name: "Subsidiary Financial",
+
+        children: [
+            {
+                key: "2026-27",
+                name: "Financial Year 2026-27"
+            },
+            {
+                key: "2025-26",
+                name: "Financial Year 2025-26"
+            }
+        ]
+    }
+
+];
+
+/* =========================================================
+   SECTION DISPLAY NAME
+========================================================= */
+
+function getSectionDisplayName(section) {
+
+    if (!section) {
+        return "-";
+    }
+
+    function findInTree(items) {
+        for (const item of items) {
+            if (item.key === section) {
+                return item.name;
+            }
+            if (item.children) {
+                const childName = findInTree(item.children);
+                if (childName) {
+                    return childName;
+                }
+            }
+        }
+        return null;
+    }
+
+    return findInTree(investorSections) || section;
+
+}
+
+
+
+/* =========================================================
+   DASHBOARD STATISTICS
+========================================================= */
+async function loadDashboardStatistics() {
+
+    try {
+
+        const response = await fetch(
+            "{% url 'dashboard_statistics_api' %}",
+            {
+                method: "GET",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Accept": "application/json"
+                },
+                cache: "no-store"
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                "Failed to load dashboard statistics."
+            );
+        }
+
+        const data = await response.json();
+
+        const sectionCounts = data.section_counts || {};
+        const childCounts = data.child_counts || {};
+
+        /*
+         * =====================================================
+         * DOCUMENT LIBRARY COUNTS (9 top-level sections)
+         * Keys match investorSections[].key exactly
+         * =====================================================
+         */
+
+        const dashboardSectionCounts = {
+
+            /* 1. Annual Report */
+            annual_report:
+                Number(sectionCounts.annual_report || 0),
+
+            /* 2. Financial Results */
+            financial_result:
+                Number(sectionCounts.financial_result || 0),
+
+            /* 3. Annual Returns */
+            annual_return:
+                Number(sectionCounts.annual_return || 0),
+
+            /* 4. Corporate Announcements
+               = Notice to Stakeholder
+               + Newspaper Publication
+               + Stock Exchange Disclosure
+               (+ any direct corporate_announcements if present)
+            */
+            corporate_announcements:
+                Number(sectionCounts.corporate_announcements || 0),
+
+            /* 5. Corporate Governance */
+            corporate_governance:
+                Number(sectionCounts.corporate_governance || 0),
+
+            /* 6. Shareholding Pattern */
+            shareholding_pattern:
+                Number(sectionCounts.shareholding_pattern || 0),
+
+            /* 7. Disclosure under Regulations 46 of SEBI LODR */
+            sebi_document:
+                Number(sectionCounts.sebi_document || 0),
+
+            /* 8. Investor Forms & Declaration
+               = KYC / Investor Forms
+               + Tax Declaration
+               + Unclaimed Dividend
+            */
+            investor_form:
+                Number(sectionCounts.investor_form || 0),
+
+            /* 9. Subsidiary Financial */
+            subsidiary_financial:
+                Number(sectionCounts.subsidiary_financial || 0)
+
+        };
+
+        /*
+         * =====================================================
+         * TOTAL DOCUMENTS
+         * Prefer API total, otherwise sum the 9 section counts
+         * =====================================================
+         */
+
+        let total = Number(data.total_documents || 0);
+
+        if (!data.total_documents) {
+            total = Object.values(dashboardSectionCounts).reduce(
+                (sum, count) => sum + Number(count || 0),
+                0
+            );
+        }
+
+        /*
+         * =====================================================
+         * DOCUMENT SUMMARY TOTAL + DONUT CENTER
+         * =====================================================
+         */
+
+        const summaryTotal = document.getElementById("summaryTotal");
+        const donutTotal = document.getElementById("donutTotal");
+
+        if (summaryTotal) {
+            summaryTotal.textContent = total;
+        }
+
+        if (donutTotal) {
+            donutTotal.textContent = total;
+        }
+
+        /*
+         * =====================================================
+         * UPDATE DOCUMENT LIBRARY CARDS
+         * (IDs match the HTML exactly)
+         * =====================================================
+         */
+
+        const dashboardCardCounts = {
+            countAnnualReports:
+                dashboardSectionCounts.annual_report,
+
+            countFinancialResults:
+                dashboardSectionCounts.financial_result,
+
+            countAnnualReturns:
+                dashboardSectionCounts.annual_return,
+
+            countCorporateAnnouncements:
+                dashboardSectionCounts.corporate_announcements,
+
+            countCorporateGovernance:
+                dashboardSectionCounts.corporate_governance,
+
+            countShareholdingPattern:
+                dashboardSectionCounts.shareholding_pattern,
+
+            countSebiLodr:
+                dashboardSectionCounts.sebi_document,
+
+            countInvestorFormsDeclaration:
+                dashboardSectionCounts.investor_form,
+
+            countSubsidiaryFinancial:
+                dashboardSectionCounts.subsidiary_financial
+        };
+
+        Object.entries(dashboardCardCounts).forEach(
+            ([elementId, count]) => {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.textContent = Number(count);
+                }
+            }
+        );
+
+        /*
+         * =====================================================
+         * BUILD DOCUMENT SUMMARY SECTION (legend + %)
+         * =====================================================
+         */
+
+        const summaryGrid = document.getElementById("sectionSummaryGrid");
+
+        if (summaryGrid) {
+
+            summaryGrid.innerHTML = "";
+
+            investorSections.forEach((section, index) => {
+
+                const count = Number(
+                    dashboardSectionCounts[section.key] || 0
+                );
+
+                let percentage = 0;
+                if (total > 0) {
+                    percentage = Math.round((count / total) * 100);
+                }
+
+                const item = document.createElement("div");
+                item.className = "section-stat";
+
+                item.innerHTML = `
+                    <div class="section-stat-top">
+                        <span class="legend-dot section-color-${index + 1}"></span>
+                        <span class="section-stat-name">
+                            ${escapeHtml(section.name)}
+                        </span>
+                    </div>
+                    <div class="section-stat-bottom">
+                        <strong>${count}</strong>
+                        <span>${percentage}%</span>
+                    </div>
+                `;
+
+                summaryGrid.appendChild(item);
+            });
+        }
+
+        /*
+         * =====================================================
+         * UPDATE DONUT CHART
+         * =====================================================
+         */
+
+        updateDonut(dashboardSectionCounts, total);
+
+    } catch (error) {
+
+        console.error("Dashboard Statistics Error:", error);
+
+    }
+
+}
+
+
+/* =========================================================
+   DONUT CHART
+========================================================= */
+
+function updateDonut(
+    sectionCounts,
+    total
+) {
+
+    const circumference =
+        97.39;
+
+
+    let offset = 0;
+
+
+    investorSections.forEach(
+        (section, index) => {
+
+
+            const count =
+                Number(
+                    sectionCounts[
+                        section.key
+                    ] || 0
+                );
+
+
+            const segment =
+                document.getElementById(
+                    `donutSegment${index + 1}`
+                );
+
+
+            if (!segment) {
+                return;
+            }
+
+
+            if (
+                total <= 0 ||
+                count <= 0
+            ) {
+
+                segment.setAttribute(
+                    "stroke-dasharray",
+                    "0 100"
+                );
+
+                return;
+
+            }
+
+
+            const percentage =
+                count / total;
+
+
+            const dash =
+                percentage *
+                circumference;
+
+
+            segment.setAttribute(
+                "stroke-dasharray",
+                `${dash} ${circumference - dash}`
+            );
+
+
+            segment.setAttribute(
+                "stroke-dashoffset",
+                `${-offset}`
+            );
+
+
+            offset += dash;
+
+        }
+    );
+
+}
+
+/* =========================================================
+   RECENT DOCUMENTS (Dashboard card)
+========================================================= */
+
+async function loadRecentDocuments() {
+
+    const listEl = document.getElementById("recentDocumentsList");
+    const emptyEl = document.getElementById("recentDocumentsEmpty");
+
+    if (!listEl || !emptyEl) {
+        return;
+    }
+
+    // Show loading state
+    listEl.innerHTML = `
+        <div class="recent-loading">
+            Loading recent documents...
+        </div>
+    `;
+    listEl.style.display = "block";
+    emptyEl.style.display = "none";
+
+    try {
+
+        const response = await fetch(
+            "{% url 'dashboard_documents_api' %}",
+            {
+                method: "GET",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Accept": "application/json"
+                },
+                cache: "no-store"
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("Failed to load documents.");
+        }
+
+        let documents = await response.json();
+
+        if (!Array.isArray(documents) || documents.length === 0) {
+            listEl.innerHTML = "";
+            listEl.style.display = "none";
+            emptyEl.style.display = "block";
+            return;
+        }
+
+        // Each doc's most recent activity: whichever is later, its
+        // upload time (created_at) or its last edit time (updated_at).
+        documents.forEach(doc => {
+            const createdTime = doc.created_at ? new Date(doc.created_at).getTime() : 0;
+            const updatedTime = doc.updated_at ? new Date(doc.updated_at).getTime() : 0;
+            doc._activityTime = Math.max(createdTime, updatedTime);
+            // Treat as "edited" only if updated_at is meaningfully later
+            // than created_at (a few seconds' gap covers save-time jitter).
+            doc._wasEdited = updatedTime - createdTime > 5000;
+        });
+
+        // Sort by most recent activity (upload OR edit) first
+        documents.sort((a, b) => b._activityTime - a._activityTime);
+
+        // Take the 10 most recently uploaded or edited documents
+        const recent = documents.slice(0, 10);
+
+        listEl.innerHTML = "";
+
+        recent.forEach(doc => {
+
+            const title = doc.title || "Untitled Document";
+            const sectionName = getSectionDisplayName(doc.section);
+
+            // Show the date of whichever happened most recently
+            const activityDate = doc._activityTime
+                ? new Date(doc._activityTime).toLocaleDateString("en-GB", {
+                      day: "2-digit", month: "2-digit", year: "numeric"
+                  }).replace(/\//g, "-")
+                : (doc.date || doc.release_date || doc.disclosure_date || "-");
+
+            const activityBadge = doc._wasEdited
+                ? `<span class="recent-doc-activity edited">Edited</span>`
+                : `<span class="recent-doc-activity uploaded">Uploaded</span>`;
+
+            let linkHtml = escapeHtml(title);
+
+            if (doc.pdf_file) {
+                linkHtml = `
+                    <a href="${escapeHtml(doc.pdf_file)}"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="recent-doc-title">
+                        ${escapeHtml(title)}
+                    </a>
+                `;
+            } else if (doc.external_url) {
+                linkHtml = `
+                    <a href="${escapeHtml(doc.external_url)}"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="recent-doc-title">
+                        ${escapeHtml(title)}
+                    </a>
+                `;
+            } else {
+                linkHtml = `<span class="recent-doc-title">${escapeHtml(title)}</span>`;
+            }
+
+            const item = document.createElement("div");
+            item.className = "recent-document-item";
+
+            item.innerHTML = `
+                <div class="recent-doc-main">
+                    ${linkHtml}
+                    <div class="recent-doc-meta">
+                        <span class="recent-doc-section">${escapeHtml(sectionName)}</span>
+                        <span class="recent-doc-date">${escapeHtml(activityDate)}</span>
+                    </div>
+                </div>
+                <div class="recent-doc-status">
+                    ${activityBadge}
+                </div>
+            `;
+
+            listEl.appendChild(item);
+        });
+
+        listEl.style.display = "block";
+        emptyEl.style.display = "none";
+
+    } catch (error) {
+
+        console.error("Recent Documents Error:", error);
+
+        listEl.innerHTML = `
+            <div class="recent-error">
+                Unable to load recent documents.
+            </div>
+        `;
+        listEl.style.display = "block";
+        emptyEl.style.display = "none";
+    }
+}
+
+/* =========================================================
+   PAGE NAVIGATION
+========================================================= */
+
+function hideAllPages() {
+
+    document
+        .querySelectorAll(".page-section")
+        .forEach(page => {
+
+            page.classList.add(
+                "hidden"
+            );
+
+        });
+
+}
+
+
+
+function removeActiveMenu() {
+
+    document
+        .querySelectorAll(".menu-item")
+        .forEach(item => {
+
+            item.classList.remove(
+                "active"
+            );
+
+        });
+
+}
+
+
+
+function activateMenu(index) {
+
+    const menuItems =
+        document.querySelectorAll(
+            ".menu-item"
+        );
+
+
+    if (menuItems[index]) {
+
+        menuItems[index]
+            .classList.add(
+                "active"
+            );
+
+    }
+
+}
+
+
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+function showDashboard(event) {
+
+    if (event) {
+        event.preventDefault();
+    }
+
+
+    hideAllPages();
+
+    removeActiveMenu();
+
+
+    document
+        .getElementById(
+            "dashboardPage"
+        )
+        .classList.remove(
+            "hidden"
+        );
+
+
+    activateMenu(0);
+
+
+    loadDashboardStatistics();
+    loadRecentDocuments();
+
+}
+
+
+
+/* =========================================================
+   DOCUMENTS
+========================================================= */
+
+function showDocuments(event) {
+
+    if (event) {
+        event.preventDefault();
+    }
+
+
+    hideAllPages();
+
+    removeActiveMenu();
+
+
+    document
+        .getElementById(
+            "documentsPage"
+        )
+        .classList.remove(
+            "hidden"
+        );
+
+
+    activateMenu(1);
+
+
+    loadDocuments();
+
+}
+
+
+
+/* =========================================================
+   UPLOAD
+========================================================= */
+
+function showUpload(event) {
+
+    if (event) {
+        event.preventDefault();
+    }
+
+
+    hideAllPages();
+
+    removeActiveMenu();
+
+
+    document
+        .getElementById(
+            "uploadPage"
+        )
+        .classList.remove(
+            "hidden"
+        );
+
+
+    activateMenu(2);
+
+}
+
+
+
+/* =========================================================
+   MOBILE SIDEBAR
+========================================================= */
+
+function toggleSidebar() {
+
+    document
+        .querySelector(".sidebar")
+        .classList.toggle(
+            "mobile-open"
+        );
+
+}
+
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHtml(value) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+
+        return "";
+
+    }
+
+
+    return String(value)
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+
+/* =========================================================
+   FILE UPLOAD
+========================================================= */
+
+const fileInput =
+    document.getElementById(
+        "documentFile"
+    );
+
+const dropZone =
+    document.getElementById(
+        "dropZone"
+    );
+
+
+if (
+    fileInput &&
+    dropZone
+) {
+
+    fileInput.addEventListener(
+        "change",
+        function () {
+
+            if (
+                this.files.length > 0
+            ) {
+
+                dropZone
+                    .querySelector("h4")
+                    .textContent =
+                    this.files[0].name;
+
+
+                dropZone
+                    .querySelector("p")
+                    .textContent =
+                    "PDF selected successfully";
+
+            }
+
+        }
+    );
+
+
+
+    dropZone.addEventListener(
+        "dragover",
+        function (event) {
+
+            event.preventDefault();
+
+            dropZone
+                .classList
+                .add(
+                    "drag-over"
+                );
+
+        }
+    );
+
+
+
+    dropZone.addEventListener(
+        "dragleave",
+        function () {
+
+            dropZone
+                .classList
+                .remove(
+                    "drag-over"
+                );
+
+        }
+    );
+
+
+
+    dropZone.addEventListener(
+        "drop",
+        function (event) {
+
+            event.preventDefault();
+
+
+            dropZone
+                .classList
+                .remove(
+                    "drag-over"
+                );
+
+
+            const files =
+                event.dataTransfer.files;
+
+
+            if (
+                files.length > 0
+            ) {
+
+                fileInput.files =
+                    files;
+
+
+                dropZone
+                    .querySelector("h4")
+                    .textContent =
+                    files[0].name;
+
+
+                dropZone
+                    .querySelector("p")
+                    .textContent =
+                    "PDF selected successfully";
+
+            }
+
+        }
+    );
+
+}
+
+
+
+/* =========================================================
+   DYNAMIC UPLOAD FIELDS
+========================================================= */
+
+const sectionSelect =
+    document.getElementById(
+        "section"
+    );
+
+ const subsectionSelect =
+    document.getElementById(
+        "subsection"
+    );
+
+
+if (subsectionSelect) {
+
+    subsectionSelect.addEventListener(
+        "change",
+        function () {
+
+            showSubsectionFields(
+                sectionSelect.value,
+                this.value
+            );
+
+        }
+    );
+
+}   
+
+
+function showSubsectionFields(
+    section,
+    subsection
+) {
+    clearDynamicFields();
+    if (!section || !subsection) {
+        return;
+    }
+    /* =====================================================
+       CORPORATE ANNOUNCEMENTS
+    ===================================================== */
+    if (section === "corporate_announcements") {
+        /* ---------------------------------------------
+           Notice to Stakeholder
+        --------------------------------------------- */
+        if (subsection === "shareholder_notice") {
+            dynamicFields.appendChild(
+                createField(
+                    "Document Title",
+                    "title",
+                    "text",
+                    true
+                )
+            );
+            dynamicFields.appendChild(
+                createSelect(
+                    "Financial Year",
+                    "financial_year",
+                    financialYearOptions,
+                    true
+                )
+            );
+            dynamicFields.appendChild(
+                createField(
+                    "Notice Type",
+                    "notice_type"
+                )
+            );
+            dynamicFields.appendChild(
+                createField(
+                    "Disclosure Date",
+                    "disclosure_date",
+                    "date"
+                )
+            );
+            dynamicFields.appendChild(
+                createField(
+                    "Meeting Date",
+                    "meeting_date",
+                    "date"
+                )
+            );
+        }
+        /* ---------------------------------------------
+           Newspaper Publication
+        --------------------------------------------- */
+        else if (
+            subsection === "newspaper_publication"
+        ) {
+            dynamicFields.appendChild(
+                createField(
+                    "Document Title",
+                    "title",
+                    "text",
+                    true
+                )
+            );
+            dynamicFields.appendChild(
+                createSelect(
+                    "Financial Year",
+                    "financial_year",
+                    financialYearOptions,
+                    true
+                )
+            );
+            dynamicFields.appendChild(
+                createField(
+                    "Disclosure Date",
+                    "disclosure_date",
+                    "date"
+                )
+            );
+        }
+        /* ---------------------------------------------
+           Stock Exchange Disclosure
+        --------------------------------------------- */
+        else if (
+            subsection === "stock_exchange_disclosure"
+        ) {
+            dynamicFields.appendChild(
+                createField(
+                    "Document Title",
+                    "title",
+                    "text",
+                    true
+                )
+            );
+            dynamicFields.appendChild(
+                createSelect(
+                    "Financial Year",
+                    "financial_year",
+                    financialYearOptions,
+                    true
+                )
+            );
+            dynamicFields.appendChild(
+                createField(
+                    "Disclosure Date",
+                    "disclosure_date",
+                    "date"
+                )
+            );
+        }
+    }
+}
+
+const dynamicFields =
+    document.getElementById(
+        "dynamicFields"
+    );
+
+
+
+function createField(
+    label,
+    name,
+    type = "text",
+    required = false
+) {
+
+    const group =
+        document.createElement(
+            "div"
+        );
+
+
+    group.className =
+        "form-group";
+
+
+    group.innerHTML = `
+
+        <label for="${name}">
+
+            ${label}
+
+            ${
+                required
+                    ? "<span>*</span>"
+                    : ""
+            }
+
+        </label>
+
+
+        <input
+            type="${type}"
+            id="${name}"
+            name="${name}"
+            ${required ? "required" : ""}
+        >
+
+    `;
+
+
+    return group;
+
+}
+
+
+
+function createSelect(
+    label,
+    name,
+    options,
+    required = false
+) {
+
+    const group =
+        document.createElement(
+            "div"
+        );
+
+
+    group.className =
+        "form-group";
+
+
+    let optionsHTML = `
+        <option value="">
+            Select ${label}
+        </option>
+    `;
+
+
+    options.forEach(
+        option => {
+
+            optionsHTML += `
+                <option value="${option.value}">
+                    ${option.label}
+                </option>
+            `;
+
+        }
+    );
+
+
+    group.innerHTML = `
+
+        <label for="${name}">
+
+            ${label}
+
+            ${
+                required
+                    ? "<span>*</span>"
+                    : ""
+            }
+
+        </label>
+
+
+        <select
+            id="${name}"
+            name="${name}"
+            ${required ? "required" : ""}
+        >
+
+            ${optionsHTML}
+
+        </select>
+
+    `;
+
+
+    return group;
+
+}
+
+
+
+function clearDynamicFields() {
+
+    if (dynamicFields) {
+
+        dynamicFields.innerHTML =
+            "";
+
+    }
+
+}
+
+
+function showSectionFields(section) {
+
+    clearDynamicFields();
+
+    const subsectionField =
+        document.getElementById("subsectionField");
+
+    const subsectionSelect =
+        document.getElementById("subsection");
+
+
+    /*
+     * Reset subsection
+     */
+
+    if (subsectionSelect) {
+
+        subsectionSelect.innerHTML = `
+            <option value="">
+                Select Subsection
+            </option>
+        `;
+
+    }
+
+
+    if (subsectionField) {
+
+        subsectionField.style.display = "none";
+
+    }
+
+
+    if (!section) {
+        return;
+    }
+
+
+    /* =====================================================
+       1. ANNUAL REPORT
+    ===================================================== */
+
+    if (section === "annual_report") {
+
+        dynamicFields.appendChild(
+            createField(
+                "Document Title",
+                "title",
+                "text",
+                true
+            )
+        );
+
+        dynamicFields.appendChild(
+            createSelect(
+                "Financial Year",
+                "financial_year",
+                financialYearOptions,
+                true
+            )
+        );
+
+    }
+
+
+    /* =====================================================
+       2. FINANCIAL RESULTS
+    ===================================================== */
+
+    else if (section === "financial_result") {
+
+        dynamicFields.appendChild(
+            createField(
+                "Document Title",
+                "title",
+                "text",
+                true
+            )
+        );
+
+        dynamicFields.appendChild(
+            createSelect(
+                "Financial Year",
+                "financial_year",
+                financialYearOptions,
+                true
+            )
+        );
+
+        dynamicFields.appendChild(
+            createSelect(
+                "Quarter",
+                "quarter",
+                [
+                    {
+                        value: "Q1",
+                        label: "Q1"
+                    },
+                    {
+                        value: "Q2",
+                        label: "Q2"
+                    },
+                    {
+                        value: "Q3",
+                        label: "Q3"
+                    },
+                    {
+                        value: "Q4",
+                        label: "Q4"
+                    },
+                    {
+                        value: "Annual",
+                        label: "Annual"
+                    }
+                ],
+                true
+            )
+        );
+
+        dynamicFields.appendChild(
+            createField(
+                "Release Date",
+                "release_date",
+                "date",
+                true
+            )
+        );
+
+    }
+
+
+    /* =====================================================
+       3. ANNUAL RETURNS
+    ===================================================== */
+
+    else if (section === "annual_return") {
+
+        dynamicFields.appendChild(
+            createField(
+                "Document Title",
+                "title",
+                "text",
+                true
+            )
+        );
+
+        dynamicFields.appendChild(
+            createSelect(
+                "Financial Year",
+                "financial_year",
+                financialYearOptions,
+                true
+            )
+        );
+
+    }
+
+
+    /* =====================================================
+       4. CORPORATE ANNOUNCEMENTS
+    ===================================================== */
+
+    else if (section === "corporate_announcements") {
+
+        if (subsectionField) {
+            subsectionField.style.display = "block";
+        }
+
+        if (subsectionSelect) {
+
+            subsectionSelect.required = true;
+
+            subsectionSelect.innerHTML = `
+                <option value="">
+                    Select Subsection
+                </option>
+
+                <option value="shareholder_notice">
+                    Notice to Stakeholder
+                </option>
+
+                <option value="newspaper_publication">
+                    Newspaper Publication
+                </option>
+
+                <option value="stock_exchange_disclosure">
+                    Stock Exchange Disclosure
+                </option>
+            `;
+        }
+
+    }
+
+
+    /* =====================================================
+       5. CORPORATE GOVERNANCE
+    ===================================================== */
+
+    else if (section === "corporate_governance") {
+
+        dynamicFields.appendChild(
+            createField(
+                "Document Title",
+                "title",
+                "text",
+                true
+            )
+        );
+
+        dynamicFields.appendChild(
+            createSelect(
+                "Financial Year",
+                "financial_year",
+                financialYearOptions,
+                true
+            )
+        );
+
+    }
+
+
+    /* =====================================================
+       6. SHAREHOLDING PATTERN
+    ===================================================== */
+
+    else if (section === "shareholding_pattern") {
+
+        dynamicFields.appendChild(
+            createField(
+                "Document Title",
+                "title",
+                "text",
+                true
+            )
+        );
+
+        dynamicFields.appendChild(
+            createSelect(
+                "Financial Year",
+                "financial_year",
+                financialYearOptions,
+                true
+            )
+        );
+
+        dynamicFields.appendChild(
+            createSelect(
+                "Quarter",
+                "quarter",
+                [
+                    {
+                        value: "Q1",
+                        label: "Q1"
+                    },
+                    {
+                        value: "Q2",
+                        label: "Q2"
+                    },
+                    {
+                        value: "Q3",
+                        label: "Q3"
+                    },
+                    {
+                        value: "Q4",
+                        label: "Q4"
+                    },
+                    {
+                        value: "Annual",
+                        label: "Annual"
+                    }
+                ],
+                true
+            )
+        );
+
+    }
+
+
+    /* =====================================================
+       7. SEBI LODR
+    ===================================================== */
+
+    else if (section === "sebi_document") {
+
+        dynamicFields.appendChild(
+            createField(
+                "Document Title",
+                "title",
+                "text",
+                true
+            )
+        );
+
+        dynamicFields.appendChild(
+            createSelect(
+                "Category",
+                "category",
+                [
+                    {
+                        value: "corporate_documents",
+                        label: "Corporate Documents"
+                    },
+                    {
+                        value: "board_of_directors",
+                        label: "Board of Directors"
+                    },
+                    {
+                        value: "board_committees",
+                        label: "Committee of Board of Directors"
+                    },
+                    {
+                        value: "codes_policies",
+                        label: "Codes and Policies"
+                    },
+                    {
+                        value: "investor_grievances",
+                        label: "Investor Grievance"
+                    }
+                ],
+                true
+            )
+        );
+
+    }
+
+
+    /* =====================================================
+       8. INVESTOR FORMS & DECLARATION
+    ===================================================== */
+
+    else if (section === "investor_form") {
+
+        dynamicFields.appendChild(
+            createField(
+                "Document Title",
+                "title",
+                "text",
+                true
+            )
+        );
+
+        dynamicFields.appendChild(
+            createSelect(
+                "Form Type",
+                "category",
+                [
+                    {
+                        value: "kyc_nomination",
+                        label: "KYC and Nomination Form"
+                    },
+                    {
+                        value: "tax_declaration",
+                        label: "Tax Declaration for Dividend TDS Related"
+                    },
+                    {
+                        value: "unclaimed_dividend",
+                        label: "Unpaid or Unclaimed Dividend Details"
+                    }
+                ],
+                true
+            )
+        );
+
+        dynamicFields.appendChild(
+            createField(
+                "Description",
+                "description"
+            )
+        );
+
+    }
+
+
+    /* =====================================================
+       9. SUBSIDIARY FINANCIAL
+    ===================================================== */
+
+    else if (section === "subsidiary_financial") {
+
+        dynamicFields.appendChild(
+            createField(
+                "Document Title",
+                "title",
+                "text",
+                true
+            )
+        );
+
+        dynamicFields.appendChild(
+            createSelect(
+                "Financial Year",
+                "financial_year",
+                financialYearOptions,
+                true
+            )
+        );
+
+        dynamicFields.appendChild(
+            createField(
+                "Company Name",
+                "company_name",
+                "text",
+                true
+            )
+        );
+
+        dynamicFields.appendChild(
+            createField(
+                "Financial Type",
+                "financial_type"
+            )
+        );
+
+    }
+
+}
+
+
+if (sectionSelect) {
+
+    sectionSelect.addEventListener(
+        "change",
+        function () {
+
+            showSectionFields(
+                this.value
+            );
+
+        }
+    );
+
+}
+
+
+
+/* =========================================================
+   UPLOAD FORM
+========================================================= */
+
+const documentUploadForm =
+    document.getElementById(
+        "documentUploadForm"
+    );
+
+
+const uploadDocumentButton =
+    document.getElementById(
+        "uploadDocumentButton"
+    );
+
+
+const cancelUploadButton =
+    document.getElementById(
+        "cancelUploadButton"
+    );
+
+
+
+if (documentUploadForm) {
+
+    documentUploadForm.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+
+            const section =
+                document.getElementById(
+                    "section"
+                ).value;
+
+
+            const pdfFile =
+                document.getElementById(
+                    "documentFile"
+                ).files[0];
+
+
+            const externalUrl =
+                document.getElementById(
+                    "external_url"
+                ).value.trim();
+
+
+            if (!section) {
+
+                alert(
+                    "Please select a document section."
+                );
+
+                return;
+
+            }
+
+
+            if (
+                !pdfFile &&
+                !externalUrl
+            ) {
+
+                alert(
+                    "Please upload a PDF or provide an external URL."
+                );
+
+                return;
+
+            }
+
+
+            // Client-side file validation
+            if (pdfFile) {
+                // Only PDF
+                if (!pdfFile.name.toLowerCase().endsWith(".pdf")) {
+                    alert("Only PDF files are allowed.");
+                    return;
+                }
+
+                // Max 10 MB
+                if (pdfFile.size > 10 * 1024 * 1024) {
+                    alert("File size must be less than 10 MB.");
+                    return;
+                }
+            }
+
+            uploadDocumentButton.disabled =
+                true;
+
+
+            uploadDocumentButton.textContent =
+                "Uploading...";
+
+
+            const formData =
+                new FormData(
+                    documentUploadForm
+                );
+
+
+            const csrfToken =
+                getCookie(
+                    "csrftoken"
+                );
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "{% url 'upload_investor_document' %}",
+                        {
+                            method:
+                                "POST",
+
+                            headers: {
+                                "X-CSRFToken":
+                                    csrfToken,
+
+                                "X-Requested-With":
+                                    "XMLHttpRequest"
+                            },
+
+                            body:
+                                formData
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (
+                    response.ok &&
+                    data.success
+                ) {
+
+                    alert(
+                        data.message
+                    );
+
+
+                    documentUploadForm.reset();
+
+                    clearDynamicFields();
+
+
+                    loadDashboardStatistics();
+
+                    loadDocuments();
+                    loadRecentDocuments();
+
+                }
+
+
+                else {
+
+                    alert(
+                        data.message ||
+                        "Unable to upload the document."
+                    );
+
+                }
+
+            }
+
+
+            catch (error) {
+
+                console.error(
+                    "Upload error:",
+                    error
+                );
+
+
+                alert(
+                    "An error occurred while uploading the document."
+                );
+
+            }
+
+
+            finally {
+
+                uploadDocumentButton.disabled =
+                    false;
+
+
+                uploadDocumentButton.textContent =
+                    "↑ Upload Document";
+
+            }
+
+        }
+    );
+
+}
+
+
+
+/* =========================================================
+   CANCEL UPLOAD
+========================================================= */
+
+if (cancelUploadButton) {
+
+    cancelUploadButton.addEventListener(
+        "click",
+        function () {
+
+            documentUploadForm.reset();
+
+            clearDynamicFields();
+
+        }
+    );
+
+}
+
+
+
+/* =========================================================
+   CSRF
+========================================================= */
+
+function getCookie(name) {
+
+    let cookieValue =
+        null;
+
+
+    if (
+        document.cookie &&
+        document.cookie !== ""
+    ) {
+
+        const cookies =
+            document.cookie.split(";");
+
+
+        for (
+            let i = 0;
+            i < cookies.length;
+            i++
+        ) {
+
+            const cookie =
+                cookies[i].trim();
+
+
+            if (
+                cookie.substring(
+                    0,
+                    name.length + 1
+                ) ===
+                name + "="
+            ) {
+
+                cookieValue =
+                    decodeURIComponent(
+                        cookie.substring(
+                            name.length + 1
+                        )
+                    );
+
+                break;
+
+            }
+
+        }
+
+    }
+
+
+    return cookieValue;
+
+}
+
+
+
+/* =========================================================
+   LOAD DOCUMENTS
+========================================================= */
+
+async function loadDocuments() {
+
+    const tableBody =
+        document.getElementById(
+            "documentsTableBody"
+        );
+
+
+    if (!tableBody) {
+        return;
+    }
+
+
+    tableBody.innerHTML = `
+
+        <tr>
+
+            <td
+                colspan="5"
+                class="table-empty">
+
+                Loading documents...
+
+            </td>
+
+        </tr>
+
+    `;
+
+
+    try {
+
+        const response =
+            await fetch(
+                "{% url 'dashboard_documents_api' %}",
+                {
+                    method:
+                        "GET",
+
+                    headers: {
+                        "X-Requested-With":
+                            "XMLHttpRequest",
+
+                        "Accept":
+                            "application/json"
+                    },
+
+                    cache:
+                        "no-store"
+                }
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Failed to load documents."
+            );
+
+        }
+
+
+        const documents =
+            await response.json();
+
+
+        tableBody.innerHTML = "";
+
+
+        if (
+            !Array.isArray(documents) ||
+            documents.length === 0
+        ) {
+
+            tableBody.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="5"
+                        class="table-empty">
+
+                        No documents available.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+            return;
+
+        }
+
+
+        documents.forEach(
+            doc => {
+
+
+                const row =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                const title =
+                    doc.title ||
+                    "Untitled Document";
+
+
+                let documentLink =
+                    escapeHtml(
+                        title
+                    );
+
+
+                if (doc.pdf_file) {
+
+                    documentLink = `
+
+                        <a
+                            href="${escapeHtml(doc.pdf_file)}"
+                            target="_blank"
+                            rel="noopener noreferrer">
+
+                            ${escapeHtml(title)}
+
+                        </a>
+
+                    `;
+
+                }
+
+                else if (
+                    doc.external_url
+                ) {
+
+                    documentLink = `
+
+                        <a
+                            href="${escapeHtml(doc.external_url)}"
+                            target="_blank"
+                            rel="noopener noreferrer">
+
+                            ${escapeHtml(title)}
+
+                        </a>
+
+                    `;
+
+                }
+
+
+                const section =
+                    getSectionDisplayName(
+                        doc.section
+                    );
+
+
+                const financialYear =
+                    doc.financial_year ||
+                    "-";
+
+
+                const date =
+                    doc.date ||
+                    doc.release_date ||
+                    doc.disclosure_date ||
+                    doc.meeting_date ||
+                    doc.created_at ||
+                    "-";
+
+
+                    row.innerHTML = `
+
+                        <td>
+                            ${documentLink}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(section)}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(financialYear)}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(date)}
+                        </td>
+
+                        <td>
+                            <div class="document-actions">
+                                <button
+                                    type="button"
+                                    class="action-btn edit-btn"
+                                    onclick="openEditModal(${doc.id}, '${escapeHtml(doc.section)}')"
+                                    title="Edit document">
+                                    ✎ Edit
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="action-btn delete-btn"
+                                    onclick="deleteDocument(${doc.id}, '${escapeHtml(doc.section)}')"
+                                    title="Delete document">
+                                    🗑 Delete
+                                </button>
+                            </div>
+                        </td>
+
+                    `;
+
+
+                tableBody.appendChild(
+                    row
+                );
+
+            }
+        );
+
+
+        applyDocumentFilters();
+
+    }
+
+
+    catch (error) {
+
+        console.error(
+            "Documents Loading Error:",
+            error
+        );
+
+
+        tableBody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="5"
+                    class="table-empty">
+
+                    Unable to load documents.
+
+                </td>
+
+            </tr>
+
+        `;
+
+    }
+
+}
+
+
+
+/* =========================================================
+   SEARCH + FILTER
+========================================================= */
+
+const documentSearch =
+    document.getElementById(
+        "documentSearch"
+    );
+
+
+const documentSectionFilter =
+    document.getElementById(
+        "documentSectionFilter"
+    );
+
+
+
+function applyDocumentFilters() {
+
+    const tableBody = document.getElementById("documentsTableBody");
+    if (!tableBody) return;
+
+    const searchValue = documentSearch
+        ? documentSearch.value.trim().toLowerCase()
+        : "";
+
+    const selectedSection = documentSectionFilter
+        ? documentSectionFilter.value
+        : "all";
+
+    // Children that belong under Corporate Announcements
+    const corporateChildren = [
+        "shareholder_notice",
+        "newspaper_publication",
+        "stock_exchange_disclosure"
+    ];
+
+    // Children that belong under Investor Forms
+    const investorFormChildren = [
+        "tax_declaration",
+        "unclaimed_dividend",
+        "kyc_nomination"
+    ];
+
+    const rows = tableBody.querySelectorAll("tr");
+
+    rows.forEach(row => {
+        const cells = row.querySelectorAll("td");
+        if (cells.length !== 5) return;
+
+        const rowText = row.textContent.toLowerCase();
+        const sectionText = cells[1].textContent.trim().toLowerCase();
+
+        let sectionMatches = true;
+
+        if (selectedSection !== "all") {
+            const selectedName = getSectionDisplayName(selectedSection).toLowerCase();
+
+            if (selectedSection === "corporate_announcements") {
+                // Match parent name OR any of the three children
+                sectionMatches =
+                    sectionText === selectedName ||
+                    corporateChildren.some(child =>
+                        sectionText === getSectionDisplayName(child).toLowerCase()
+                    );
+            }
+            else if (selectedSection === "investor_form") {
+                sectionMatches =
+                    sectionText === selectedName ||
+                    investorFormChildren.some(child =>
+                        sectionText === getSectionDisplayName(child).toLowerCase()
+                    );
+            }
+            else {
+                sectionMatches = sectionText === selectedName;
+            }
+        }
+
+        const searchMatches = !searchValue || rowText.includes(searchValue);
+
+        row.style.display = (searchMatches && sectionMatches) ? "" : "none";
+    });
+}
+
+
+
+if (documentSearch) {
+
+    documentSearch.addEventListener(
+        "input",
+        applyDocumentFilters
+    );
+
+}
+
+
+
+if (documentSectionFilter) {
+
+    documentSectionFilter.addEventListener(
+        "change",
+        applyDocumentFilters
+    );
+
+}
+
+
+
+/* =========================================================
+   INITIAL PAGE
+========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        showDashboard();
+
+    }
+);
+
+/* =========================================================
+   DOWNLOAD SUMMARY REPORT (PDF)
+========================================================= */
+document.addEventListener("DOMContentLoaded", function () {
+    const downloadBtn = document.getElementById("downloadSummaryBtn");
+
+    if (!downloadBtn) return;
+
+    downloadBtn.addEventListener("click", async function () {
+        const originalText = downloadBtn.innerHTML;
+        downloadBtn.disabled = true;
+        downloadBtn.innerHTML = "Generating PDF...";
+
+        try {
+            const response = await fetch("{% url 'download_summary_report' %}", {
+                method: "GET",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to generate report");
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "NIBE_Investor_Summary_Report.pdf";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+
+        } catch (error) {
+            console.error("Download error:", error);
+            alert("Failed to download Summary Report. Please try again.");
+        } finally {
+            downloadBtn.disabled = false;
+            downloadBtn.innerHTML = originalText;
+        }
+    });
+});
+
+</script>
+
+
+</body>
+
+</html>

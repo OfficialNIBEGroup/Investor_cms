@@ -1,0 +1,1687 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+{% comment %} Priyanka {% endcomment %}
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home | NIBE LIMITED</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png"
+      href="{% static 'Nibe Limited Logo/NIBE Group Logo.png' %}">
+    <link rel="stylesheet" href="{% static 'Style.css' %}">
+    <link rel="icon" type="image/png" href="{% static 'Nibe Limited Logo/NIBE Group Logo.png' %}">
+    <script src="{% static 'image-perf.js' %}" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <img src="Nibe Limited Logo/NIBE Group Logo.png" alt="NIBE Logo" fetchpriority="high" decoding="async"
+                    loading="eager">
+            </div>
+
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="About_us.html">About Us</a></li>
+
+                <li class="mega-menu">
+
+                    <a href="#">Divisions <i class="fa-solid fa-chevron-down"></i></a>
+
+                    <div class="mega-menu-content">
+
+                        <!-- Column 1 -->
+                        <div class="mega-column">
+
+                            <h4 class="sub-heading mt">
+                                <a href="index.html">NIBE LIMITED</a>
+                            </h4>
+
+                            <ul class="mega-sub-list">
+                                <li><a href="Land_Systems.html">Land Systems</a></li>
+                                <li><a href="Airforce_Systems.html">Air Systems</a></li>
+                                <li><a href="Naval_Systems.html">Naval Systems</a></li>
+                            </ul>
+
+                            <h4 class="sub-heading mt">
+                                <a href="https://www.nibespace.com/" target="_blank">NIBE SPACE</a>
+                            </h4>
+
+                            <h4 class="sub-heading mt">
+                                <a href="Electronics.html">NDAL</a>
+                            </h4>
+
+                            <ul class="mega-sub-list">
+                                <li><a href="Electronics.html">Electronics</a></li>
+                            </ul>
+
+                        </div>
+
+                        <!-- Column 2 -->
+                        <div class="mega-column">
+
+                            <h4 class="sub-heading mt">
+                                <a href="BBGPL.html">BIO ENERGY</a>
+                            </h4>
+
+                            <h4 class="sub-heading mt">
+                                <a href="#">BHARAT MARITIME PRIVATE LIMITED</a>
+                            </h4>
+
+                            <h4 class="sub-heading mt">
+                                <a href="https://bhaarat-space.vercel.app/" target="_blank">
+                                    BHARAT SPACE PRIVATE LIMITED
+                                </a>
+                            </h4>
+
+                        </div>
+
+                    </div>
+
+                </li>
+
+                <li><a href="Investors.html">Investors</a></li>
+                <li><a href="ContactUs.html">Contact Us</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="investor-relations">
+        <div class="investor-overlay">
+            <div class="investor-content">
+                <h2>Investor Relations</h2>
+                <p>
+                    Stay informed with key company developments, financial results,
+                    regulatory announcements, and all relevant investors’
+                    communications.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="investor-updates">
+        <div class="container">
+
+            <!-- Left Menu -->
+            <div class="investor-sidebar">
+                <h2>Investor Updates</h2>
+
+                <ul>
+                    <li class="active">
+                        <a href="#" onclick="showTab('annualReports',this)">
+                            Annual Reports
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="#" onclick="showTab('financialResults',this)">
+                            Financial Results
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="#" onclick="showTab('AnnualReturns',this)">
+                            Annual Returns</a>
+                    </li>
+
+                    <li>
+                        <a href="#" onclick="showTab('CorporateAnnouncements',this)">
+                            Corporate Announcements</a>
+                    </li>
+
+                    <li>
+                        <a href="#" onclick="showTab('CorporateGovernance',this)">
+                            Corporate Governance</a>
+                    </li>
+
+                    <li>
+                        <a href="#" onclick="showTab('ShareholdingPattern',this)">
+                            Shareholding Pattern</a>
+                    </li>
+
+                    <li>
+                        <a href="#" onclick="Disclosure46(); return false;" class="sidebar-item">
+                            Disclosure under Regulation 46 of SEBI LODR
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="#" onclick="InvestorForms(); return false;" class="sidebar-item">
+                            Investor Forms & Declarations
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="#" onclick="showTab('SubsidiaryFinancials',this)">
+                            Subsidiary Financials</a>
+                    </li>
+
+                </ul>
+            </div>
+
+
+            <!-- Right Content -->
+            <div class="investor-content">
+
+              <!-- Annual Reports -->
+                    <div id="annualReports" class="tab-content active-content">
+
+                        <h2>Annual Reports</h2>
+
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Sr No</th>
+                                        <th>Financial Year</th>
+                                        <th>Annual Report</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="annualReportsTableBody">
+                                </tbody>
+
+                            </table>
+                        </div>
+
+                    </div>
+
+                <!-- Financial Results -->
+                <div id="financialResults" class="tab-content">
+
+                    <h2>Financial Results</h2>
+
+                    <div class="financial-list">
+
+                        <a href="#" onclick="showFY2026(); return false;" class="financial-item">
+
+                            <span>Financial Year 2026-27</span>
+                            <span class="arrow">&#8250;</span>
+
+                        </a>
+
+                        <a href="#" onclick="showFY2025(); return false;" class="financial-item">
+
+                            <span>Financial Year 2025-26</span>
+                            <span class="arrow">&#8250;</span>
+
+                        </a>
+
+                        <a href="#" class="financial-item" onclick="showFY2024(); return false;">
+
+                            <span>Financial Year 2024-25</span>
+                            <span class="arrow">&#8250;</span>
+
+                        </a>
+
+                        <a href="#" class="financial-item" onclick="showFY2023(); return false;">
+
+                            <span>Financial Year 2023-24</span>
+                            <span class="arrow">&#8250;</span>
+
+                        </a>
+
+                        <a href="#" class="financial-item" onclick="showFY2022(); return false;">
+
+                            <span>Financial Year 2022-23</span>
+                            <span class="arrow">&#8250;</span>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+                <div id="fy2026Page" style="display:none;">
+
+                    <h2>Financial Results</h2>
+
+                    <div class="back-link" onclick="backToFinancialResults()">
+                        &#8249; Back
+                    </div>
+
+                    <h3>Financial Year 2026-27</h3>
+
+                    <table class="financial-table">
+
+                        <thead>
+                            <tr>
+                                <th>Sr No.</th>
+                                <th>Quarter</th>
+                                <th>Date of Release</th>
+                                <th>Financials</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="fy2026ResultsBody">
+
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <div id="fy2025Page" style="display:none;">
+
+                    <h2>Financial Results</h2>
+
+                    <div class="back-link" onclick="backToFinancialResults()">
+                        &#8249; Back
+                    </div>
+
+                    <h3>Financial Year 2025-26</h3>
+
+                    <table class="financial-table">
+
+                        <thead>
+                            <tr>
+                                <th>Sr No.</th>
+                                <th>Quarter</th>
+                                <th>Date of Release</th>
+                                <th>Financials</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="fy2025ResultsBody">
+
+                           
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <div id="fy2024Page" style="display:none;">
+
+                    <h2>Financial Results</h2>
+
+                    <div class="back-link" onclick="backToFinancialResults()">
+                        &#8249; Back
+                    </div>
+
+                    <h3>Financial Year 2024-25</h3>
+
+                    <table class="financial-table">
+
+                        <thead>
+                            <tr>
+                                <th>Sr No.</th>
+                                <th>Quarter</th>
+                                <th>Date of Release</th>
+                                <th>Financials</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="fy2024ResultsBody">
+
+                            
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <div id="fy2023Page" style="display:none;">
+
+                    <h2>Financial Results</h2>
+
+                    <div class="back-link" onclick="backToFinancialResults()">
+                        &#8249; Back
+                    </div>
+
+                    <h3>Financial Year 2023-24</h3>
+
+                    <table class="financial-table">
+
+                        <thead>
+                            <tr>
+                                <th>Sr No.</th>
+                                <th>Quarter</th>
+                                <th>Date of Release</th>
+                                <th>Financials</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="fy2023ResultsBody">
+
+                            
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <div id="fy2022Page" style="display:none;">
+
+                    <h2>Financial Results</h2>
+
+                    <div class="back-link" onclick="backToFinancialResults()">
+                        &#8249; Back
+                    </div>
+
+                    <h3>Financial Year 2022-23</h3>
+
+                    <table class="financial-table">
+
+                        <thead>
+                            <tr>
+                                <th>Sr No.</th>
+                                <th>Quarter</th>
+                                <th>Date of Release</th>
+                                <th>Financials</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="fy2022ResultsBody">
+
+                        
+                        </tbody>
+
+                    </table>
+                </div>
+
+
+                <!-- Annual Returns -->
+
+                <div id="AnnualReturns" class="tab-content active-content">
+
+                    <h2>Annual Returns</h2>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Sr No</th>
+                                    <th>Financial Year</th>
+                                    <th>Annual Returns</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="annualReturnsTableBody">
+
+                                
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+
+                <!-- Corporate Announcements -->
+
+                <div id="CorporateAnnouncements" class="tab-content">
+
+                    <h2>Corporate Announcements</h2>
+
+                    <div class="Announcements-list">
+
+                        <a href="#" onclick="NoticeToStackholders(); return false;" class="Announcements-item">
+
+                            <span>Notice To Stackholders</span>
+                            <span class="arrow">&#8250;</span>
+
+                        </a>
+
+                        <a href="#" class="Announcements-item" onclick="NewspaperPublication(); return false;">
+
+                            <span>Newspaper Publication</span>
+                            <span class="arrow">&#8250;</span>
+
+                        </a>
+
+                        <a href="#" class="Announcements-item" onclick="StockExchangeExclosers(); return false;">
+
+                            <span>Stock Exchange Disclosures</span>
+                            <span class="arrow">&#8250;</span>
+
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="showStackholders" style="display:none;">
+
+                    <div class="back-link" onclick="backToCorporateAnnouncements()">
+                        &#8249; Back
+                    </div>
+
+                    <h3>Notice to Shareholders</h3>
+
+                    <div class="table-wrapper">
+
+                            <table class="Stackholders-table">
+
+                                <thead>
+                                    <tr>
+                                        <th>Sr No.</th>
+                                        <th>Title</th>
+                                        <th>Type</th>
+                                        <th>Financial Year</th>
+                                        <th>Date of Disclosure</th>
+                                        <th>Meeting Date / Voting End Date</th>
+                                        <th>Link</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="shareholderNoticesTableBody">
+                                    <!-- Data will be loaded from API -->
+                                </tbody>
+
+                            </table>
+
+                    </div>
+                </div>
+
+
+                <!-- Newspaper Publication Financial Year List -->
+
+                <div id="showNewspaperPublication" style="display:none;">
+
+                    <div class="back-link" onclick="backToCorporateAnnouncements()">
+                        &#8249; Back
+                    </div>
+
+                    <h4>Newspaper Publication</h4>
+
+                    <div class="Announcements-list">
+
+                        <a href="#" class="Announcements-item" onclick="showNP2026(); return false;">
+
+                            <span>Financial Year 2026-27</span>
+                            <span class="arrow">&#8250;</span>
+
+                        </a>
+
+                        <a href="#" class="Announcements-item" onclick="showNP2025(); return false;">
+
+                            <span>Financial Year 2025-26</span>
+                            <span class="arrow">&#8250;</span>
+
+                        </a>
+
+                        <a href="#" class="Announcements-item" onclick="showNP2024(); return false;">
+
+                            <span>Financial Year 2024-25</span>
+                            <span class="arrow">&#8250;</span>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <!-- FY 2026-27 TABLE -->
+
+                <div id="NP2026" style="display:none;">
+
+                    <div class="back-link" onclick="backToNewspaperPublication()">
+                        &#8249; Back
+                    </div>
+
+                    <h3>Financial Year 2026-27</h3>
+
+                    <div class="table-wrapper">
+
+                        <table class="Stackholders-table">
+
+                            <thead>
+                                <tr>
+                                    <th>Sr No.</th>
+                                    <th>Title</th>
+                                    <th>Date of Disclosure</th>
+                                    <th>Link</th>
+                                </tr>
+                            </thead>
+
+                           <tbody id="np2026TableBody">
+                                    <!-- Data loaded from API -->
+                                </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+                <!-- FY 2025-26 TABLE -->
+
+                <div id="NP2025" style="display:none;">
+
+                    <div class="back-link" onclick="backToNewspaperPublication()">
+                        &#8249; Back
+                    </div>
+
+                    <h3>Financial Year 2025-26</h3>
+
+                    <div class="table-wrapper">
+
+                        <table class="Stackholders-table">
+
+                            <thead>
+                                <tr>
+                                    <th>Sr No.</th>
+                                    <th>Title</th>
+                                    <th>Date of Disclosure</th>
+                                    <th>Link</th>
+                                </tr>
+                            </thead>
+
+                            
+                           <tbody id="np2025TableBody">
+                                <!-- Data loaded from API -->
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+                <!-- FY 2024-25 TABLE -->
+
+                <div id="NP2024" style="display:none;">
+
+                    <div class="back-link" onclick="backToNewspaperPublication()">
+                        &#8249; Back
+                    </div>
+
+                    <h3>Financial Year 2024-25</h3>
+
+                    <div class="table-wrapper">
+
+                        <table class="Stackholders-table">
+
+                            <thead>
+                                <tr>
+                                    <th>Sr No.</th>
+                                    <th>Title</th>
+                                    <th>Date of Disclosure</th>
+                                    <th>Link</th>
+                                </tr>
+                            </thead>
+
+                           <tbody id="np2024TableBody">
+                                <!-- Data loaded from API -->
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Stock Exchange Disclosures Financial Year List -->
+
+                <div id="showStockExchange" style="display:none;">
+
+                    <div class="back-link" onclick="backToCorporateAnnouncements()">
+                        &#8249; Back
+                    </div>
+
+                    <h2>Stock Exchange Disclosures</h2>
+
+                    <div class="Announcements-list">
+
+                        <a href="#" class="Announcements-item" onclick="showSED2026(); return false;">
+
+                            <span>Financial Year 2026-27</span>
+                            <span class="arrow">&#8250;</span>
+
+                        </a>
+
+                        <a href="#" class="Announcements-item" onclick="showSED2025(); return false;">
+
+                            <span>Financial Year 2025-26</span>
+                            <span class="arrow">&#8250;</span>
+
+                        </a>
+
+                        <a href="#" class="Announcements-item" onclick="showSED2024(); return false;">
+
+                            <span>Financial Year 2024-25</span>
+                            <span class="arrow">&#8250;</span>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <!-- FY 2026-27 TABLE -->
+
+                <div id="SED2026" style="display:none;">
+
+                    <div class="back-link" onclick="backToStockExchangeDisclosures()">
+                        &#8249; Back
+                    </div>
+
+                    <h3>Financial Year 2026-27</h3>
+
+                    <div class="table-wrapper">
+
+                        <table class="Stackholders-table">
+
+                            <thead>
+                                <tr>
+                                    <th>Sr No.</th>
+                                    <th>Title</th>
+                                    <th>Date of Disclosure</th>
+                                    <th>Link</th>
+                                </tr>
+                            </thead>
+
+                           <tbody id="sed2026TableBody">
+                                <!-- Data loaded from API -->
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+                <!-- FY 2025-26 TABLE -->
+
+                <div id="SED2025" style="display:none;">
+
+                    <div class="back-link" onclick="backToStockExchangeDisclosures()">
+                        &#8249; Back
+                    </div>
+
+                    <h3>Financial Year 2025-26</h3>
+
+                    <div class="table-wrapper">
+
+                        <table class="Stackholders-table">
+
+                            <thead>
+                                <tr>
+                                    <th>Sr No.</th>
+                                    <th>Title</th>
+                                    <th>Date of Disclosure</th>
+                                    <th>Link</th>
+                                </tr>
+                            </thead>
+
+                           <tbody id="sed2025TableBody">
+                                <!-- Data loaded from API -->
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+                <!-- FY 2024-25 TABLE -->
+
+                <div id="SED2024" style="display:none;">
+
+                    <div class="back-link" onclick="backToStockExchangeDisclosures()">
+                        &#8249; Back
+                    </div>
+
+                    <h3>Financial Year 2024-25</h3>
+
+                    <div class="table-wrapper">
+
+                        <table class="Stackholders-table">
+
+                            <thead>
+                                <tr>
+                                    <th>Sr No.</th>
+                                    <th>Title</th>
+                                    <th>Date of Disclosure</th>
+                                    <th>Link</th>
+                                </tr>
+                            </thead>
+
+                         <tbody id="sed2024TableBody">
+                            <!-- Data loaded from API -->
+                        </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+                <!--Corporate Governance-->
+
+                <div id="CorporateGovernance" class="tab-content">
+
+                    <h2>Corporate Governance</h2>
+
+                    <div class="financial-list">
+
+                        <a href="#" onclick="showCG2025(); return false;" class="financial-item">
+
+                            <span>Financial Year 2025-26</span>
+                            <span class="arrow">&#8250;</span>
+
+                        </a>
+
+                        <a href="#" onclick="showCG2024(); return false;" class="financial-item">
+
+                            <span>Financial Year 2024-25</span>
+                            <span class="arrow">&#8250;</span>
+
+                        </a>
+
+                        <a href="#" onclick="showCG2023(); return false;" class="financial-item">
+
+                            <span>Financial Year 2023-24</span>
+                            <span class="arrow">&#8250;</span>
+
+                        </a>
+
+                        <a href="#" onclick="showCG2022(); return false;" class="financial-item">
+
+                            <span>Financial Year 2022-23</span>
+                            <span class="arrow">&#8250;</span>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+                <div id="cg2025Page" style="display:none;">
+
+                    <h2>Corporate Governance</h2>
+
+                    <div class="back-link" onclick="backToCorporateGovernance()">
+                        &#8249; Back
+                    </div>
+
+                    <h3>Financial Year 2025-26</h3>
+
+                    <table class="financial-table">
+
+                        <thead>
+                            <tr>
+                                <th>Sr No.</th>
+                                <th>Quarter</th>
+                                <th>Corporate Governance</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="cg2025TableBody">
+                            
+
+                        </tbody>
+                    </table>
+
+                </div>
+
+
+                <div id="cg2024Page" style="display:none;">
+
+                    <h2>Corporate Governance</h2>
+
+                    <div class="back-link" onclick="backToCorporateGovernance()">
+                        &#8249; Back
+                    </div>
+
+                    <h3>Financial Year 2024-25</h3>
+
+                    <table class="financial-table">
+
+                        <thead>
+                            <tr>
+                                <th>Sr No.</th>
+                                <th>Quarter</th>
+                                <th>Corporate Governance</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="cg2024TableBody">
+
+                            
+                        </tbody>
+                    </table>
+
+                </div>
+
+
+                <div id="cg2023Page" style="display:none;">
+
+                    <h2>Corporate Governance</h2>
+
+                    <div class="back-link" onclick="backToCorporateGovernance()">
+                        &#8249; Back
+                    </div>
+
+                    <h3>Financial Year 2023-24</h3>
+
+                    <table class="financial-table">
+
+                        <thead>
+                            <tr>
+                                <th>Sr No.</th>
+                                <th>Quarter</th>
+                                <th>Corporate Governance</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="cg2023TableBody">
+
+                          
+                        </tbody>
+                    </table>
+
+                </div>
+
+
+                <div id="cg2022Page" style="display:none;">
+
+                    <h2>Corporate Governance</h2>
+
+                    <div class="back-link" onclick="backToCorporateGovernance()">
+                        &#8249; Back
+                    </div>
+
+                    <h3>Financial Year 2022-23</h3>
+
+                    <table class="financial-table">
+
+                        <thead>
+                            <tr>
+                                <th>Sr No.</th>
+                                <th>Quarter</th>
+                                <th>Corporate Governance</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="cg2022TableBody">
+
+                          
+                        </tbody>
+                    </table>
+
+                </div>
+
+                <!--Shareholding Pattern-->
+                <div id="ShareholdingPattern" class="tab-content">
+
+                    <h2>Shareholding Pattern</h2>
+
+                    <div class="financial-list">
+
+                         <a href="#" onclick="showSP2026(); return false;" class="financial-item">
+                            <span>Financial Year 2026-27</span>
+                            <span class="arrow">&#8250;</span>
+                        </a>
+
+                        <a href="#" onclick="showSP2025(); return false;" class="financial-item">
+                            <span>Financial Year 2025-26</span>
+                            <span class="arrow">&#8250;</span>
+                        </a>
+
+                        <a href="#" onclick="showSP2024(); return false;" class="financial-item">
+                            <span>Financial Year 2024-25</span>
+                            <span class="arrow">&#8250;</span>
+                        </a>
+
+                        <a href="#" onclick="showSP2023(); return false;" class="financial-item">
+                            <span>Financial Year 2023-24</span>
+                            <span class="arrow">&#8250;</span>
+                        </a>
+
+                        <a href="#" onclick="showSP2022(); return false;" class="financial-item">
+                            <span>Financial Year 2022-23</span>
+                            <span class="arrow">&#8250;</span>
+                        </a>
+
+                    </div>
+
+                </div>
+
+                <div id="sp2026Page" style="display:none;">
+
+                    <h2>Shareholding Pattern</h2>
+
+                    <div class="back-link" onclick="backToShareholdingPattern()">
+                        &#8249; Back
+                    </div>
+
+                    <h3>Financial Year 2026-27</h3>
+
+                    <table class="financial-table">
+
+                        <thead>
+                            <tr>
+                                <th>Sr No.</th>
+                                <th>Quarter</th>
+                                <th>Shareholding Pattern</th>
+                            </tr>
+                        </thead>
+
+                       <tbody id="sp2026ResultsBody">
+
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <div id="sp2025Page" style="display:none;">
+
+                    <h2>Shareholding Pattern</h2>
+
+                    <div class="back-link" onclick="backToShareholdingPattern()">
+                        &#8249; Back
+                    </div>
+
+                    <h3>Financial Year 2025-26</h3>
+
+                    <table class="financial-table">
+
+                        <thead>
+                            <tr>
+                                <th>Sr No.</th>
+                                <th>Quarter</th>
+                                <th>Shareholding Pattern</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="sp2025ResultsBody">
+                            
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <div id="sp2024Page" style="display:none;">
+
+                    <h2>Shareholding Pattern</h2>
+
+                    <div class="back-link" onclick="backToShareholdingPattern()">
+                        &#8249; Back
+                    </div>
+
+                    <h3>Financial Year 2024-25</h3>
+
+                    <table class="financial-table">
+
+                        <thead>
+                            <tr>
+                                <th>Sr No.</th>
+                                <th>Quarter</th>
+                                <th>Shareholding Pattern</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="sp2024ResultsBody">
+                            
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <div id="sp2023Page" style="display:none;">
+
+                    <h2>Shareholding Pattern</h2>
+
+                    <div class="back-link" onclick="backToShareholdingPattern()">
+                        &#8249; Back
+                    </div>
+
+                    <h3>Financial Year 2023-24</h3>
+
+                    <table class="financial-table">
+
+                        <thead>
+                            <tr>
+                                <th>Sr No.</th>
+                                <th>Quarter</th>
+                                <th>Shareholding Pattern</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="sp2023ResultsBody">
+                            
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <div id="sp2022Page" style="display:none;">
+
+                    <h2>Shareholding Pattern</h2>
+
+                    <div class="back-link" onclick="backToShareholdingPattern()">
+                        &#8249; Back
+                    </div>
+
+                    <h3>Financial Year 2022-23</h3>
+
+                    <table class="financial-table">
+
+                        <thead>
+                            <tr>
+                                <th>Sr No.</th>
+                                <th>Quarter</th>
+                                <th>Shareholding Pattern</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="sp2022ResultsBody">
+                            
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <!--Disclosure under Regulation 46 of SEBI LODR-->
+
+                <div id="Disclosure46" style="display:none;" class="tab-content">
+
+                    <h2>Disclosure under Regulation 46 of SEBI LODR</h2>
+
+                    <div class="Announcements-list">
+
+                        <a href="#" onclick="CorporateDocuments(); return false;" class="Announcements-item">
+
+                            <span>Corporate Documents</span>
+                            <span class="arrow">&#8250;</span>
+
+                        </a>
+
+                        <a href="#" onclick="BoardOfDirectors(); return false;" class="Announcements-item">
+
+                            <span>Board of Directors</span>
+                            <span class="arrow">&#8250;</span>
+
+                        </a>
+
+                        <!-- Direct PDF Link -->
+                        <a href="#" onclick="BoardCommittees(); return false;" class="Announcements-item">
+
+                            <span>Committees of Board of Directors</span>
+                            <span class="arrow">&#8250;</span>
+
+                        </a>
+
+                        <a href="#" onclick="CodesPolicies(); return false;" class="Announcements-item">
+
+                            <span>Codes and Policies</span>
+                            <span class="arrow">&#8250;</span>
+
+                        </a>
+
+                       <a href="#" onclick="InvestorGrievances(); return false;" class="Announcements-item">
+
+                            <span>Investor Grievances</span>
+                            <span class="arrow">&#8250;</span>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+                <div id="showCorporateDocuments" style="display:none;">
+
+                    <div class="back-link" onclick="backToDisclosure46()">
+
+                        &#8249; Back
+
+                    </div>
+
+                    <h3>Corporate Documents</h3>
+
+                    <div class="table-wrapper">
+
+                        <table class="Stackholders-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>Sr No.</th>
+                                    <th>Title</th>
+                                    <th>Link</th>
+
+                                </tr>
+
+                            </thead>
+
+                           <tbody id="corporateDocumentsTableBody">
+                                <!-- Data loaded from API -->
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+                <div id="showBoardOfDirectors" style="display:none;">
+
+                    <div class="back-link" onclick="backToDisclosure46()">
+
+                        &#8249; Back
+
+                    </div>
+
+                    <h3>Board of Directors</h3>
+
+                    <div class="table-wrapper">
+
+                        <table class="Stackholders-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>Sr No.</th>
+                                    <th>Title</th>
+                                    <th>Link</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="boardOfDirectorsTableBody">
+                                <!-- Data loaded from API -->
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+                <div id="showBoardCommittees" style="display:none;">
+
+                        <div class="back-link" onclick="backToDisclosure46()">
+                            &#8249; Back
+                        </div>
+
+                        <h3>Committees of Board of Directors</h3>
+
+                        <div class="table-wrapper">
+
+                            <table class="Stackholders-table">
+
+                                <thead>
+                                    <tr>
+                                        <th>Sr No.</th>
+                                        <th>Title</th>
+                                        <th>Link</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="boardCommitteesTableBody">
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                <div id="showCodesPolicies" style="display:none;">
+
+                    <div class="back-link" onclick="backToDisclosure46()">
+                        &#8249; Back
+                    </div>
+                    <h3>Codes and Policies</h3>
+
+                    <div class="table-wrapper">
+
+                        <table class="Stackholders-table">
+                            <thead>
+                                <tr>
+                                    <th>Sr No.</th>
+                                    <th>Title</th>
+                                    <th>Link</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="codesPoliciesTableBody">
+                                <!-- Data loaded from API -->
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+                    <div id="showInvestorGrievances" style="display:none;">
+
+                        <div class="back-link" onclick="backToDisclosure46()">
+                            &#8249; Back
+                        </div>
+
+                        <h3>Investor Grievances</h3>
+
+                        <div class="table-wrapper">
+
+                            <table class="Stackholders-table">
+
+                                <thead>
+                                    <tr>
+                                        <th>Sr No.</th>
+                                        <th>Title</th>
+                                        <th>Link</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="investorGrievancesTableBody">
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+                <!--Investors forms and declaration-->
+
+                <div id="InvestorForms" class="tab-content" style="display:none;">
+
+                    <h2>Investor Forms & Declarations</h2>
+
+                    <div class="Announcements-list">
+
+                        <a href="#" onclick="KYCForms(); return false;" class="Announcements-item">
+
+                            <span>KYC and Nomination Forms</span>
+                            <!-- <span class="arrow"> &#8250;</span> -->
+
+                        </a>
+
+                        <a href="#" onclick="TaxDeclaration(); return false;" class="Announcements-item">
+
+                            <span>Tax Declarations for Dividend TDS Related</span>
+                            <span class="arrow">&#8250;</span>
+
+                        </a>
+
+                        <a href="#" onclick="UnpaidDividend(); return false;" class="Announcements-item">
+
+                            <span>Unpaid or Unclaimed Dividend Details</span>
+                            <span class="arrow">&#8250;</span>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+                <div id="showKYCForms" style="display:none;">
+
+                    <div class="back-link" onclick="backToInvestorForms()">
+                        &#8249; Back
+                    </div>
+
+                    <h3>KYC and Nomination Forms</h3>
+
+                    <div class="table-wrapper">
+
+                        <table class="Stackholders-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>Sr No.</th>
+                                    <th>Form Name</th>
+                                    <th>Description</th>
+                                    <th>Download Link</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="kycFormsTableBody">
+                                <!-- Data loaded from API -->
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+                
+
+
+                <div id="showTaxDeclaration" style="display:none;">
+
+                    <div class="back-link" onclick="backToInvestorForms()">
+                        &#8249; Back
+                    </div>
+
+                    <h3>Tax Declarations for Dividend TDS Related</h3>
+
+                    <div class="table-wrapper">
+
+                        <table class="Stackholders-table">
+
+                            <thead>
+                                <tr>
+                                    <th>Sr No.</th>
+                                    <th>Form Name</th>
+                                    <th>Purpose</th>
+                                    <th>Applicable To</th>
+                                    <th>Download Link</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="taxDeclarationTableBody">
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+                <div id="showUnpaidDividend" style="display:none;">
+
+                    <div class="back-link" onclick="backToInvestorForms()">
+                        &#8249; Back
+                    </div>
+
+                    <h3>Unpaid or Unclaimed Dividend Details</h3>
+
+                    <div class="table-wrapper">
+
+                        <table class="Stackholders-table">
+
+                            <thead>
+                                <tr>
+                                    <th>Sr No.</th>
+                                    <th>Financial Year</th>
+                                    <th>Date of Declaration of Dividend</th>
+                                    <th>Type of Dividend</th>
+                                    <th>Due Date for Transfer to IEPF</th>
+                                    <th>Download Details</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="unclaimedDividendTableBody">
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+                <!-- Subsidiary Financials -->
+
+                <div id="SubsidiaryFinancials" class="tab-content">
+
+                    <h2>Subsidiary Financials</h2>
+
+                    <div class="financial-list">
+
+                        <a href="#" onclick="showSF2024(); return false;" class="financial-item">
+
+                            <span>Financial Year 2024-25</span>
+                            <span class="arrow">&#8250;</span>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+                <div id="sf2024Page" style="display:none;">
+
+                    <h2>Subsidiary Financials</h2>
+
+                    <div class="back-link" onclick="backToSubsidiaryFinancials()">
+
+                        &#8249; Back
+
+                    </div>
+
+                    <h3 id="sfYearHeading">Financial Year 2024-25</h3>
+
+                    <table class="financial-table">
+
+                        <thead>
+                            <tr>
+                                <th>Sr No.</th>
+                                <th>Company Name</th>
+                                <th>Financials</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="subsidiaryFinancialsTableBody">
+                            <!-- Data loaded from API -->
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <footer class="land-footer">
+
+        <div class="land-footer-main">
+
+            <!-- Logo -->
+
+            <div class="footer-logo">
+
+                <img src="Nibe Limited Logo/Nibe Limited Logo2.png" alt="NIBE Limited">
+
+            </div>
+
+            <!-- Business -->
+
+            <div class="footer-column">
+
+                <h4>Registered Office</h4>
+
+                <p>
+                    Address: Plot No E, </br>
+                    Industrial Area, </br>
+                    MIDC Phase-III, Kharabwadi, </br>
+                    Chakan, Maharashtra 410501
+                </p>
+
+            </div>
+
+            <!-- Office -->
+
+            <div class="footer-column">
+
+                <h4>Corporate Office</h4>
+
+                <p>
+                    Address: The Melange, </br>
+                    Fugewadi, Seva Nagar,</br>
+                    Dapodi, Pimpri-Chinchwad, </br>
+                    Pune, Maharashtra 411012
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="footer-bottom">
+
+            <p>
+
+                © 2026 NIBE Limited. All Rights Reserved.
+
+            </p>
+
+            <div class="footer-social">
+
+                <a href="https://www.instagram.com/nibelimited" target="_blank" aria-label="Instagram">
+                    <i class="fab fa-instagram"></i>
+                </a>
+
+                <a href="https://www.linkedin.com/company/nibe-limited-com/" target="_blank" aria-label="LinkedIn">
+                    <i class="fab fa-linkedin-in"></i>
+                </a>
+
+                <a href="https://x.com/Nibe_Limited" target="_blank" aria-label="X (Twitter)">
+                    <i class="fab fa-x-twitter"></i>
+                </a>
+
+                <a href="https://www.facebook.com/nibelimited" target="_blank" aria-label="Facebook">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+
+                <a href="https://www.youtube.com/@Nibe_Limited" target="_blank" aria-label="YouTube">
+                    <i class="fab fa-youtube"></i>
+                </a>
+
+            </div>
+        </div>
+
+    </footer>
+
+    <script>
+
+    async function loadAnnualReports() {
+    try {
+        const response = await fetch("/api/annual-reports/");
+
+        if (!response.ok) {
+            throw new Error("Failed to load annual reports");
+        }
+
+        const reports = await response.json();
+
+        reports.sort((a, b) => b.display_order - a.display_order);
+
+        const tableBody = document.getElementById("annualReportsTableBody");
+
+        // Clear the existing hard-coded rows
+        tableBody.innerHTML = "";
+
+        reports.forEach((report, index) => {
+
+            const documentUrl = report.pdf_file || report.external_url;
+
+            const row = `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${report.financial_year}</td>
+                    <td>
+                        ${
+                            documentUrl
+                            ? `<a href="${documentUrl}" target="_blank" rel="noopener noreferrer">
+                                   View Report
+                               </a>`
+                            : `<span>Document unavailable</span>`
+                        }
+                    </td>
+                </tr>
+            `;
+
+            tableBody.insertAdjacentHTML("beforeend", row);
+        });
+
+    } catch (error) {
+        console.error("Error loading annual reports:", error);
+    }
+}
+
+loadAnnualReports();
+
+async function loadAnnualReturns() {
+    try {
+        const response = await fetch("/api/annual-returns/");
+
+        if (!response.ok) {
+            throw new Error("Failed to load annual returns");
+        }
+
+        const returns = await response.json();
+
+        const tableBody = document.getElementById("annualReturnsTableBody");
+
+        if (!tableBody) {
+            return;
+        }
+
+        tableBody.innerHTML = "";
+
+        returns.forEach((annualReturn, index) => {
+
+            const documentUrl =
+                annualReturn.pdf_file || annualReturn.external_url;
+
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${annualReturn.financial_year}</td>
+                <td>
+                    ${
+                        documentUrl
+                        ? `<a href="${documentUrl}" target="_blank" rel="noopener noreferrer">
+                               View Report
+                           </a>`
+                        : `<span>Document unavailable</span>`
+                    }
+                </td>
+            `;
+
+            tableBody.appendChild(row);
+        });
+
+    } catch (error) {
+        console.error("Error loading annual returns:", error);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", loadAnnualReturns);
+
+
+</script>
+
+
+<script src="{% static 'Main.js' %}"></script>
+
+</body>
+
+</html>

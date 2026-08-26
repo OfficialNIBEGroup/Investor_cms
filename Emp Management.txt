@@ -1,0 +1,456 @@
+Frontend (Employees page)
+We will add:
+
+Sidebar menu item Employees
+New page section for Employees
+Add / Edit Employee modal
+Full JavaScript
+
+A. Add “Employees” in the Sidebar
+File: templates/Investor_Dashboard.html
+Find the sidebar navigation (around the Documents / Upload Document items) and add this after the Upload Document menu item:
+
+            <a href="#"
+               class="menu-item"
+               onclick="showEmployees(event)">
+
+                <span class="menu-icon">👥</span>
+
+                <span>
+                    Employees
+                </span>
+
+            </a>
+
+B. Add the Employees Page Section
+Find the end of the Upload Page section (</section> of id="uploadPage") and paste this new section right after it (before the final closing tags of main content):
+
+        <!-- =====================================================
+             EMPLOYEES PAGE
+        ====================================================== -->
+
+        <section
+            id="employeesPage"
+            class="page-section hidden">
+
+            <div class="page-heading">
+                <div>
+                    <span class="welcome-label">USER MANAGEMENT</span>
+                    <h2>Employees</h2>
+                    <p>Manage dashboard users and their access.</p>
+                </div>
+
+                <button
+                    type="button"
+                    class="primary-button"
+                    onclick="openAddEmployeeModal()"
+                    style="margin-top: 12px;">
+                    + Add Employee
+                </button>
+            </div>
+
+            <div class="dashboard-card documents-table-card">
+
+                <div class="search-row">
+                    <input
+                        type="text"
+                        id="employeeSearch"
+                        placeholder="Search by Employee ID, name or email...">
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Employee ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Joined</th>
+                                <th>Last Login</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employeesTableBody">
+                            <tr>
+                                <td colspan="7" class="table-empty">
+                                    Loading employees...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </section>
+
+C. Add Employee Modal (Add / Edit)
+Paste this just before the closing </main> or near the other modals (Edit Document modal is fine):
+
+<!-- =========================================================
+     ADD / EDIT EMPLOYEE MODAL
+========================================================== -->
+
+<div class="modal-overlay" id="employeeModalOverlay">
+    <div class="edit-modal" style="max-width: 520px;">
+
+        <div class="edit-modal-header">
+            <h3 id="employeeModalTitle">Add Employee</h3>
+            <button class="modal-close-btn" onclick="closeEmployeeModal()">×</button>
+        </div>
+
+        <form id="employeeForm">
+
+            <div class="edit-modal-body">
+
+                <input type="hidden" id="employee_id" name="id">
+
+                <div class="form-group full-width">
+                    <label for="emp_username">Employee ID <span>*</span></label>
+                    <input type="text" id="emp_username" name="username"
+                           placeholder="e.g. EMP001" required>
+                    <small id="usernameHelp">This will be used to login</small>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="emp_first_name">First Name</label>
+                    <input type="text" id="emp_first_name" name="first_name"
+                           placeholder="First name">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="emp_last_name">Last Name</label>
+                    <input type="text" id="emp_last_name" name="last_name"
+                           placeholder="Last name">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="emp_email">Email</label>
+                    <input type="email" id="emp_email" name="email"
+                           placeholder="email@example.com">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="emp_password">
+                        Password <span id="passwordRequired">*</span>
+                    </label>
+                    <input type="password" id="emp_password" name="password"
+                           placeholder="Minimum 6 characters">
+                    <small id="passwordHelp">Required when creating a new employee</small>
+                </div>
+
+                <div class="form-group full-width" style="margin-top: 10px;">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="emp_is_active" name="is_active"
+                               checked style="width: 18px; height: 18px; accent-color: #16845d;">
+                        <span>Active (can login to dashboard)</span>
+                    </label>
+                </div>
+
+            </div>
+
+            <div class="edit-modal-footer">
+                <button type="button" class="secondary-button" onclick="closeEmployeeModal()">
+                    Cancel
+                </button>
+                <button type="submit" class="primary-button" id="saveEmployeeButton">
+                    Save Employee
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+D. JavaScript – Paste at the end of the <script> section
+Paste this just before the closing </script> tag:
+
+/* =========================================================
+   EMPLOYEE MANAGEMENT
+========================================================= */
+
+function showEmployees(event) {
+    if (event) event.preventDefault();
+
+    // Hide other pages
+    document.getElementById("dashboardPage")?.classList.add("hidden");
+    document.getElementById("uploadPage")?.classList.add("hidden");
+    document.getElementById("documentsPage")?.classList.add("hidden");
+    document.getElementById("employeesPage")?.classList.remove("hidden");
+
+    // Update active menu
+    document.querySelectorAll(".menu-item").forEach(item => item.classList.remove("active"));
+    if (event && event.currentTarget) {
+        event.currentTarget.classList.add("active");
+    }
+
+    loadEmployees();
+}
+
+async function loadEmployees() {
+    const tableBody = document.getElementById("employeesTableBody");
+    if (!tableBody) return;
+
+    tableBody.innerHTML = `
+        <tr>
+            <td colspan="7" class="table-empty">Loading employees...</td>
+        </tr>
+    `;
+
+    try {
+        const response = await fetch("{% url 'employees_list_api' %}", {
+            method: "GET",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "Accept": "application/json"
+            },
+            cache: "no-store"
+        });
+
+        if (!response.ok) throw new Error("Failed to load employees");
+
+        const employees = await response.json();
+        tableBody.innerHTML = "";
+
+        if (!Array.isArray(employees) || employees.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="table-empty">No employees found.</td>
+                </tr>
+            `;
+            return;
+        }
+
+        employees.forEach(emp => {
+            const row = document.createElement("tr");
+            const fullName = `${emp.first_name || ""} ${emp.last_name || ""}`.trim() || "—";
+            const statusClass = emp.is_active ? "published" : "unpublished";
+            const statusText = emp.is_active ? "Active" : "Inactive";
+
+            row.innerHTML = `
+                <td><strong>${escapeHtml(emp.username)}</strong></td>
+                <td>${escapeHtml(fullName)}</td>
+                <td>${escapeHtml(emp.email || "—")}</td>
+                <td>
+                    <span class="status-badge ${statusClass}"
+                          style="cursor:pointer"
+                          title="Click to toggle status"
+                          onclick="toggleEmployeeStatus(${emp.id}, this)">
+                        ${statusText}
+                    </span>
+                </td>
+                <td>${escapeHtml(emp.date_joined)}</td>
+                <td>${escapeHtml(emp.last_login)}</td>
+                <td>
+                    <div class="document-actions">
+                        <button type="button" class="action-btn edit-btn"
+                                onclick='openEditEmployeeModal(${JSON.stringify(emp)})'
+                                title="Edit">
+                            ✎ Edit
+                        </button>
+                        <button type="button" class="action-btn delete-btn"
+                                onclick="deleteEmployee(${emp.id}, '${escapeHtml(emp.username)}')"
+                                title="Delete">
+                            🗑 Delete
+                        </button>
+                    </div>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+
+        // Apply search filter if any
+        applyEmployeeFilters();
+
+    } catch (error) {
+        console.error("Employees load error:", error);
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="table-empty">Unable to load employees.</td>
+            </tr>
+        `;
+    }
+}
+
+function applyEmployeeFilters() {
+    const searchInput = document.getElementById("employeeSearch");
+    const tableBody = document.getElementById("employeesTableBody");
+    if (!searchInput || !tableBody) return;
+
+    const searchValue = searchInput.value.trim().toLowerCase();
+    const rows = tableBody.querySelectorAll("tr");
+
+    rows.forEach(row => {
+        const cells = row.querySelectorAll("td");
+        if (cells.length < 5) return;
+        const rowText = row.textContent.toLowerCase();
+        row.style.display = (!searchValue || rowText.includes(searchValue)) ? "" : "none";
+    });
+}
+
+// Search listener
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("employeeSearch");
+    if (searchInput) {
+        searchInput.addEventListener("input", applyEmployeeFilters);
+    }
+});
+
+function openAddEmployeeModal() {
+    document.getElementById("employeeModalTitle").textContent = "Add Employee";
+    document.getElementById("employeeForm").reset();
+    document.getElementById("employee_id").value = "";
+    document.getElementById("emp_username").disabled = false;
+    document.getElementById("passwordRequired").style.display = "inline";
+    document.getElementById("passwordHelp").textContent = "Required when creating a new employee";
+    document.getElementById("emp_is_active").checked = true;
+    document.getElementById("employeeModalOverlay").classList.add("active");
+}
+
+function openEditEmployeeModal(emp) {
+    document.getElementById("employeeModalTitle").textContent = "Edit Employee";
+    document.getElementById("employee_id").value = emp.id;
+    document.getElementById("emp_username").value = emp.username;
+    document.getElementById("emp_username").disabled = true;  // Employee ID cannot be changed
+    document.getElementById("emp_first_name").value = emp.first_name || "";
+    document.getElementById("emp_last_name").value = emp.last_name || "";
+    document.getElementById("emp_email").value = emp.email || "";
+    document.getElementById("emp_password").value = "";
+    document.getElementById("passwordRequired").style.display = "none";
+    document.getElementById("passwordHelp").textContent = "Leave blank to keep current password";
+    document.getElementById("emp_is_active").checked = emp.is_active;
+    document.getElementById("employeeModalOverlay").classList.add("active");
+}
+
+function closeEmployeeModal() {
+    document.getElementById("employeeModalOverlay").classList.remove("active");
+}
+
+// Save Employee (Create or Update)
+document.getElementById("employeeForm")?.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const btn = document.getElementById("saveEmployeeButton");
+    btn.disabled = true;
+    btn.textContent = "Saving...";
+
+    const id = document.getElementById("employee_id").value;
+    const isEdit = !!id;
+
+    const payload = {
+        id: id || undefined,
+        username: document.getElementById("emp_username").value.trim(),
+        first_name: document.getElementById("emp_first_name").value.trim(),
+        last_name: document.getElementById("emp_last_name").value.trim(),
+        email: document.getElementById("emp_email").value.trim(),
+        password: document.getElementById("emp_password").value,
+        is_active: document.getElementById("emp_is_active").checked
+    };
+
+    const url = isEdit
+        ? "{% url 'update_employee' %}"
+        : "{% url 'create_employee' %}";
+
+    const csrfToken = getCookie("csrftoken");
+
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken,
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert(data.message);
+            closeEmployeeModal();
+            loadEmployees();
+        } else {
+            alert(data.message || "Failed to save employee.");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("An error occurred while saving.");
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "Save Employee";
+    }
+});
+
+async function toggleEmployeeStatus(id, badgeEl) {
+    if (!confirm("Are you sure you want to change this employee's status?")) return;
+
+    const csrfToken = getCookie("csrftoken");
+
+    try {
+        const response = await fetch("{% url 'toggle_employee_status' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken,
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: JSON.stringify({ id: id })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            badgeEl.textContent = data.is_active ? "Active" : "Inactive";
+            badgeEl.classList.remove("published", "unpublished");
+            badgeEl.classList.add(data.is_active ? "published" : "unpublished");
+        } else {
+            alert(data.message || "Failed to update status.");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("An error occurred.");
+    }
+}
+
+async function deleteEmployee(id, username) {
+    if (!confirm(`Are you sure you want to delete employee "${username}"?\nThis action cannot be undone.`)) {
+        return;
+    }
+
+    const csrfToken = getCookie("csrftoken");
+
+    try {
+        const response = await fetch("{% url 'delete_employee' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken,
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: JSON.stringify({ id: id })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert(data.message);
+            loadEmployees();
+        } else {
+            alert(data.message || "Failed to delete employee.");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("An error occurred while deleting.");
+    }
+}
+
+Final Checklist
+
+Sidebar has Employees menu item
+Employees page section is added
+Modal is added
+JavaScript is added at the end of <script>
+Restart server:Bashpython manage.py runserver
+Hard refresh browser (Ctrl + Shift + R)
