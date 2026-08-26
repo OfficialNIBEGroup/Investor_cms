@@ -210,3 +210,27 @@ class SubsidiaryFinancial(DocumentBase):
         max_length=100,
         blank=True
     )
+
+    
+
+class AuditLog(models.Model):
+    ACTION_CHOICES = [
+        ("uploaded", "Uploaded"),
+        ("edited", "Edited"),
+        ("deleted", "Deleted"),
+    ]
+
+    document_title = models.CharField(max_length=255)
+    section = models.CharField(max_length=100)
+    action = models.CharField(max_length=20, choices=ACTION_CHOICES)
+    performed_by = models.CharField(max_length=150)
+    document_id = models.IntegerField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.action} - {self.document_title} by {self.performed_by}"
+
+    

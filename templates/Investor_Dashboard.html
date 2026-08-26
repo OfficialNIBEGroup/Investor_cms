@@ -98,33 +98,16 @@
 
             </a>
 
-
-
-            <div class="sidebar-divider"></div>
-
-
             <a href="#"
-               class="menu-item">
+                class="menu-item"
+                onclick="showAuditLog(event)">
 
-                <span class="menu-icon">?</span>
-
-                <span>
-                    Help & Support
-                </span>
-
+                    <span class="menu-icon">📋</span>
+                    <span>Audit Log</span>
             </a>
 
+           
 
-            <a href="#"
-               class="menu-item">
-
-                <span class="menu-icon">⚙</span>
-
-                <span>
-                    Settings
-                </span>
-
-            </a>
 
         </nav>
 
@@ -1431,6 +1414,35 @@
 
         </section>
 
+        <!-- ===================== AUDIT LOG PAGE ===================== -->
+        
+        <section id="auditLogPage" class="page-section hidden">
+
+            <div class="page-header">
+                <div>
+                    <h2>Audit Log / History</h2>
+                    <p>Latest uploaded, edited and deleted documents</p>
+                </div>
+            </div>
+
+            <div class="dashboard-card" style="margin-top: 20px;">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3>Recent Activity</h3>
+                    <button onclick="loadAuditLogs()" class="primary-button" style="padding: 6px 14px; font-size: 13px;">
+                        Refresh
+                    </button>
+                </div>
+
+                <div id="auditLogList" class="recent-documents-list">
+                    <!-- Logs will be loaded here by JavaScript -->
+                </div>
+
+                <div id="auditLogEmpty" class="empty-state" style="display: none;">
+                    <p>No activity found yet.</p>
+                </div>
+            </div>
+
+        </section>
 
     </main>
 
@@ -2516,7 +2528,188 @@ function showDocuments(event) {
 
 }
 
+/* =========================================================
+   AUDIT LOG PAGE
+========================================================= */
 
+function showAuditLog(event) {
+    if (event) event.preventDefault();
+
+    hideAllPages();
+    removeActiveMenu();
+
+    const page = document.getElementById("auditLogPage");
+    if (page) {
+        page.classList.remove("hidden");
+    }
+
+    // Activate menu item
+    document.querySelectorAll(".menu-item").forEach(item => {
+        if (item.textContent.trim().includes("Audit Log")) {
+            item.classList.add("active");
+        }
+    });
+
+    loadAuditLogs();
+}
+
+
+async function loadAuditLogs() {
+    const listEl = document.getElementById("auditLogList");
+    const emptyEl = document.getElementById("auditLogEmpty");
+
+    if (!listEl || !emptyEl) return;
+
+    // Loading state
+    listEl.innerHTML = `
+        <div class="recent-loading" style="padding: 20px; text-align: center; color: #64748b;">
+            Loading audit logs...
+        </div>
+    `;
+    listEl.style.display = "block";
+    emptyEl.style.display = "none";
+
+    try {
+        const response = await fetch("{% url 'audit_log_api' %}", {
+            method: "GET",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "Accept": "application/json"
+            },
+            cache: "no-store"
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to load audit logs");
+        }
+
+        const logs = await response.json();
+
+        if (!Array.isArray(logs) || logs.length === 0) {
+            listEl.innerHTML = "";
+            listEl.style.display = "none";
+            emptyEl.style.display = "block";
+            return;
+        }
+
+        listEl.innerHTML = "";
+
+        logs.forEach(log => {
+            let badgeClass = "uploaded";
+            let badgeText = "UPLOADED";
+
+            if (log.action === "edited") {
+                badgeClass = "edited";
+                badgeText = "EDITED";
+            } else if (log.action === "deleted") {
+                badgeClass = "deleted";
+                badgeText = "DELETED";
+            }
+
+            // Make section name readable
+            const sectionName = (log.section || "")
+                .replace(/_/g, " ")
+                .replace(/\b\w/g, c => c.toUpperCase());
+
+            const item = document.createElement("div");
+            item.className = "recent-document-item";
+
+            item.innerHTML = `
+                <div class="recent-doc-main">
+                    <div class="recent-doc-title">${escapeHtml(log.document_title || "Untitled")}</div>
+                    <div class="recent-doc-meta">
+                        <span class="recent-doc-section">${escapeHtml(sectionName)}</span>
+                        <span class="recent-doc-date">${escapeHtml(log.created_at || "")}</span>
+                        <span class="recent-doc-section">by ${escapeHtml(log.performed_by || "System")}</span>
+                    </div>
+                </div>
+                <div class="recent-doc-status">
+                    <span class="recent-doc-activity ${badgeClass}">${badgeText}</span>
+                </div>
+            `;
+
+            listEl.appendChild(item);
+        });
+
+    } catch (error) {
+        console.error(error);
+        listEl.innerHTML = `
+            <div class="recent-error" style="padding: 20px; color: #b91c1c;">
+                Unable to load audit logs. Please try again.
+            </div>
+        `;
+    }
+}
+
+async function loadAuditLogs() {
+    const listEl = document.getElementById("auditLogList");
+    const emptyEl = document.getElementById("auditLogEmpty");
+
+    if (!listEl) return;
+
+    listEl.innerHTML = `<div class="recent-loading">Loading audit logs...</div>`;
+    listEl.style.display = "block";
+    emptyEl.style.display = "none";
+
+    try {
+        const response = await fetch("{% url 'audit_log_api' %}", {
+            method: "GET",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "Accept": "application/json"
+            },
+            cache: "no-store"
+        });
+
+        if (!response.ok) throw new Error("Failed to load");
+
+        const logs = await response.json();
+
+        if (!logs.length) {
+            listEl.innerHTML = "";
+            listEl.style.display = "none";
+            emptyEl.style.display = "block";
+            return;
+        }
+
+        listEl.innerHTML = "";
+
+        logs.forEach(log => {
+            let badgeClass = "uploaded";
+            let badgeText = "UPLOADED";
+
+            if (log.action === "edited") {
+                badgeClass = "edited";
+                badgeText = "EDITED";
+            } else if (log.action === "deleted") {
+                badgeClass = "deleted";
+                badgeText = "DELETED";
+            }
+
+            const item = document.createElement("div");
+            item.className = "recent-document-item";
+
+            item.innerHTML = `
+                <div class="recent-doc-main">
+                    <div class="recent-doc-title">${escapeHtml(log.document_title)}</div>
+                    <div class="recent-doc-meta">
+                        <span class="recent-doc-section">${escapeHtml(log.section.replace(/_/g, " "))}</span>
+                        <span class="recent-doc-date">${escapeHtml(log.created_at)}</span>
+                        <span class="recent-doc-section">by ${escapeHtml(log.performed_by)}</span>
+                    </div>
+                </div>
+                <div class="recent-doc-status">
+                    <span class="recent-doc-activity ${badgeClass}">${badgeText}</span>
+                </div>
+            `;
+
+            listEl.appendChild(item);
+        });
+
+    } catch (err) {
+        listEl.innerHTML = `<div class="recent-error">Unable to load audit logs.</div>`;
+    }
+}
 
 /* =========================================================
    UPLOAD

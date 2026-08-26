@@ -15,6 +15,7 @@ from .models import (
     TaxDeclaration,
     UnclaimedDividend,
     SubsidiaryFinancial,
+    AuditLog,
 )
 
 
@@ -397,4 +398,25 @@ class SubsidiaryFinancialAdmin(admin.ModelAdmin):
     ordering = (
         "-financial_year",
         "display_order",
+    )
+
+@admin.register(AuditLog)
+class AuditLogAdmin(admin.ModelAdmin):
+    list_display = (
+        "document_title",
+        "section",
+        "action",
+        "performed_by",
+        "created_at",
+    )
+    list_filter = (
+        "section",
+        "action",
+    )
+    search_fields = (
+        "document_title",
+        "performed_by",
+    )
+    ordering = (
+        "-created_at",
     )

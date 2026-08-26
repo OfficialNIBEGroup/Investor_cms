@@ -93,6 +93,10 @@ body {
     pointer-events: none;
 }
 
+.recent-doc-activity.deleted {
+    background: #fee2e2;
+    color: #b91c1c;
+}
 .brand-panel-top {
     position: relative;
     z-index: 1;
@@ -625,3 +629,27 @@ a.primary-button:visited {
     }
 }
 
+/* Audit Log badges */
+.recent-doc-activity.uploaded {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.recent-doc-activity.edited {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.recent-doc-activity.deleted {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.recent-doc-activity {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}

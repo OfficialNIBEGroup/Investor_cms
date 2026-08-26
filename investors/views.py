@@ -22,7 +22,21 @@ from .models import (
     TaxDeclaration,
     UnclaimedDividend,
     SubsidiaryFinancial,
+    AuditLog,
 )
+
+def log_audit(request, title, section, action, document_id=None):
+    """Save an audit log entry."""
+    try:
+        AuditLog.objects.create(
+            document_title=title or "Untitled",
+            section=section or "",
+            action=action,
+            performed_by=request.user.username if request.user.is_authenticated else "System",
+            document_id=document_id,
+        )
+    except Exception:
+        pass  # Never break main action if logging fails
 
 
 # ============================================================
@@ -1328,6 +1342,15 @@ def update_investor_document(request):
                 status=400
             )
 
+                # Log the update
+        log_audit(
+            request,
+            title=title,
+            section=section,
+            action="Updated",
+            document_id=document_id,
+        )
+
         return JsonResponse({
             "success": True,
             "message": "Document updated successfully."
@@ -2077,6 +2100,15 @@ def upload_investor_document(request):
                 status=400
             )
 
+                # Log the upload
+        log_audit(
+            request,
+            title=title,
+            section=effective_section,
+            action="Created",
+            document_id=None,   # you can pass the new object's id if you capture it
+        )
+
         return JsonResponse(
             {"success": True, "message": "Document uploaded successfully."}
         )
@@ -2158,20 +2190,30 @@ def delete_investor_document(request):
 
     if request.method != "POST":
         return JsonResponse(
-            {
-                "success": False,
-                "message": "Invalid method"
-            },
+            {"success": False, "message": "Invalid method"},
             status=405
         )
 
     try:
         import json
-
         body = json.loads(request.body)
 
-        document_id = int(body.get("document_id"))
-        section = body.get("section", "").strip()
+        document_id = body.get("document_id")
+        section = (body.get("section") or "").strip()
+
+        if not document_id or not section:
+            return JsonResponse(
+                {"success": False, "message": "document_id and section are required."},
+                status=400
+            )
+
+        try:
+            document_id = int(document_id)
+        except (TypeError, ValueError):
+            return JsonResponse(
+                {"success": False, "message": "Invalid document_id."},
+                status=400
+            )
 
         model_map = {
             "annual_report": AnnualReport,
@@ -2193,33 +2235,44 @@ def delete_investor_document(request):
 
         if not model:
             return JsonResponse(
-                {
-                    "success": False,
-                    "message": "Invalid section"
-                },
+                {"success": False, "message": f"Invalid section: {section}"},
                 status=400
             )
 
-        obj = model.objects.get(id=document_id)
+        try:
+            obj = model.objects.get(id=document_id)
+        except model.DoesNotExist:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "message": f"Document not found (id={document_id}, section={section})."
+                },
+                status=404
+            )
+
+        # Capture title before deleting
+        doc_title = getattr(obj, "title", "Untitled")
+
+        # Audit log
+        log_audit(
+            request,
+            title=doc_title,
+            section=section,
+            action="Deleted",
+            document_id=document_id,
+        )
 
         obj.delete()
 
         return JsonResponse(
-            {
-                "success": True,
-                "message": "Document deleted successfully."
-            }
+            {"success": True, "message": "Document deleted successfully."}
         )
 
     except Exception as e:
         return JsonResponse(
-            {
-                "success": False,
-                "message": str(e)
-            },
+            {"success": False, "message": str(e)},
             status=500
         )
-
  # ============================================================
 # SUMMARY REPORT DOWNLOAD
 # ============================================================
@@ -2571,3 +2624,22 @@ def delete_employee(request):
         return JsonResponse({"success": False, "message": "Employee not found."}, status=404)
     except Exception as e:
         return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+
+@login_required(login_url="dashboard_login")
+def audit_log_api(request):
+    """Return latest audit logs."""
+    logs = AuditLog.objects.all()[:50]  # latest 50
+
+    data = []
+    for log in logs:
+        data.append({
+            "id": log.id,
+            "document_title": log.document_title,
+            "section": log.section,
+            "action": log.action,
+            "performed_by": log.performed_by,
+            "created_at": log.created_at.strftime("%d-%m-%Y %H:%M"),
+        })
+
+    return JsonResponse(data, safe=False)   

@@ -30,6 +30,7 @@ from .views import (
     update_employee,
     toggle_employee_status,
     delete_employee,
+    audit_log_api,
 )
 
 
@@ -211,5 +212,7 @@ urlpatterns = [
         ),
         name="password_reset_complete"
     ),
+
+    path("api/audit-logs/", audit_log_api, name="audit_log_api"),
 ]
 
