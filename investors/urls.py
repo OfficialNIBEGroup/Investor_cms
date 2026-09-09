@@ -31,6 +31,17 @@ from .views import (
     toggle_employee_status,
     delete_employee,
     audit_log_api,
+    sections_list_api,
+    create_section,
+    update_section,
+    delete_section,
+    toggle_section_status,
+    create_subsection,
+    update_subsection,
+    delete_subsection,
+    custom_documents_api,
+    upload_custom_document,
+    delete_custom_document,
 )
 
 
@@ -214,5 +225,22 @@ urlpatterns = [
     ),
 
     path("api/audit-logs/", audit_log_api, name="audit_log_api"),
+
+    # Section management (Admin CRUD + list for Admin/Employee)
+    path("api/sections/", sections_list_api, name="sections_list_api"),
+    path("api/sections/create/", create_section, name="create_section"),
+    path("api/sections/update/", update_section, name="update_section"),
+    path("api/sections/delete/", delete_section, name="delete_section"),
+    path("api/sections/toggle-status/", toggle_section_status, name="toggle_section_status"),
+
+    # Sub-sections
+    path("api/subsections/create/", create_subsection, name="create_subsection"),
+    path("api/subsections/update/", update_subsection, name="update_subsection"),
+    path("api/subsections/delete/", delete_subsection, name="delete_subsection"),
+
+    # Custom section documents
+    path("api/custom-documents/", custom_documents_api, name="custom_documents_api"),
+    path("api/custom-documents/upload/", upload_custom_document, name="upload_custom_document"),
+    path("api/custom-documents/delete/", delete_custom_document, name="delete_custom_document"),
 ]
 

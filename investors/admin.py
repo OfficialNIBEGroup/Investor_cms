@@ -16,8 +16,12 @@ from .models import (
     UnclaimedDividend,
     SubsidiaryFinancial,
     AuditLog,
+    # DocumentBase,
 )
 
+from .models import Profile
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import User
 
 @admin.register(AnnualReport)
 class AnnualReportAdmin(admin.ModelAdmin):
@@ -422,3 +426,77 @@ class AuditLogAdmin(admin.ModelAdmin):
     ordering = (
         "-created_at",
     )
+
+
+
+
+class ProfileInline(admin.StackedInline):
+    model = Profile
+    can_delete = False
+    verbose_name_plural = 'Profile / Role'
+
+
+class UserAdmin(BaseUserAdmin):
+    inlines = (ProfileInline,)
+    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'get_role')
+    list_filter = ('is_staff', 'is_active', 'profile__role')
+
+    def get_role(self, obj):
+        return obj.profile.get_role_display() if hasattr(obj, 'profile') else '-'
+    get_role.short_description = 'Role'
+
+
+# Re-register UserAdmin
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
+
+
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'role', 'phone', 'department', 'created_at')
+    list_filter = ('role',)
+    search_fields = ('user__username', 'user__email', 'phone')
+from .models import Section, SubSection, CustomDocument
+
+
+class SubSectionInline(admin.TabularInline):
+    model = SubSection
+    extra = 0
+
+
+@admin.register(Section)
+class SectionAdmin(admin.ModelAdmin):
+    list_display = (
+        "name", "slug", "model_key", "is_system", "is_active",
+        "show_on_public", "display_order",
+    )
+    list_filter = ("is_system", "is_active", "show_on_public")
+    search_fields = ("name", "slug", "model_key")
+    prepopulated_fields = {"slug": ("name",)}
+    ordering = ("display_order", "name")
+    inlines = [SubSectionInline]
+
+
+@admin.register(SubSection)
+class SubSectionAdmin(admin.ModelAdmin):
+    list_display = ("name", "section", "slug", "is_active", "display_order")
+    list_filter = ("is_active", "section")
+    search_fields = ("name", "slug")
+    ordering = ("section", "display_order")
+
+
+@admin.register(CustomDocument)
+class CustomDocumentAdmin(admin.ModelAdmin):
+    list_display = (
+        "title", "section", "subsection", "published",
+        "display_order", "created_at",
+    )
+    list_filter = ("published", "section")
+    search_fields = ("title", "extra_info")
+    ordering = ("-display_order", "-created_at")
+
+# @admin.register(DocumentBase)
+# class DocumentBaseAdmin(admin.ModelAdmin):
+#     list_display = (
+#             "title", "pdf_file", "external_url", "published",
+#         )

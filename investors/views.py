@@ -7,6 +7,9 @@ from django.shortcuts import render, redirect
 from django.db.models import Max
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from functools import wraps
+from django.contrib import messages
+from .models import Profile   # make sure Profile is imported
 
 from .models import (
     AnnualReport,
@@ -23,7 +26,11 @@ from .models import (
     UnclaimedDividend,
     SubsidiaryFinancial,
     AuditLog,
+    Section,
+    SubSection,
+    CustomDocument,
 )
+from django.utils.text import slugify
 
 AUDIT_ACTION_MAP = {
     "created": "uploaded",
@@ -38,6 +45,58 @@ AUDIT_ACTION_MAP = {
     "delete": "deleted",
 }
 
+
+# ============================================================
+# ROLE BASED ACCESS CONTROL
+# ============================================================
+# ADMIN    → Full system access
+# EMPLOYEE → Only Documents + Upload Document
+# CLIENT   → Only public website (www.nibelimited.com)
+
+def role_required(allowed_roles=None):
+    """
+    Restrict a view to specific roles only.
+
+    Example:
+        @role_required(['ADMIN'])
+        def employees_list_api(...):
+
+        @role_required(['ADMIN', 'EMPLOYEE'])
+        def upload_investor_document(...):
+    """
+    if allowed_roles is None:
+        allowed_roles = []
+
+    def decorator(view_func):
+        @wraps(view_func)
+        def wrapper(request, *args, **kwargs):
+
+            # User must be logged in
+            if not request.user.is_authenticated:
+                return redirect('dashboard_login')
+
+            # Safety: create profile if it does not exist
+            if not hasattr(request.user, 'profile'):
+                Profile.objects.create(user=request.user, role='EMPLOYEE')
+
+            user_role = request.user.profile.role
+
+            # Role not allowed → block access
+            if user_role not in allowed_roles:
+                # For API calls return JSON error
+                if request.path.startswith('/api/'):
+                    return JsonResponse({
+                        "success": False,
+                        "message": "You do not have permission to perform this action."
+                    }, status=403)
+
+                # For normal pages → redirect with message
+                messages.error(request, "You do not have permission to access this page.")
+                return redirect('upload_dashboard')
+
+            return view_func(request, *args, **kwargs)
+        return wrapper
+    return decorator
 
 def normalize_audit_action(action):
     """Map free-form action labels to AuditLog choices."""
@@ -626,11 +685,8 @@ def subsidiary_financials_api(request):
 # DASHBOARD STATISTICS API
 # ============================================================
 
-# ============================================================
-# DASHBOARD STATISTICS API
-# ============================================================
-
 @login_required(login_url="dashboard_login")
+@role_required(['ADMIN', 'EMPLOYEE'])
 def dashboard_statistics_api(request):
 
     # --------------------------------------------------------
@@ -740,6 +796,23 @@ def dashboard_statistics_api(request):
         "subsidiary_financial": subsidiary_financial,
     }
 
+    # Dynamic custom sections (created via Sections CRUD)
+    ensure_system_sections()
+    custom_sections_payload = []
+    for sec in Section.objects.filter(is_system=False, is_active=True).order_by("display_order", "name"):
+        count = sec.custom_documents.count()
+        key = f"custom_{sec.id}"
+        section_counts[key] = count
+        custom_sections_payload.append({
+            "id": sec.id,
+            "key": key,
+            "name": sec.name,
+            "slug": sec.slug,
+            "icon": sec.icon or "📁",
+            "count": count,
+            "is_system": False,
+        })
+
     # --------------------------------------------------------
     # TOTAL DOCUMENTS
     # --------------------------------------------------------
@@ -748,13 +821,16 @@ def dashboard_statistics_api(request):
     # --------------------------------------------------------
     # RETURN RESPONSE
     #
-    # section_counts = 9 top-level dashboard sections
+    # section_counts = system + custom section counts
+    # custom_sections = list for frontend dynamic cards
     # child_counts   = individual child/subsection counts
     # --------------------------------------------------------
     return JsonResponse({
         "total_documents": total_documents,
 
         "section_counts": section_counts,
+
+        "custom_sections": custom_sections_payload,
 
         "child_counts": {
             "shareholder_notice": shareholder_notice,
@@ -814,6 +890,7 @@ def dashboard_statistics_api(request):
 # ============================================================
 
 @login_required(login_url="dashboard_login")
+@role_required(['ADMIN', 'EMPLOYEE'])
 def edit_investor_document(request, document_id, section):
 
     try:
@@ -1244,6 +1321,7 @@ def edit_investor_document(request, document_id, section):
 
 
 @login_required(login_url="dashboard_login")
+@role_required(['ADMIN', 'EMPLOYEE'])
 def update_investor_document(request):
     """
     POST – Update an existing investor document.
@@ -1293,6 +1371,12 @@ def update_investor_document(request):
             document.external_url = external_url
             if pdf_file:
                 document.pdf_file = pdf_file
+
+            # Update publish status if sent
+            published_raw = request.POST.get("published")
+            if published_raw is not None:
+                document.published = str(published_raw).strip().lower() in ("true", "1", "yes", "on")
+
             document.save()
 
         # -------------------------------------------------------
@@ -1452,6 +1536,7 @@ def update_investor_document(request):
 # ============================================================
 
 @login_required(login_url="dashboard_login")
+@role_required(['ADMIN', 'EMPLOYEE'])
 def dashboard_documents_api(request):
 
     documents = []
@@ -1711,10 +1796,31 @@ def dashboard_documents_api(request):
             "external_url": obj.external_url,
         })
 
+    # --------------------------------------------------------
+    # Custom sections (created via Sections CRUD)
+    # --------------------------------------------------------
+    for obj in CustomDocument.objects.select_related("section", "subsection").all().order_by("-display_order"):
+        documents.append({
+            "id": obj.id,
+            "section": f"custom_{obj.section_id}",
+            "section_name": obj.section.name if obj.section else "",
+            "subsection_name": obj.subsection.name if obj.subsection else "",
+            "title": obj.title,
+            "extra_info": obj.extra_info,
+            "date": obj.created_at.strftime("%d-%m-%Y"),
+            "created_at": obj.created_at.isoformat(),
+            "updated_at": obj.updated_at.isoformat(),
+            "published": obj.published,
+            "display_order": obj.display_order,
+            "pdf_file": obj.pdf_file.url if obj.pdf_file else None,
+            "external_url": obj.external_url,
+            "is_custom": True,
+        })
+
     return JsonResponse(documents, safe=False)
 
 # ============================================================
-# INVESTORS PAGE
+# INVESTORS PAGE (public)
 # ============================================================
 
 def investors_page(request):
@@ -1728,8 +1834,40 @@ def investors_page(request):
 @never_cache
 @login_required(login_url="dashboard_login")
 def upload_dashboard(request):
-    return render(request, "Investor_Dashboard.html")
+    """
+    Main dashboard page.
+    Passes role + display name so template can show correct menus
+    and the logged-in user name in the header.
+    """
 
+    # Safety: ensure profile exists
+    if not hasattr(request.user, 'profile'):
+        Profile.objects.create(user=request.user, role='EMPLOYEE')
+
+    role = request.user.profile.role
+
+    # Client must not access dashboard
+    if role == 'CLIENT':
+        return redirect('https://www.nibelimited.com')
+
+    # Display name for header
+    full_name = request.user.get_full_name().strip()
+    display_name = full_name if full_name else request.user.username
+    # Avatar initials (max 2 chars)
+    if full_name:
+        parts = full_name.split()
+        initials = (parts[0][0] + (parts[-1][0] if len(parts) > 1 else "")).upper()
+    else:
+        initials = (request.user.username[:2] if request.user.username else "U").upper()
+
+    return render(request, "Investor_Dashboard.html", {
+        "user_role": role,
+        "is_admin": role == "ADMIN",
+        "is_employee": role == "EMPLOYEE",
+        "display_name": display_name,
+        "user_initials": initials,
+        "username": request.user.username,
+    })
 
 # ============================================================
 # DASHBOARD LOGOUT
@@ -1748,6 +1886,7 @@ def dashboard_logout(request):
 # ============================================================
 
 @login_required(login_url="dashboard_login")
+@role_required(['ADMIN', 'EMPLOYEE'])
 def upload_investor_document(request):
 
     if request.method != "POST":
@@ -1761,6 +1900,10 @@ def upload_investor_document(request):
     title        = request.POST.get("title", "").strip()
     pdf_file     = request.FILES.get("pdf_file")
     external_url = request.POST.get("external_url", "").strip() or None
+
+    # Publish status from radio button (default = Published)
+    published_raw = request.POST.get("published", "true").strip().lower()
+    is_published = published_raw in ("true", "1", "yes", "on")
 
     if not section:
         return JsonResponse(
@@ -1800,11 +1943,11 @@ def upload_investor_document(request):
                 status=400
             )
 
-        # 2. File size validation (max 10 MB)
-        max_size = 10 * 1024 * 1024  # 10 MB
+        # 2. File size validation (max 50 MB)
+        max_size = 50 * 1024 * 1024  # 50 MB
         if pdf_file.size > max_size:
             return JsonResponse(
-                {"success": False, "message": "File size must be less than 10 MB."},
+                {"success": False, "message": "File size must be less than 50 MB."},
                 status=400
             )
 
@@ -1870,7 +2013,7 @@ def upload_investor_document(request):
                 title=title,
                 pdf_file=pdf_file,
                 external_url=external_url,
-                published=True,
+                published=is_published,
                 display_order=display_order,
                 financial_year=request.POST.get("financial_year", "").strip(),
             )
@@ -1884,7 +2027,7 @@ def upload_investor_document(request):
                 title=title,
                 pdf_file=pdf_file,
                 external_url=external_url,
-                published=True,
+                published=is_published,
                 display_order=display_order,
                 financial_year=request.POST.get("financial_year", "").strip(),
             )
@@ -1898,7 +2041,7 @@ def upload_investor_document(request):
                 title=title,
                 pdf_file=pdf_file,
                 external_url=external_url,
-                published=True,
+                published=is_published,
                 display_order=display_order,
                 financial_year=request.POST.get("financial_year", "").strip(),
                 quarter=request.POST.get("quarter", "").strip(),
@@ -1913,7 +2056,7 @@ def upload_investor_document(request):
                 title=title,
                 pdf_file=pdf_file,
                 external_url=external_url,
-                published=True,
+                published=is_published,
                 display_order=display_order,
                 financial_year=request.POST.get("financial_year", "").strip(),
                 quarter=request.POST.get("quarter", "").strip(),
@@ -1929,7 +2072,7 @@ def upload_investor_document(request):
                 title=title,
                 pdf_file=pdf_file,
                 external_url=external_url,
-                published=True,
+                published=is_published,
                 display_order=display_order,
                 financial_year=request.POST.get("financial_year", "").strip(),
                 notice_type=request.POST.get("notice_type", "").strip(),
@@ -1946,7 +2089,7 @@ def upload_investor_document(request):
                 title=title,
                 pdf_file=pdf_file,
                 external_url=external_url,
-                published=True,
+                published=is_published,
                 display_order=display_order,
                 financial_year=request.POST.get("financial_year", "").strip(),
                 disclosure_date=request.POST.get("disclosure_date") or None,
@@ -1961,7 +2104,7 @@ def upload_investor_document(request):
                 title=title,
                 pdf_file=pdf_file,
                 external_url=external_url,
-                published=True,
+                published=is_published,
                 display_order=display_order,
                 financial_year=request.POST.get("financial_year", "").strip(),
                 disclosure_date=request.POST.get("disclosure_date") or None,
@@ -1976,7 +2119,7 @@ def upload_investor_document(request):
                 title=title,
                 pdf_file=pdf_file,
                 external_url=external_url,
-                published=True,
+                published=is_published,
                 display_order=display_order,
                 financial_year=request.POST.get("financial_year", "").strip(),
                 quarter=request.POST.get("quarter", "").strip(),
@@ -1991,7 +2134,7 @@ def upload_investor_document(request):
                 title=title,
                 pdf_file=pdf_file,
                 external_url=external_url,
-                published=True,
+                published=is_published,
                 display_order=display_order,
                 category=request.POST.get("category", "").strip(),
             )
@@ -2021,7 +2164,7 @@ def upload_investor_document(request):
                     title=title,
                     pdf_file=pdf_file,
                     external_url=external_url,
-                    published=True,
+                    published=is_published,
                     display_order=display_order,
                     category="kyc_nomination",
                     description=request.POST.get(
@@ -2044,7 +2187,7 @@ def upload_investor_document(request):
                     title=title,
                     pdf_file=pdf_file,
                     external_url=external_url,
-                    published=True,
+                    published=is_published,
                     display_order=display_order,
                     applicable_to=request.POST.get(
                         "applicable_to",
@@ -2070,7 +2213,7 @@ def upload_investor_document(request):
                     title=title,
                     pdf_file=pdf_file,
                     external_url=external_url,
-                    published=True,
+                    published=is_published,
                     display_order=display_order,
                     financial_year=request.POST.get(
                         "financial_year",
@@ -2115,7 +2258,7 @@ def upload_investor_document(request):
                 title=title,
                 pdf_file=pdf_file,
                 external_url=external_url,
-                published=True,
+                published=is_published,
                 display_order=display_order,
                 applicable_to=request.POST.get(
                     "applicable_to",
@@ -2141,7 +2284,7 @@ def upload_investor_document(request):
                 title=title,
                 pdf_file=pdf_file,
                 external_url=external_url,
-                published=True,
+                published=is_published,
                 display_order=display_order,
                 financial_year=request.POST.get(
                     "financial_year",
@@ -2172,7 +2315,7 @@ def upload_investor_document(request):
                 title=title,
                 pdf_file=pdf_file,
                 external_url=external_url,
-                published=True,
+                published=is_published,
                 display_order=display_order,
                 financial_year=request.POST.get("financial_year", "").strip(),
                 company_name=request.POST.get("company_name", "").strip(),
@@ -2211,66 +2354,79 @@ def upload_investor_document(request):
 
 @never_cache
 def dashboard_login(request):
+    """
+    Login for Admin & Employee only.
+    Client role is redirected to the public website.
+    """
+    # Already logged in → go to correct place
+    if request.user.is_authenticated:
+        return redirect_based_on_role(request.user)
 
     if request.method == "POST":
-
         username = request.POST.get("username", "").strip()
         password = request.POST.get("password", "")
         remember_me = request.POST.get("remember_me")
 
-        user = authenticate(
-            request,
-            username=username,
-            password=password
-        )
+        user = authenticate(request, username=username, password=password)
 
         if user is not None:
+            # Create profile if missing
+            if not hasattr(user, 'profile'):
+                Profile.objects.create(user=user, role='EMPLOYEE')
 
+            # CLIENT should not enter the dashboard
+            if user.profile.role == 'CLIENT':
+                login(request, user)
+                return redirect('https://www.nibelimited.com')
+
+            # Admin or Employee
             login(request, user)
 
             if remember_me:
-                # Keep the user logged in for 30 days
-                request.session.set_expiry(60 * 60 * 24 * 30)
-
-                # Remember Employee ID in browser session
+                request.session.set_expiry(60 * 60 * 24 * 30)  # 30 days
                 request.session["remembered_username"] = username
-
             else:
-                # Session expires when browser is closed
                 request.session.set_expiry(0)
-
-                # Remove remembered Employee ID
                 request.session.pop("remembered_username", None)
 
-            return redirect("upload_dashboard")
+            return redirect_based_on_role(user)
 
-        return render(
-            request,
-            "Investor_Login.html",
-            {
-                "error": "Invalid Employee ID or Password.",
-                "remembered_username": username,
-            }
-        )
+        # Wrong credentials
+        return render(request, "Investor_Login.html", {
+            "error": "Invalid Employee ID or Password.",
+            "remembered_username": username,
+        })
 
-    remembered_username = request.session.get(
-        "remembered_username",
-        ""
-    )
+    # GET request
+    remembered_username = request.session.get("remembered_username", "")
+    return render(request, "Investor_Login.html", {
+        "remembered_username": remembered_username,
+    })
 
-    return render(
-        request,
-        "Investor_Login.html",
-        {
-            "remembered_username": remembered_username,
-        }
-    )
+
+def redirect_based_on_role(user):
+    """
+    After login, send user to the correct place according to role.
+    ADMIN / EMPLOYEE → Dashboard
+    CLIENT           → Public website
+    """
+    if not hasattr(user, 'profile'):
+        Profile.objects.create(user=user, role='EMPLOYEE')
+
+    role = user.profile.role
+
+    if role in ['ADMIN', 'EMPLOYEE']:
+        return redirect('upload_dashboard')
+
+    # CLIENT (or any other role)
+    return redirect('https://www.nibelimited.com')
 
 # ============================================================
 # DELETE INVESTOR DOCUMENT
 # ============================================================
 
 @login_required(login_url="dashboard_login")
+@role_required(['ADMIN', 'EMPLOYEE'])
 def delete_investor_document(request):
 
     if request.method != "POST":
@@ -2367,6 +2523,7 @@ def delete_investor_document(request):
 # ============================================================
 
 @login_required(login_url="dashboard_login")
+@role_required(['ADMIN', 'EMPLOYEE'])
 def download_summary_report(request):
     """
     Generate and download a professional PDF Summary Report
@@ -2533,24 +2690,29 @@ def download_summary_report(request):
         )
 
 # ============================================================
-# EMPLOYEE MANAGEMENT
+# EMPLOYEE MANAGEMENT  (Only ADMIN can access)
 # ============================================================
 
+
 @login_required(login_url="dashboard_login")
+@role_required(['ADMIN'])
 def employees_list_api(request):
-    """Return list of all employees (users) for the dashboard."""
+    """Only Admin can see the list of employees."""
     users = User.objects.all().order_by("-date_joined")
 
     data = []
     for user in users:
+        role = user.profile.role if hasattr(user, 'profile') else 'EMPLOYEE'
+
         data.append({
             "id": user.id,
-            "username": user.username,          # Employee ID
+            "username": user.username,
             "first_name": user.first_name,
             "last_name": user.last_name,
             "email": user.email,
             "is_active": user.is_active,
             "is_staff": user.is_staff,
+            "role": role,
             "date_joined": user.date_joined.strftime("%d-%m-%Y"),
             "last_login": user.last_login.strftime("%d-%m-%Y %H:%M") if user.last_login else "Never",
         })
@@ -2559,20 +2721,25 @@ def employees_list_api(request):
 
 
 @login_required(login_url="dashboard_login")
+@role_required(['ADMIN'])
 def create_employee(request):
-    """Create a new employee (User)."""
+    """Only Admin can create new users."""
     if request.method != "POST":
         return JsonResponse({"success": False, "message": "Invalid method"}, status=405)
 
     try:
         body = json.loads(request.body)
 
-        username = body.get("username", "").strip()
-        password = body.get("password", "").strip()
+        username   = body.get("username", "").strip()
+        password   = body.get("password", "").strip()
         first_name = body.get("first_name", "").strip()
-        last_name = body.get("last_name", "").strip()
-        email = body.get("email", "").strip()
-        is_active = body.get("is_active", True)
+        last_name  = body.get("last_name", "").strip()
+        email      = body.get("email", "").strip()
+        is_active  = body.get("is_active", True)
+        role       = body.get("role", "EMPLOYEE").strip().upper()
+
+        if role not in ['ADMIN', 'EMPLOYEE', 'CLIENT']:
+            role = 'EMPLOYEE'
 
         if not username:
             return JsonResponse({"success": False, "message": "Employee ID is required."}, status=400)
@@ -2590,12 +2757,16 @@ def create_employee(request):
             last_name=last_name,
             email=email,
             is_active=is_active,
-            is_staff=True,          # Can access dashboard
+            is_staff=True,
         )
+
+        # Set role
+        user.profile.role = role
+        user.profile.save()
 
         return JsonResponse({
             "success": True,
-            "message": f"Employee '{username}' created successfully.",
+            "message": f"User '{username}' created as {role}.",
             "id": user.id
         })
 
@@ -2604,27 +2775,28 @@ def create_employee(request):
 
 
 @login_required(login_url="dashboard_login")
+@role_required(['ADMIN'])
 def update_employee(request):
-    """Update an existing employee."""
+    """Only Admin can update users."""
     if request.method != "POST":
         return JsonResponse({"success": False, "message": "Invalid method"}, status=405)
 
     try:
         body = json.loads(request.body)
 
-        user_id = body.get("id")
+        user_id    = body.get("id")
         first_name = body.get("first_name", "").strip()
-        last_name = body.get("last_name", "").strip()
-        email = body.get("email", "").strip()
-        is_active = body.get("is_active", True)
-        password = body.get("password", "").strip()   # optional
+        last_name  = body.get("last_name", "").strip()
+        email      = body.get("email", "").strip()
+        is_active  = body.get("is_active", True)
+        password   = body.get("password", "").strip()
+        role       = body.get("role", "").strip().upper()
 
         if not user_id:
-            return JsonResponse({"success": False, "message": "Employee ID is required."}, status=400)
+            return JsonResponse({"success": False, "message": "User ID is required."}, status=400)
 
         user = User.objects.get(id=user_id)
 
-        # Prevent deactivating yourself
         if user.id == request.user.id and not is_active:
             return JsonResponse({"success": False, "message": "You cannot deactivate your own account."}, status=400)
 
@@ -2640,20 +2812,22 @@ def update_employee(request):
 
         user.save()
 
-        return JsonResponse({
-            "success": True,
-            "message": "Employee updated successfully."
-        })
+        if role in ['ADMIN', 'EMPLOYEE', 'CLIENT']:
+            user.profile.role = role
+            user.profile.save()
+
+        return JsonResponse({"success": True, "message": "User updated successfully."})
 
     except User.DoesNotExist:
-        return JsonResponse({"success": False, "message": "Employee not found."}, status=404)
+        return JsonResponse({"success": False, "message": "User not found."}, status=404)
     except Exception as e:
         return JsonResponse({"success": False, "message": str(e)}, status=500)
 
 
 @login_required(login_url="dashboard_login")
+@role_required(['ADMIN'])
 def toggle_employee_status(request):
-    """Activate or Deactivate an employee."""
+    """Only Admin can activate/deactivate users."""
     if request.method != "POST":
         return JsonResponse({"success": False, "message": "Invalid method"}, status=405)
 
@@ -2673,18 +2847,19 @@ def toggle_employee_status(request):
         return JsonResponse({
             "success": True,
             "is_active": user.is_active,
-            "message": f"Employee has been {status}."
+            "message": f"User has been {status}."
         })
 
     except User.DoesNotExist:
-        return JsonResponse({"success": False, "message": "Employee not found."}, status=404)
+        return JsonResponse({"success": False, "message": "User not found."}, status=404)
     except Exception as e:
         return JsonResponse({"success": False, "message": str(e)}, status=500)
 
 
 @login_required(login_url="dashboard_login")
+@role_required(['ADMIN'])
 def delete_employee(request):
-    """Delete an employee."""
+    """Only Admin can delete users."""
     if request.method != "POST":
         return JsonResponse({"success": False, "message": "Invalid method"}, status=405)
 
@@ -2702,19 +2877,44 @@ def delete_employee(request):
 
         return JsonResponse({
             "success": True,
-            "message": f"Employee '{username}' deleted successfully."
+            "message": f"User '{username}' deleted successfully."
         })
 
     except User.DoesNotExist:
-        return JsonResponse({"success": False, "message": "Employee not found."}, status=404)
+        return JsonResponse({"success": False, "message": "User not found."}, status=404)
     except Exception as e:
         return JsonResponse({"success": False, "message": str(e)}, status=500)
 
-
 @login_required(login_url="dashboard_login")
+@role_required(['ADMIN'])
 def audit_log_api(request):
-    """Return latest audit logs."""
-    logs = AuditLog.objects.all()[:50]  # latest 50
+    """Only Admin can see audit logs."""
+    # ... keep your existing code inside this function ...
+    """Return paginated audit logs."""
+    try:
+        page = int(request.GET.get("page", 1))
+        page_size = int(request.GET.get("page_size", 10))
+    except (TypeError, ValueError):
+        page = 1
+        page_size = 10
+
+    if page < 1:
+        page = 1
+    if page_size < 1:
+        page_size = 10
+    if page_size > 50:
+        page_size = 50
+
+    qs = AuditLog.objects.all().order_by("-created_at")
+    total = qs.count()
+    total_pages = max(1, (total + page_size - 1) // page_size)
+
+    if page > total_pages:
+        page = total_pages
+
+    start = (page - 1) * page_size
+    end = start + page_size
+    logs = qs[start:end]
 
     data = []
     for log in logs:
@@ -2728,4 +2928,514 @@ def audit_log_api(request):
             "created_at": log.created_at.strftime("%d-%m-%Y %H:%M"),
         })
 
-    return JsonResponse(data, safe=False)   
+    return JsonResponse({
+        "results": data,
+        "page": page,
+        "page_size": page_size,
+        "total": total,
+        "total_pages": total_pages,
+    })
+     
+# ============================================================
+# SECTION MANAGEMENT (Admin only)
+# A) Create new custom sections
+# B) Manage name / order / show-hide for all sections
+# C) Sub-sections under any section
+# ============================================================
+
+# Built-in sections that map to existing document models
+SYSTEM_SECTIONS_SEED = [
+    {"name": "Annual Reports", "slug": "annual-reports", "model_key": "annual_report", "icon": "📊", "display_order": 1},
+    {"name": "Financial Results", "slug": "financial-results", "model_key": "financial_result", "icon": "📈", "display_order": 2},
+    {"name": "Annual Returns", "slug": "annual-returns", "model_key": "annual_return", "icon": "📋", "display_order": 3},
+    {"name": "Corporate Governance", "slug": "corporate-governance", "model_key": "corporate_governance", "icon": "🏛️", "display_order": 4},
+    {"name": "Shareholding Pattern", "slug": "shareholding-pattern", "model_key": "shareholding_pattern", "icon": "🥧", "display_order": 5},
+    {"name": "Shareholder Notices", "slug": "shareholder-notices", "model_key": "shareholder_notice", "icon": "📢", "display_order": 6},
+    {"name": "Newspaper Publications", "slug": "newspaper-publications", "model_key": "newspaper_publication", "icon": "📰", "display_order": 7},
+    {"name": "Stock Exchange Disclosures", "slug": "stock-exchange-disclosures", "model_key": "stock_exchange_disclosure", "icon": "📉", "display_order": 8},
+    {"name": "SEBI Documents", "slug": "sebi-documents", "model_key": "sebi_document", "icon": "📑", "display_order": 9},
+    {"name": "Investor Forms", "slug": "investor-forms", "model_key": "investor_form", "icon": "📝", "display_order": 10},
+    {"name": "Tax Declarations", "slug": "tax-declarations", "model_key": "tax_declaration", "icon": "🧾", "display_order": 11},
+    {"name": "Unclaimed Dividends", "slug": "unclaimed-dividends", "model_key": "unclaimed_dividend", "icon": "💰", "display_order": 12},
+    {"name": "Subsidiary Financials", "slug": "subsidiary-financials", "model_key": "subsidiary_financial", "icon": "🏢", "display_order": 13},
+]
+
+
+def ensure_system_sections():
+    """Create system Section rows once if they do not exist yet."""
+    for item in SYSTEM_SECTIONS_SEED:
+        Section.objects.get_or_create(
+            slug=item["slug"],
+            defaults={
+                "name": item["name"],
+                "model_key": item["model_key"],
+                "icon": item["icon"],
+                "display_order": item["display_order"],
+                "is_system": True,
+                "is_active": True,
+                "show_on_public": True,
+                "allow_subsections": True,
+            },
+        )
+
+
+def unique_section_slug(base_slug, exclude_id=None):
+    slug = slugify(base_slug) or "section"
+    candidate = slug
+    n = 2
+    while True:
+        qs = Section.objects.filter(slug=candidate)
+        if exclude_id:
+            qs = qs.exclude(id=exclude_id)
+        if not qs.exists():
+            return candidate
+        candidate = f"{slug}-{n}"
+        n += 1
+
+
+def unique_subsection_slug(section, base_slug, exclude_id=None):
+    slug = slugify(base_slug) or "subsection"
+    candidate = slug
+    n = 2
+    while True:
+        qs = SubSection.objects.filter(section=section, slug=candidate)
+        if exclude_id:
+            qs = qs.exclude(id=exclude_id)
+        if not qs.exists():
+            return candidate
+        candidate = f"{slug}-{n}"
+        n += 1
+
+
+@login_required(login_url="dashboard_login")
+@role_required(["ADMIN", "EMPLOYEE"])
+def sections_list_api(request):
+    """
+    List all sections (for upload dropdowns + manage page).
+    Query: ?active_only=1  → only active sections
+    """
+    ensure_system_sections()
+
+    qs = Section.objects.all().prefetch_related("subsections")
+    if request.GET.get("active_only") in ("1", "true", "yes"):
+        qs = qs.filter(is_active=True)
+
+    data = []
+    for s in qs:
+        subs = s.subsections.all()
+        if request.GET.get("active_only") in ("1", "true", "yes"):
+            subs = subs.filter(is_active=True)
+
+        data.append({
+            "id": s.id,
+            "name": s.name,
+            "slug": s.slug,
+            "model_key": s.model_key,
+            "description": s.description,
+            "icon": s.icon or "📁",
+            "is_system": s.is_system,
+            "is_active": s.is_active,
+            "show_on_public": s.show_on_public,
+            "allow_subsections": s.allow_subsections,
+            "display_order": s.display_order,
+            "document_count": (
+                s.custom_documents.count()
+                if not s.is_system
+                else None
+            ),
+            "subsections": [
+                {
+                    "id": sub.id,
+                    "name": sub.name,
+                    "slug": sub.slug,
+                    "is_active": sub.is_active,
+                    "display_order": sub.display_order,
+                }
+                for sub in subs
+            ],
+        })
+
+    return JsonResponse(data, safe=False)
+
+
+@login_required(login_url="dashboard_login")
+@role_required(["ADMIN"])
+def create_section(request):
+    """Create a new custom section (Option A). Admin only."""
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Invalid method"}, status=405)
+
+    try:
+        body = json.loads(request.body)
+        name = (body.get("name") or "").strip()
+        description = (body.get("description") or "").strip()
+        icon = (body.get("icon") or "📁").strip() or "📁"
+        is_active = body.get("is_active", True)
+        show_on_public = body.get("show_on_public", True)
+        allow_subsections = body.get("allow_subsections", True)
+        display_order = body.get("display_order")
+
+        if not name:
+            return JsonResponse({"success": False, "message": "Section name is required."}, status=400)
+
+        slug = unique_section_slug(body.get("slug") or name)
+
+        if display_order is None or display_order == "":
+            last = Section.objects.aggregate(m=Max("display_order"))["m"]
+            display_order = (last or 0) + 1
+        else:
+            display_order = int(display_order)
+
+        section = Section.objects.create(
+            name=name,
+            slug=slug,
+            model_key="",  # custom → no system model
+            description=description,
+            icon=icon,
+            is_system=False,
+            is_active=bool(is_active),
+            show_on_public=bool(show_on_public),
+            allow_subsections=bool(allow_subsections),
+            display_order=display_order,
+        )
+
+        return JsonResponse({
+            "success": True,
+            "message": f"Section '{section.name}' created.",
+            "id": section.id,
+            "slug": section.slug,
+        })
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+
+@login_required(login_url="dashboard_login")
+@role_required(["ADMIN"])
+def update_section(request):
+    """Update section name / order / visibility (Option B). Admin only."""
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Invalid method"}, status=405)
+
+    try:
+        body = json.loads(request.body)
+        section_id = body.get("id")
+        if not section_id:
+            return JsonResponse({"success": False, "message": "Section id is required."}, status=400)
+
+        section = Section.objects.get(id=section_id)
+
+        if "name" in body and (body.get("name") or "").strip():
+            section.name = body["name"].strip()
+
+        if "description" in body:
+            section.description = (body.get("description") or "").strip()
+
+        if "icon" in body:
+            section.icon = (body.get("icon") or "📁").strip() or "📁"
+
+        if "is_active" in body:
+            section.is_active = bool(body["is_active"])
+
+        if "show_on_public" in body:
+            section.show_on_public = bool(body["show_on_public"])
+
+        if "allow_subsections" in body:
+            section.allow_subsections = bool(body["allow_subsections"])
+
+        if "display_order" in body and body["display_order"] is not None and body["display_order"] != "":
+            section.display_order = int(body["display_order"])
+
+        # Optional slug change for custom sections only
+        if not section.is_system and body.get("slug"):
+            section.slug = unique_section_slug(body["slug"], exclude_id=section.id)
+
+        section.save()
+
+        return JsonResponse({
+            "success": True,
+            "message": f"Section '{section.name}' updated.",
+        })
+    except Section.DoesNotExist:
+        return JsonResponse({"success": False, "message": "Section not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+
+@login_required(login_url="dashboard_login")
+@role_required(["ADMIN"])
+def delete_section(request):
+    """Delete a custom section only (system sections cannot be deleted)."""
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Invalid method"}, status=405)
+
+    try:
+        body = json.loads(request.body)
+        section_id = body.get("id")
+        section = Section.objects.get(id=section_id)
+
+        if section.is_system:
+            return JsonResponse({
+                "success": False,
+                "message": "System sections cannot be deleted. You can hide them instead.",
+            }, status=400)
+
+        name = section.name
+        # Custom documents cascade-delete with section
+        section.delete()
+
+        return JsonResponse({
+            "success": True,
+            "message": f"Section '{name}' deleted.",
+        })
+    except Section.DoesNotExist:
+        return JsonResponse({"success": False, "message": "Section not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+
+@login_required(login_url="dashboard_login")
+@role_required(["ADMIN"])
+def toggle_section_status(request):
+    """Show / hide a section (is_active)."""
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Invalid method"}, status=405)
+
+    try:
+        body = json.loads(request.body)
+        section = Section.objects.get(id=body.get("id"))
+        section.is_active = not section.is_active
+        section.save(update_fields=["is_active"])
+        status = "shown" if section.is_active else "hidden"
+        return JsonResponse({
+            "success": True,
+            "is_active": section.is_active,
+            "message": f"Section is now {status}.",
+        })
+    except Section.DoesNotExist:
+        return JsonResponse({"success": False, "message": "Section not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+
+# ---------- Sub-sections (Option C) ----------
+
+@login_required(login_url="dashboard_login")
+@role_required(["ADMIN"])
+def create_subsection(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Invalid method"}, status=405)
+
+    try:
+        body = json.loads(request.body)
+        section_id = body.get("section_id")
+        name = (body.get("name") or "").strip()
+
+        if not section_id or not name:
+            return JsonResponse({"success": False, "message": "section_id and name are required."}, status=400)
+
+        section = Section.objects.get(id=section_id)
+        if not section.allow_subsections:
+            return JsonResponse({"success": False, "message": "This section does not allow sub-sections."}, status=400)
+
+        slug = unique_subsection_slug(section, body.get("slug") or name)
+        last = section.subsections.aggregate(m=Max("display_order"))["m"]
+        display_order = int(body["display_order"]) if body.get("display_order") not in (None, "") else (last or 0) + 1
+
+        sub = SubSection.objects.create(
+            section=section,
+            name=name,
+            slug=slug,
+            is_active=bool(body.get("is_active", True)),
+            display_order=display_order,
+        )
+
+        return JsonResponse({
+            "success": True,
+            "message": f"Sub-section '{sub.name}' created.",
+            "id": sub.id,
+        })
+    except Section.DoesNotExist:
+        return JsonResponse({"success": False, "message": "Parent section not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+
+@login_required(login_url="dashboard_login")
+@role_required(["ADMIN"])
+def update_subsection(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Invalid method"}, status=405)
+
+    try:
+        body = json.loads(request.body)
+        sub = SubSection.objects.get(id=body.get("id"))
+
+        if "name" in body and (body.get("name") or "").strip():
+            sub.name = body["name"].strip()
+        if "is_active" in body:
+            sub.is_active = bool(body["is_active"])
+        if "display_order" in body and body["display_order"] not in (None, ""):
+            sub.display_order = int(body["display_order"])
+        if body.get("slug"):
+            sub.slug = unique_subsection_slug(sub.section, body["slug"], exclude_id=sub.id)
+
+        sub.save()
+        return JsonResponse({"success": True, "message": "Sub-section updated."})
+    except SubSection.DoesNotExist:
+        return JsonResponse({"success": False, "message": "Sub-section not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+
+@login_required(login_url="dashboard_login")
+@role_required(["ADMIN"])
+def delete_subsection(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Invalid method"}, status=405)
+
+    try:
+        body = json.loads(request.body)
+        sub = SubSection.objects.get(id=body.get("id"))
+        name = sub.name
+        sub.delete()
+        return JsonResponse({"success": True, "message": f"Sub-section '{name}' deleted."})
+    except SubSection.DoesNotExist:
+        return JsonResponse({"success": False, "message": "Sub-section not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+
+# ---------- Custom documents under custom sections ----------
+
+@login_required(login_url="dashboard_login")
+@role_required(["ADMIN", "EMPLOYEE"])
+def custom_documents_api(request):
+    """List documents for a custom section (?section_id= or ?slug=)."""
+    section_id = request.GET.get("section_id")
+    slug = request.GET.get("slug")
+
+    try:
+        if section_id:
+            section = Section.objects.get(id=section_id, is_system=False)
+        elif slug:
+            section = Section.objects.get(slug=slug, is_system=False)
+        else:
+            return JsonResponse({"success": False, "message": "section_id or slug required."}, status=400)
+    except Section.DoesNotExist:
+        return JsonResponse({"success": False, "message": "Custom section not found."}, status=404)
+
+    docs = CustomDocument.objects.filter(section=section).select_related("subsection")
+    if request.GET.get("published_only") in ("1", "true"):
+        docs = docs.filter(published=True)
+
+    data = []
+    for d in docs:
+        data.append({
+            "id": d.id,
+            "section": section.slug,
+            "section_id": section.id,
+            "subsection_id": d.subsection_id,
+            "subsection_name": d.subsection.name if d.subsection else "",
+            "title": d.title,
+            "pdf_file": request.build_absolute_uri(d.pdf_file.url) if d.pdf_file else None,
+            "external_url": d.external_url,
+            "published": d.published,
+            "display_order": d.display_order,
+            "extra_info": d.extra_info,
+            "created_at": d.created_at.strftime("%d-%m-%Y"),
+        })
+
+    return JsonResponse(data, safe=False)
+
+
+@login_required(login_url="dashboard_login")
+@role_required(["ADMIN", "EMPLOYEE"])
+def upload_custom_document(request):
+    """Upload a document into a custom section (PDF / URL / published)."""
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Invalid method"}, status=405)
+
+    try:
+        section_id = request.POST.get("section_id")
+        subsection_id = request.POST.get("subsection_id") or None
+        title = (request.POST.get("title") or "").strip()
+        external_url = (request.POST.get("external_url") or "").strip() or None
+        extra_info = (request.POST.get("extra_info") or "").strip()
+        published = request.POST.get("published", "true") in ("true", "1", "on", "True")
+        pdf_file = request.FILES.get("pdf_file")
+
+        if not section_id or not title:
+            return JsonResponse({"success": False, "message": "section_id and title are required."}, status=400)
+        if not pdf_file and not external_url:
+            return JsonResponse({"success": False, "message": "Provide a PDF file or external URL."}, status=400)
+
+        section = Section.objects.get(id=section_id, is_system=False, is_active=True)
+
+        subsection = None
+        if subsection_id:
+            subsection = SubSection.objects.get(id=subsection_id, section=section)
+
+        last = CustomDocument.objects.filter(section=section).aggregate(m=Max("display_order"))["m"]
+        display_order = (last or 0) + 1
+
+        doc = CustomDocument.objects.create(
+            section=section,
+            subsection=subsection,
+            title=title,
+            pdf_file=pdf_file,
+            external_url=external_url,
+            published=published,
+            display_order=display_order,
+            extra_info=extra_info,
+        )
+
+        log_audit(
+            request,
+            title=doc.title,
+            section=section.slug,
+            action="uploaded",
+            document_id=doc.id,
+            details=f"Custom section document uploaded under {section.name}",
+        )
+
+        return JsonResponse({
+            "success": True,
+            "message": "Document uploaded successfully.",
+            "id": doc.id,
+        })
+    except Section.DoesNotExist:
+        return JsonResponse({"success": False, "message": "Custom section not found or inactive."}, status=404)
+    except SubSection.DoesNotExist:
+        return JsonResponse({"success": False, "message": "Sub-section not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+
+@login_required(login_url="dashboard_login")
+@role_required(["ADMIN", "EMPLOYEE"])
+def delete_custom_document(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Invalid method"}, status=405)
+
+    try:
+        body = json.loads(request.body)
+        doc = CustomDocument.objects.select_related("section").get(id=body.get("id"))
+        title = doc.title
+        section_slug = doc.section.slug
+        doc_id = doc.id
+        doc.delete()
+
+        log_audit(
+            request,
+            title=title,
+            section=section_slug,
+            action="deleted",
+            document_id=doc_id,
+            details="Custom section document deleted",
+        )
+
+        return JsonResponse({"success": True, "message": "Document deleted."})
+    except CustomDocument.DoesNotExist:
+        return JsonResponse({"success": False, "message": "Document not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=500)

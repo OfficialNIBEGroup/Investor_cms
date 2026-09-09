@@ -38,13 +38,11 @@
 
             <div class="logo-text">
 
-                <div class="logo-mark">
-                    NIBE
-                </div>
+                <img class="logo-mark-img"
+                     src="{% static 'Nibe Limited Logo/NIBE Group Logo.png' %}"
+                     alt="NIBE Limited logo">
 
-                <div class="logo-brand">
-                    LIMITED
-                </div>
+               
 
             </div>
 
@@ -56,58 +54,56 @@
 
 
         <!-- NAVIGATION -->
-
+        <!-- Admin    → Dashboard, Documents, Upload, Audit Log, Employees, Sections
+             Employee → Documents, Upload only
+        -->
         <nav class="sidebar-navigation">
 
-
+            {% if is_admin %}
             <a href="#"
                class="menu-item active"
                onclick="showDashboard(event)">
-
                 <span class="menu-icon">⌂</span>
-
-                <span>
-                    Dashboard
-                </span>
-
+                <span>Dashboard</span>
             </a>
-
+            {% endif %}
 
             <a href="#"
-               class="menu-item"
+               class="menu-item {% if not is_admin %}active{% endif %}"
                onclick="showDocuments(event)">
-
                 <span class="menu-icon">▤</span>
-
-                <span>
-                    Documents
-                </span>
-
+                <span>Documents</span>
             </a>
-
 
             <a href="#"
                class="menu-item"
                onclick="showUpload(event)">
-
                 <span class="menu-icon">🢁</span>
-
-                <span>
-                    Upload Document
-                </span>
-
+                <span>Upload Document</span>
             </a>
 
-            <a href="#"
-                class="menu-item"
-                onclick="showAuditLog(event)">
-
+            {% if is_admin %}
+                <a href="#"
+                   class="menu-item"
+                   onclick="showAuditLog(event)">
                     <span class="menu-icon">📋</span>
                     <span>Audit Log</span>
-            </a>
+                </a>
 
-           
+                <a href="#"
+                   class="menu-item"
+                   onclick="showEmployees(event)">
+                    <span class="menu-icon">👥</span>
+                    <span>Employees</span>
+                </a>
 
+                <a href="#"
+                   class="menu-item"
+                   onclick="showSections(event)">
+                    <span class="menu-icon">📂</span>
+                    <span>Sections</span>
+                </a>
+            {% endif %}
 
         </nav>
 
@@ -164,13 +160,10 @@
 
 
                 <h1>
-
                     Welcome back,
-
                     <span class="muted">
-                        Investor Relations
+                        {{ display_name|default:user.username|default:"User" }}
                     </span>
-
                 </h1>
 
             </div>
@@ -178,17 +171,18 @@
 
             <div class="header-right">
 
+                <span style="font-size: 13px; color: #64748b; margin-right: 8px;">
+                    {% if user_role %}{{ user_role }}{% endif %}
+                </span>
+
                 <a
                     href="{% url 'dashboard_logout' %}"
                     class="logout-btn">
-
                     Log out
-
                 </a>
 
-
-                <div class="header-avatar">
-                    IR
+                <div class="header-avatar" title="{{ username|default:user.username }}">
+                    {{ user_initials|default:"U" }}
                 </div>
 
             </div>
@@ -1184,7 +1178,7 @@
 
 
                                 <small>
-                                    Supported format: PDF
+                                    Supported format: PDF (Max file size: 50 MB)
                                 </small>
 
 
@@ -1220,6 +1214,39 @@
                                 on an external website.
                             </small>
 
+                        </div>
+
+                        <!-- ========== PUBLISH STATUS ========== -->
+                        <div class="form-group full-width">
+                            <label>
+                                Publish Status
+                                <span>*</span>
+                            </label>
+
+                            <div style="display: flex; gap: 24px; margin-top: 8px; align-items: center;">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; color: #1e293b;">
+                                    <input
+                                        type="radio"
+                                        name="published"
+                                        value="true"
+                                        checked
+                                        style="width: 16px; height: 16px; accent-color: #2563eb;">
+                                    Published
+                                </label>
+
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; color: #1e293b;">
+                                    <input
+                                        type="radio"
+                                        name="published"
+                                        value="false"
+                                        style="width: 16px; height: 16px; accent-color: #2563eb;">
+                                    Unpublished
+                                </label>
+                            </div>
+
+                            <small style="display: block; margin-top: 6px; color: #64748b;">
+                                Only <strong>Published</strong> documents will appear on the public Investor page.
+                            </small>
                         </div>
 
                     </div>
@@ -1375,7 +1402,17 @@
                                 </th>
 
                                 <th>
-                                    Financial Year
+                                    <div>
+                                        <select
+                                            id="documentYearFilter"
+                                            class="table-filter-select">
+
+                                            <option value="all">
+                                            Financial Year
+                                            </option>
+
+                                        </select>
+                                    </div>
                                 </th>
 
                                 <th>
@@ -1383,8 +1420,33 @@
                                 </th>
 
                                 <th>
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        
+                                        <select
+                                            id="documentStatusFilter"
+                                            class="table-filter-select">
+
+                                            <option value="all">
+                                                Status
+                                            </option>
+
+                                            <option value="published">
+                                                Published
+                                            </option>
+
+                                            <option value="unpublished">
+                                                Unpublished
+                                            </option>
+
+                                        </select>
+                                    </div>
+                                </th>
+                                
+                                <th>
                                     Actions
                                 </th>
+
+                                
 
                             </tr>
                         </thead>
@@ -1395,7 +1457,7 @@
                             <tr>
 
                                 <td
-                                    colspan="5"
+                                    colspan="6"
                                     class="table-empty">
 
                                     Loading documents...
@@ -1408,6 +1470,41 @@
 
                     </table>
 
+                </div>
+
+
+
+                <!-- Documents pagination (same design as Audit Log) -->
+                <div id="documentsPagination" style="display: none; margin-top: 0; padding: 14px 16px; border-top: 1px solid #e2e8f0; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+
+                    <!-- Left side: Per page + Showing text -->
+                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 13px; color: #64748b; font-weight: 500;">Per page</span>
+                            <select id="documentsPageSize"
+                                    onchange="changeDocumentsPageSize(this.value)"
+                                    style="padding: 6px 28px 6px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: white; color: #1e293b; cursor: pointer; outline: none; appearance: none; -webkit-appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%2364748b%22 stroke-width=%222%22><polyline points=%226 9 12 15 18 9%22/></svg>'); background-repeat: no-repeat; background-position: right 10px center;">
+                                <option value="10">10</option>
+                                <option value="20" selected>20</option>
+                                <option value="50">50</option>
+                            </select>
+                        </div>
+                        <span id="documentsPageInfo" style="font-size: 13px; color: #94a3b8;"></span>
+                    </div>
+
+                    <!-- Right side: Prev / Next -->
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <button type="button" id="documentsPrevBtn"
+                                onclick="goDocumentsPage(currentDocPage - 1)"
+                                style="padding: 6px 14px; font-size: 13px; border-radius: 8px; border: 1.5px solid #cbd5e1; background: white; color: #334155; cursor: pointer;">
+                            ← Previous
+                        </button>
+                        <button type="button" id="documentsNextBtn"
+                                onclick="goDocumentsPage(currentDocPage + 1)"
+                                style="padding: 6px 14px; font-size: 13px; border-radius: 8px; border: 1.5px solid #cbd5e1; background: white; color: #334155; cursor: pointer;">
+                            Next →
+                        </button>
+                    </div>
                 </div>
 
             </div>
@@ -1428,7 +1525,7 @@
             <div class="dashboard-card" style="margin-top: 20px;">
                 <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                     <h3>Recent Activity</h3>
-                    <button onclick="loadAuditLogs()" class="primary-button" style="padding: 6px 14px; font-size: 13px;">
+                    <button onclick="loadAuditLogs(1)" class="primary-button" style="padding: 6px 14px; font-size: 13px;">
                         Refresh
                     </button>
                 </div>
@@ -1440,12 +1537,360 @@
                 <div id="auditLogEmpty" class="empty-state" style="display: none;">
                     <p>No activity found yet.</p>
                 </div>
+
+                <!-- Pagination -->
+                <!-- Pagination (same design as screenshot) -->
+                <div id="auditLogPagination" style="display: none; margin-top: 16px; padding: 14px 16px; border-top: 1px solid #e2e8f0; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+
+                    <!-- Left side: Per page + Showing text -->
+                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 13px; color: #64748b; font-weight: 500;">Per page</span>
+                            <select id="auditLogPageSize" 
+                                    onchange="changeAuditPageSize(this.value)"
+                                    style="padding: 6px 28px 6px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: white; color: #1e293b; cursor: pointer; outline: none; appearance: none; -webkit-appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%2364748b%22 stroke-width=%222%22><polyline points=%226 9 12 15 18 9%22/></svg>'); background-repeat: no-repeat; background-position: right 10px center;">
+                                <option value="10">10</option>
+                                <option value="20" selected>20</option>
+                                <option value="50">50</option>
+                            </select>
+                        </div>
+                        <span id="auditLogPageInfo" style="font-size: 13px; color: #94a3b8;"></span>
+                    </div>
+
+                    <!-- Right side: Prev / Next -->
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <button type="button" id="auditLogPrevBtn" 
+                                onclick="loadAuditLogs(currentAuditPage - 1)"
+                                style="padding: 6px 14px; font-size: 13px; border-radius: 8px; border: 1.5px solid #cbd5e1; background: white; color: #334155; cursor: pointer;">
+                            ← Previous
+                        </button>
+                        <button type="button" id="auditLogNextBtn" 
+                                onclick="loadAuditLogs(currentAuditPage + 1)"
+                                style="padding: 6px 14px; font-size: 13px; border-radius: 8px; border: 1.5px solid #cbd5e1; background: white; color: #334155; cursor: pointer;">
+                            Next →
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             EMPLOYEES PAGE (Admin only)
+        ====================================================== -->
+        <section id="employeesPage" class="page-section hidden">
+
+            <div class="page-heading">
+                <div>
+                    <span class="welcome-label">USER MANAGEMENT</span>
+                    <h2>Employees</h2>
+                    <p>Manage dashboard users, roles and access.</p>
+                </div>
+
+                <button type="button"
+                        class="primary-button"
+                        onclick="openAddEmployeeModal()"
+                        style="margin-top: 12px;">
+                    + Add User
+                </button>
+            </div>
+
+            <div class="dashboard-card documents-table-card">
+
+                <div class="search-row">
+                    <input type="text"
+                           id="employeeSearch"
+                           placeholder="Search by Employee ID, name or email..."
+                           oninput="filterEmployeesTable()">
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Employee ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Joined</th>
+                                <th>Last Login</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employeesTableBody">
+                            <tr>
+                                <td colspan="8" class="table-empty">
+                                    Loading employees...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             SECTIONS PAGE (Admin only) – A + B + C
+        ====================================================== -->
+        <section id="sectionsPage" class="page-section hidden">
+
+            <div class="page-heading">
+                <div>
+                    <span class="welcome-label">CONTENT STRUCTURE</span>
+                    <h2>Sections</h2>
+                    <p>Create custom sections, manage existing ones, and add sub-sections.</p>
+                </div>
+
+                <button type="button"
+                        class="primary-button"
+                        onclick="openAddSectionModal()"
+                        style="margin-top: 12px;">
+                    + Add Section
+                </button>
+            </div>
+
+            <div class="dashboard-card documents-table-card">
+                <div class="search-row">
+                    <input type="text"
+                           id="sectionSearch"
+                           placeholder="Search sections..."
+                           oninput="filterSectionsTable()">
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order</th>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Public</th>
+                                <th>Sub-sections</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sectionsTableBody">
+                            <tr>
+                                <td colspan="7" class="table-empty">Loading sections...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
         </section>
 
     </main>
 
+</div>
+
+
+<!-- =====================================================
+     ADD / EDIT SECTION MODAL
+====================================================== -->
+<div class="modal-overlay" id="sectionModalOverlay">
+    <div class="edit-modal" style="max-width: 520px;">
+        <div class="edit-modal-header">
+            <h3 id="sectionModalTitle">Add Section</h3>
+            <button type="button" class="modal-close-btn" onclick="closeSectionModal()">×</button>
+        </div>
+        <form id="sectionForm" onsubmit="saveSection(event)">
+            <div class="edit-modal-body">
+                <input type="hidden" id="section_id" value="">
+
+                <div class="form-group full-width">
+                    <label>Section Name <span style="color:#ef4444;">*</span></label>
+                    <input type="text" id="section_name" required placeholder="e.g. ESG Reports">
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Icon (emoji)</label>
+                    <input type="text" id="section_icon" placeholder="📁" maxlength="10">
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Description</label>
+                    <textarea id="section_description" rows="2" placeholder="Optional description"></textarea>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Display Order</label>
+                    <input type="number" id="section_display_order" min="0" placeholder="Auto if empty">
+                </div>
+
+                <div class="form-group full-width">
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                        <input type="checkbox" id="section_is_active" checked style="width:auto;">
+                        Active (visible in system)
+                    </label>
+                </div>
+
+                <div class="form-group full-width">
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                        <input type="checkbox" id="section_show_on_public" checked style="width:auto;">
+                        Show on public website
+                    </label>
+                </div>
+
+                <div class="form-group full-width">
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                        <input type="checkbox" id="section_allow_subsections" checked style="width:auto;">
+                        Allow sub-sections
+                    </label>
+                </div>
+            </div>
+            <div class="edit-modal-footer" style="display:flex;justify-content:flex-end;gap:10px;padding:16px 20px;border-top:1px solid #e2e8f0;">
+                <button type="button" onclick="closeSectionModal()"
+                        style="padding:8px 16px;border-radius:8px;border:1.5px solid #cbd5e1;background:white;cursor:pointer;">
+                    Cancel
+                </button>
+                <button type="submit" class="primary-button" id="saveSectionButton">Save Section</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- =====================================================
+     ADD / EDIT SUB-SECTION MODAL
+====================================================== -->
+<div class="modal-overlay" id="subsectionModalOverlay">
+    <div class="edit-modal" style="max-width: 480px;">
+        <div class="edit-modal-header">
+            <h3 id="subsectionModalTitle">Add Sub-section</h3>
+            <button type="button" class="modal-close-btn" onclick="closeSubsectionModal()">×</button>
+        </div>
+        <form id="subsectionForm" onsubmit="saveSubsection(event)">
+            <div class="edit-modal-body">
+                <input type="hidden" id="subsection_id" value="">
+                <input type="hidden" id="subsection_section_id" value="">
+
+                <div class="form-group full-width">
+                    <label>Parent Section</label>
+                    <input type="text" id="subsection_section_name" readonly style="background:#f1f5f9;">
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Sub-section Name <span style="color:#ef4444;">*</span></label>
+                    <input type="text" id="subsection_name" required placeholder="e.g. Q1 Disclosures">
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Display Order</label>
+                    <input type="number" id="subsection_display_order" min="0" placeholder="Auto if empty">
+                </div>
+
+                <div class="form-group full-width">
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                        <input type="checkbox" id="subsection_is_active" checked style="width:auto;">
+                        Active
+                    </label>
+                </div>
+            </div>
+            <div class="edit-modal-footer" style="display:flex;justify-content:flex-end;gap:10px;padding:16px 20px;border-top:1px solid #e2e8f0;">
+                <button type="button" onclick="closeSubsectionModal()"
+                        style="padding:8px 16px;border-radius:8px;border:1.5px solid #cbd5e1;background:white;cursor:pointer;">
+                    Cancel
+                </button>
+                <button type="submit" class="primary-button" id="saveSubsectionButton">Save Sub-section</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- =====================================================
+     ADD / EDIT EMPLOYEE MODAL
+====================================================== -->
+<div class="modal-overlay" id="employeeModalOverlay">
+    <div class="edit-modal" style="max-width: 520px;">
+
+        <div class="edit-modal-header">
+            <h3 id="employeeModalTitle">Add User</h3>
+            <button type="button" class="modal-close-btn" onclick="closeEmployeeModal()">×</button>
+        </div>
+
+        <form id="employeeForm" onsubmit="saveEmployee(event)">
+            <div class="edit-modal-body">
+
+                <input type="hidden" id="employee_id" value="">
+
+                <div class="form-group full-width">
+                    <label for="employee_username">Employee ID <span style="color:#ef4444;">*</span></label>
+                    <input type="text"
+                           id="employee_username"
+                           name="username"
+                           placeholder="e.g. EMP001"
+                           required
+                           autocomplete="off">
+                    <small id="usernameHelp">Used for login. Cannot be changed after creation.</small>
+                </div>
+
+                <div class="form-group full-width" style="display: flex; gap: 12px;">
+                    <div style="flex: 1;">
+                        <label for="employee_first_name">First Name</label>
+                        <input type="text" id="employee_first_name" name="first_name" placeholder="First name">
+                    </div>
+                    <div style="flex: 1;">
+                        <label for="employee_last_name">Last Name</label>
+                        <input type="text" id="employee_last_name" name="last_name" placeholder="Last name">
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="employee_email">Email</label>
+                    <input type="email" id="employee_email" name="email" placeholder="user@example.com">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="employee_role">Role <span style="color:#ef4444;">*</span></label>
+                    <select id="employee_role" name="role" required>
+                        <option value="EMPLOYEE">Employee – Documents &amp; Upload only</option>
+                        <option value="ADMIN">Admin – Full system access</option>
+                        <option value="CLIENT">Client – Public website only</option>
+                    </select>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="employee_password">
+                        Password
+                        <span id="passwordRequiredMark" style="color:#ef4444;">*</span>
+                    </label>
+                    <input type="password"
+                           id="employee_password"
+                           name="password"
+                           placeholder="Min. 6 characters"
+                           autocomplete="new-password">
+                    <small id="passwordHelp">Required when creating. Leave blank when editing to keep current password.</small>
+                </div>
+
+                <div class="form-group full-width">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;">
+                        <input type="checkbox" id="employee_is_active" checked style="width: auto;">
+                        Active account
+                    </label>
+                </div>
+
+            </div>
+
+            <div class="edit-modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; padding: 16px 20px; border-top: 1px solid #e2e8f0;">
+                <button type="button" class="secondary-button" onclick="closeEmployeeModal()"
+                        style="padding: 8px 16px; border-radius: 8px; border: 1.5px solid #cbd5e1; background: white; cursor: pointer;">
+                    Cancel
+                </button>
+                <button type="submit" class="primary-button" id="saveEmployeeButton">
+                    Save User
+                </button>
+            </div>
+        </form>
+
+    </div>
 </div>
 
 
@@ -1489,6 +1934,39 @@
                            placeholder="https://example.com/document">
                 </div>
 
+                     <!-- ========== PUBLISH STATUS ========== -->
+                        <div class="form-group full-width">
+                            <label>
+                                Publish Status
+                                <span>*</span>
+                            </label>
+
+                            <div style="display: flex; gap: 24px; margin-top: 8px; align-items: center;">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; color: #1e293b;">
+                                    <input
+                                        type="radio"
+                                        name="published"
+                                        value="true"
+                                        checked
+                                        style="width: 16px; height: 16px; accent-color: #2563eb;">
+                                    Published
+                                </label>
+
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; color: #1e293b;">
+                                    <input
+                                        type="radio"
+                                        name="published"
+                                        value="false"
+                                        style="width: 16px; height: 16px; accent-color: #2563eb;">
+                                    Unpublished
+                                </label>
+                            </div>
+
+                            <small style="display: block; margin-top: 6px; color: #64748b;">
+                                Only <strong>Published</strong> documents will appear on the public Investor page.
+                            </small>
+                        </div>
+
             </div>
 
             <div class="edit-modal-footer">
@@ -1510,6 +1988,10 @@
 ========================================================== -->
 
 <script>
+
+/* Role from Django view – used across the dashboard */
+const CURRENT_USER_ROLE = "{{ user_role|default:'EMPLOYEE' }}";
+const IS_ADMIN = CURRENT_USER_ROLE === "ADMIN";
 
     /* =========================================================
    EDIT DOCUMENT
@@ -1764,7 +2246,8 @@ const financialYearOptions = [
     { value: "2022-23", label: "Financial Year 2022-23" }
 ];
 
-const investorSections = [
+// Dynamic list – refreshed from API so Section CRUD reflects across the app
+let investorSections = [
 
     {
         key: "annual_report",
@@ -2324,7 +2807,7 @@ async function loadRecentDocuments() {
         documents.sort((a, b) => b._activityTime - a._activityTime);
 
         // Take the 10 most recently uploaded or edited documents
-        const recent = documents.slice(0, 10);
+        const recent = documents.slice(0, 7);
 
         listEl.innerHTML = "";
 
@@ -2471,23 +2954,25 @@ function showDashboard(event) {
         event.preventDefault();
     }
 
+    // Employee cannot open Dashboard → send to Documents
+    if (typeof IS_ADMIN !== "undefined" && !IS_ADMIN) {
+        showDocuments();
+        return;
+    }
 
     hideAllPages();
-
     removeActiveMenu();
 
+    const page = document.getElementById("dashboardPage");
+    if (page) {
+        page.classList.remove("hidden");
+    }
 
-    document
-        .getElementById(
-            "dashboardPage"
-        )
-        .classList.remove(
-            "hidden"
-        );
-
-
-    activateMenu(0);
-
+    document.querySelectorAll(".menu-item").forEach(item => {
+        if (item.textContent.trim().includes("Dashboard")) {
+            item.classList.add("active");
+        }
+    });
 
     loadDashboardStatistics();
     loadRecentDocuments();
@@ -2535,6 +3020,12 @@ function showDocuments(event) {
 function showAuditLog(event) {
     if (event) event.preventDefault();
 
+    // Extra safety: only Admin can open Audit Log
+    if (!IS_ADMIN) {
+        alert("You do not have permission to view Audit Log.");
+        return;
+    }
+
     hideAllPages();
     removeActiveMenu();
 
@@ -2550,8 +3041,367 @@ function showAuditLog(event) {
         }
     });
 
-    loadAuditLogs();
+    loadAuditLogs(1);
 }
+
+
+// ============================================================
+// EMPLOYEES PAGE (Admin only)
+// ============================================================
+let allEmployeesCache = [];
+
+function showEmployees(event) {
+    if (event) event.preventDefault();
+
+    if (!IS_ADMIN) {
+        alert("You do not have permission to manage Employees.");
+        return;
+    }
+
+    hideAllPages();
+    removeActiveMenu();
+
+    const page = document.getElementById("employeesPage");
+    if (page) {
+        page.classList.remove("hidden");
+    }
+
+    document.querySelectorAll(".menu-item").forEach(item => {
+        if (item.textContent.trim().includes("Employees")) {
+            item.classList.add("active");
+        }
+    });
+
+    loadEmployees();
+}
+
+
+async function loadEmployees() {
+    const tbody = document.getElementById("employeesTableBody");
+    if (!tbody) return;
+
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="8" class="table-empty">Loading employees...</td>
+        </tr>
+    `;
+
+    try {
+        const response = await fetch("{% url 'employees_list_api' %}", {
+            method: "GET",
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+            credentials: "same-origin",
+        });
+
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.message || "Failed to load employees");
+        }
+
+        const data = await response.json();
+        allEmployeesCache = Array.isArray(data) ? data : [];
+        renderEmployeesTable(allEmployeesCache);
+
+    } catch (error) {
+        console.error("loadEmployees error:", error);
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="table-empty" style="color:#ef4444;">
+                    ${error.message || "Failed to load employees."}
+                </td>
+            </tr>
+        `;
+    }
+}
+
+
+function filterEmployeesTable() {
+    const q = (document.getElementById("employeeSearch")?.value || "").trim().toLowerCase();
+    if (!q) {
+        renderEmployeesTable(allEmployeesCache);
+        return;
+    }
+    const filtered = allEmployeesCache.filter(u => {
+        const name = `${u.first_name || ""} ${u.last_name || ""}`.toLowerCase();
+        return (
+            (u.username || "").toLowerCase().includes(q) ||
+            name.includes(q) ||
+            (u.email || "").toLowerCase().includes(q) ||
+            (u.role || "").toLowerCase().includes(q)
+        );
+    });
+    renderEmployeesTable(filtered);
+}
+
+
+function roleBadge(role) {
+    const r = (role || "EMPLOYEE").toUpperCase();
+    if (r === "ADMIN") {
+        return `<span style="display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:#dcfce7;color:#166534;">Admin</span>`;
+    }
+    if (r === "CLIENT") {
+        return `<span style="display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:#fef3c7;color:#92400e;">Client</span>`;
+    }
+    return `<span style="display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:#dbeafe;color:#1e40af;">Employee</span>`;
+}
+
+
+function statusBadge(isActive) {
+    if (isActive) {
+        return `<span style="display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:#dcfce7;color:#166534;">Active</span>`;
+    }
+    return `<span style="display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:#fee2e2;color:#991b1b;">Inactive</span>`;
+}
+
+
+function renderEmployeesTable(list) {
+    const tbody = document.getElementById("employeesTableBody");
+    if (!tbody) return;
+
+    if (!list || list.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="table-empty">No employees found.</td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbody.innerHTML = list.map(u => {
+        const fullName = [u.first_name, u.last_name].filter(Boolean).join(" ") || "—";
+        const email = u.email || "—";
+        const safeUsername = (u.username || "").replace(/'/g, "\\'");
+
+        return `
+            <tr>
+                <td><strong>${escapeHtml(u.username || "")}</strong></td>
+                <td>${escapeHtml(fullName)}</td>
+                <td>${escapeHtml(email)}</td>
+                <td>${roleBadge(u.role)}</td>
+                <td>${statusBadge(u.is_active)}</td>
+                <td>${escapeHtml(u.date_joined || "—")}</td>
+                <td>${escapeHtml(u.last_login || "Never")}</td>
+                <td style="white-space:nowrap;">
+                    <button type="button" class="primary-button" style="padding:4px 10px;font-size:12px;margin-right:4px;"
+                            onclick='openEditEmployeeModal(${JSON.stringify(u)})'>
+                        Edit
+                    </button>
+                    <button type="button" style="padding:4px 10px;font-size:12px;border-radius:6px;border:1.5px solid #cbd5e1;background:white;cursor:pointer;margin-right:4px;"
+                            onclick="toggleEmployeeStatus(${u.id}, '${safeUsername}')">
+                        ${u.is_active ? "Deactivate" : "Activate"}
+                    </button>
+                    <button type="button" style="padding:4px 10px;font-size:12px;border-radius:6px;border:1.5px solid #fecaca;background:#fef2f2;color:#b91c1c;cursor:pointer;"
+                            onclick="deleteEmployee(${u.id}, '${safeUsername}')">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join("");
+}
+
+
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+
+function openAddEmployeeModal() {
+    document.getElementById("employeeModalTitle").textContent = "Add User";
+    document.getElementById("employee_id").value = "";
+    document.getElementById("employee_username").value = "";
+    document.getElementById("employee_username").readOnly = false;
+    document.getElementById("usernameHelp").textContent = "Used for login. Cannot be changed after creation.";
+    document.getElementById("employee_first_name").value = "";
+    document.getElementById("employee_last_name").value = "";
+    document.getElementById("employee_email").value = "";
+    document.getElementById("employee_role").value = "EMPLOYEE";
+    document.getElementById("employee_password").value = "";
+    document.getElementById("employee_password").required = true;
+    document.getElementById("passwordRequiredMark").style.display = "inline";
+    document.getElementById("passwordHelp").textContent = "Required when creating. Min. 6 characters.";
+    document.getElementById("employee_is_active").checked = true;
+    document.getElementById("saveEmployeeButton").textContent = "Create User";
+    document.getElementById("employeeModalOverlay").classList.add("active");
+}
+
+
+function openEditEmployeeModal(user) {
+    document.getElementById("employeeModalTitle").textContent = "Edit User";
+    document.getElementById("employee_id").value = user.id;
+    document.getElementById("employee_username").value = user.username || "";
+    document.getElementById("employee_username").readOnly = true;
+    document.getElementById("usernameHelp").textContent = "Employee ID cannot be changed.";
+    document.getElementById("employee_first_name").value = user.first_name || "";
+    document.getElementById("employee_last_name").value = user.last_name || "";
+    document.getElementById("employee_email").value = user.email || "";
+    document.getElementById("employee_role").value = (user.role || "EMPLOYEE").toUpperCase();
+    document.getElementById("employee_password").value = "";
+    document.getElementById("employee_password").required = false;
+    document.getElementById("passwordRequiredMark").style.display = "none";
+    document.getElementById("passwordHelp").textContent = "Leave blank to keep the current password.";
+    document.getElementById("employee_is_active").checked = !!user.is_active;
+    document.getElementById("saveEmployeeButton").textContent = "Update User";
+    document.getElementById("employeeModalOverlay").classList.add("active");
+}
+
+
+function closeEmployeeModal() {
+    const overlay = document.getElementById("employeeModalOverlay");
+    if (overlay) overlay.classList.remove("active");
+}
+
+
+async function saveEmployee(event) {
+    event.preventDefault();
+
+    const id = document.getElementById("employee_id").value;
+    const username = document.getElementById("employee_username").value.trim();
+    const first_name = document.getElementById("employee_first_name").value.trim();
+    const last_name = document.getElementById("employee_last_name").value.trim();
+    const email = document.getElementById("employee_email").value.trim();
+    const role = document.getElementById("employee_role").value;
+    const password = document.getElementById("employee_password").value;
+    const is_active = document.getElementById("employee_is_active").checked;
+
+    if (!username) {
+        alert("Employee ID is required.");
+        return;
+    }
+
+    const isCreate = !id;
+    if (isCreate && (!password || password.length < 6)) {
+        alert("Password is required and must be at least 6 characters.");
+        return;
+    }
+    if (!isCreate && password && password.length < 6) {
+        alert("Password must be at least 6 characters.");
+        return;
+    }
+
+    const payload = {
+        username,
+        first_name,
+        last_name,
+        email,
+        role,
+        is_active,
+    };
+    if (password) payload.password = password;
+    if (!isCreate) payload.id = parseInt(id, 10);
+
+    const btn = document.getElementById("saveEmployeeButton");
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Saving...";
+
+    try {
+        const url = isCreate
+            ? "{% url 'create_employee' %}"
+            : "{% url 'update_employee' %}";
+
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken"),
+                "X-Requested-With": "XMLHttpRequest",
+            },
+            credentials: "same-origin",
+            body: JSON.stringify(payload),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+            throw new Error(result.message || "Failed to save user.");
+        }
+
+        closeEmployeeModal();
+        alert(result.message || "Saved successfully.");
+        loadEmployees();
+
+    } catch (error) {
+        console.error("saveEmployee error:", error);
+        alert(error.message || "Failed to save user.");
+    } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+    }
+}
+
+
+async function toggleEmployeeStatus(userId, username) {
+    if (!confirm(`Change active status for "${username}"?`)) return;
+
+    try {
+        const response = await fetch("{% url 'toggle_employee_status' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken"),
+                "X-Requested-With": "XMLHttpRequest",
+            },
+            credentials: "same-origin",
+            body: JSON.stringify({ id: userId }),
+        });
+
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+            throw new Error(result.message || "Failed to update status.");
+        }
+
+        alert(result.message || "Status updated.");
+        loadEmployees();
+
+    } catch (error) {
+        console.error("toggleEmployeeStatus error:", error);
+        alert(error.message || "Failed to update status.");
+    }
+}
+
+
+async function deleteEmployee(userId, username) {
+    if (!confirm(`Delete user "${username}" permanently?\nThis cannot be undone.`)) return;
+
+    try {
+        const response = await fetch("{% url 'delete_employee' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken"),
+                "X-Requested-With": "XMLHttpRequest",
+            },
+            credentials: "same-origin",
+            body: JSON.stringify({ id: userId }),
+        });
+
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+            throw new Error(result.message || "Failed to delete user.");
+        }
+
+        alert(result.message || "User deleted.");
+        loadEmployees();
+
+    } catch (error) {
+        console.error("deleteEmployee error:", error);
+        alert(error.message || "Failed to delete user.");
+    }
+}
+
+// Close employee modal when clicking outside
+document.addEventListener("click", function (e) {
+    const overlay = document.getElementById("employeeModalOverlay");
+    if (overlay && e.target === overlay) {
+        closeEmployeeModal();
+    }
+});
 
 
 function getAuditActionBadge(action) {
@@ -2573,11 +3423,26 @@ function getAuditActionBadge(action) {
     };
 }
 
-async function loadAuditLogs() {
+let currentAuditPage = 1;
+let currentAuditPageSize = 20;   // default matches the screenshot
+
+async function loadAuditLogs(page = 1) {
     const listEl = document.getElementById("auditLogList");
     const emptyEl = document.getElementById("auditLogEmpty");
+    const paginationEl = document.getElementById("auditLogPagination");
+    const pageInfoEl = document.getElementById("auditLogPageInfo");
+    const prevBtn = document.getElementById("auditLogPrevBtn");
+    const nextBtn = document.getElementById("auditLogNextBtn");
+    const pageSizeSelect = document.getElementById("auditLogPageSize");
 
     if (!listEl || !emptyEl) return;
+
+    currentAuditPage = Math.max(1, page);
+
+    // Keep select in sync
+    if (pageSizeSelect) {
+        pageSizeSelect.value = currentAuditPageSize;
+    }
 
     listEl.innerHTML = `
         <div class="recent-loading" style="padding: 20px; text-align: center; color: #64748b;">
@@ -2586,27 +3451,36 @@ async function loadAuditLogs() {
     `;
     listEl.style.display = "block";
     emptyEl.style.display = "none";
+    if (paginationEl) paginationEl.style.display = "none";
 
     try {
-        const response = await fetch("{% url 'audit_log_api' %}", {
-            method: "GET",
-            headers: {
-                "X-Requested-With": "XMLHttpRequest",
-                "Accept": "application/json"
-            },
-            cache: "no-store"
-        });
+        const response = await fetch(
+            `{% url 'audit_log_api' %}?page=${currentAuditPage}&page_size=${currentAuditPageSize}`,
+            {
+                method: "GET",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Accept": "application/json"
+                },
+                cache: "no-store"
+            }
+        );
 
         if (!response.ok) {
             throw new Error("Failed to load audit logs");
         }
 
-        const logs = await response.json();
+        const payload = await response.json();
+        const logs = payload.results || [];
+        const total = payload.total || 0;
+        const totalPages = payload.total_pages || 1;
+        currentAuditPage = payload.page || currentAuditPage;
 
         if (!Array.isArray(logs) || logs.length === 0) {
             listEl.innerHTML = "";
             listEl.style.display = "none";
             emptyEl.style.display = "block";
+            if (paginationEl) paginationEl.style.display = "none";
             return;
         }
 
@@ -2643,6 +3517,25 @@ async function loadAuditLogs() {
             listEl.appendChild(item);
         });
 
+        // ===== Pagination UI (same design as screenshot) =====
+        if (paginationEl && pageInfoEl && prevBtn && nextBtn) {
+            const start = total === 0 ? 0 : ((currentAuditPage - 1) * currentAuditPageSize) + 1;
+            const end = Math.min(currentAuditPage * currentAuditPageSize, total);
+
+            pageInfoEl.textContent = `Showing ${start}–${end} of ${total}`;
+
+            // Always show pagination bar when there are results
+            paginationEl.style.display = "flex";
+
+            prevBtn.disabled = currentAuditPage <= 1;
+            nextBtn.disabled = currentAuditPage >= totalPages;
+
+            prevBtn.style.opacity = prevBtn.disabled ? "0.45" : "1";
+            nextBtn.style.opacity = nextBtn.disabled ? "0.45" : "1";
+            prevBtn.style.cursor = prevBtn.disabled ? "not-allowed" : "pointer";
+            nextBtn.style.cursor = nextBtn.disabled ? "not-allowed" : "pointer";
+        }
+
     } catch (error) {
         console.error(error);
         listEl.innerHTML = `
@@ -2650,9 +3543,15 @@ async function loadAuditLogs() {
                 Unable to load audit logs. Please try again.
             </div>
         `;
+        if (paginationEl) paginationEl.style.display = "none";
     }
 }
 
+// Called when user changes the "Per page" dropdown
+function changeAuditPageSize(newSize) {
+    currentAuditPageSize = parseInt(newSize, 10) || 20;
+    loadAuditLogs(1);   // go back to first page
+}
 /* =========================================================
    UPLOAD
 ========================================================= */
@@ -3696,12 +4595,23 @@ if (documentUploadForm) {
                     "csrftoken"
                 );
 
+            // Custom sections created via Sections CRUD → custom document API
+            const isCustomSection = section && String(section).startsWith("custom_");
+            if (isCustomSection) {
+                const sectionId = String(section).replace("custom_", "");
+                formData.set("section_id", sectionId);
+                formData.delete("section");
+            }
 
             try {
 
+                const uploadUrl = isCustomSection
+                    ? "{% url 'upload_custom_document' %}"
+                    : "{% url 'upload_investor_document' %}";
+
                 const response =
                     await fetch(
-                        "{% url 'upload_investor_document' %}",
+                        uploadUrl,
                         {
                             method:
                                 "POST",
@@ -3875,6 +4785,322 @@ function getCookie(name) {
 /* =========================================================
    LOAD DOCUMENTS
 ========================================================= */
+/* =========================================================
+   LOAD DOCUMENTS + CLIENT-SIDE PAGINATION
+========================================================= */
+
+let allDocuments = [];
+let currentDocPage = 1;
+let currentDocPageSize = 20;
+
+const documentSearch =
+    document.getElementById(
+        "documentSearch"
+    );
+
+const documentSectionFilter =
+    document.getElementById(
+        "documentSectionFilter"
+    );
+
+const documentYearFilter =
+    document.getElementById(
+        "documentYearFilter"
+    );
+
+const documentStatusFilter =
+    document.getElementById(
+        "documentStatusFilter"
+    );
+
+
+function populateYearFilterOptions(documents) {
+
+    if (!documentYearFilter) return;
+
+    const previousValue = documentYearFilter.value || "all";
+
+    const years = Array.from(
+        new Set(
+            documents
+                .map(doc => doc.financial_year)
+                .filter(year => year && year !== "-")
+        )
+    ).sort().reverse();
+
+    documentYearFilter.innerHTML =
+        `<option value="all">Financial Year</option>` +
+        years.map(year => `<option value="${escapeHtml(year)}">${escapeHtml(year)}</option>`).join("");
+
+    if (years.includes(previousValue) || previousValue === "all") {
+        documentYearFilter.value = previousValue;
+    }
+
+}
+
+
+function getFilteredDocuments() {
+    const searchValue = documentSearch
+        ? documentSearch.value.trim().toLowerCase()
+        : "";
+
+    const selectedSection = documentSectionFilter
+        ? documentSectionFilter.value
+        : "all";
+
+    const selectedYear = documentYearFilter
+        ? documentYearFilter.value
+        : "all";
+
+    const selectedStatus = documentStatusFilter
+        ? documentStatusFilter.value
+        : "all";
+
+    const corporateChildren = [
+        "shareholder_notice",
+        "newspaper_publication",
+        "stock_exchange_disclosure"
+    ];
+
+    const investorFormChildren = [
+        "tax_declaration",
+        "unclaimed_dividend",
+        "kyc_nomination"
+    ];
+
+    return allDocuments.filter(doc => {
+        const title = (doc.title || "Untitled Document").toLowerCase();
+        const sectionKey = (doc.section || "").toLowerCase();
+        const sectionName = getSectionDisplayName(doc.section).toLowerCase();
+        const financialYear = doc.financial_year || "-";
+        const date = (
+            doc.date ||
+            doc.release_date ||
+            doc.disclosure_date ||
+            doc.meeting_date ||
+            doc.created_at ||
+            "-"
+        ).toString().toLowerCase();
+
+        const isPublished = doc.published === true || doc.published === "true" || doc.published === 1;
+        const statusText = isPublished ? "published" : "unpublished";
+
+        const haystack = [title, sectionName, financialYear, date, statusText].join(" ");
+        const searchMatches = !searchValue || haystack.includes(searchValue);
+
+        let sectionMatches = true;
+        if (selectedSection !== "all") {
+            const selectedName = getSectionDisplayName(selectedSection).toLowerCase();
+
+            if (selectedSection === "corporate_announcements") {
+                sectionMatches =
+                    sectionName === selectedName ||
+                    corporateChildren.some(child =>
+                        sectionKey === child ||
+                        sectionName === getSectionDisplayName(child).toLowerCase()
+                    );
+            } else if (selectedSection === "investor_form") {
+                sectionMatches =
+                    sectionName === selectedName ||
+                    investorFormChildren.some(child =>
+                        sectionKey === child ||
+                        sectionName === getSectionDisplayName(child).toLowerCase()
+                    );
+            } else {
+                sectionMatches =
+                    sectionKey === selectedSection ||
+                    sectionName === selectedName;
+            }
+        }
+
+        const yearMatches =
+            selectedYear === "all" || financialYear === selectedYear;
+
+        const statusMatches =
+            selectedStatus === "all" || statusText === selectedStatus;
+
+        return searchMatches && sectionMatches && yearMatches && statusMatches;
+    });
+}
+
+
+function buildDocumentRow(doc) {
+    const row = document.createElement("tr");
+
+    const title = doc.title || "Untitled Document";
+
+    let documentLink = escapeHtml(title);
+
+    if (doc.pdf_file) {
+        documentLink = `
+            <a
+                href="${escapeHtml(doc.pdf_file)}"
+                target="_blank"
+                rel="noopener noreferrer">
+                ${escapeHtml(title)}
+            </a>
+        `;
+    } else if (doc.external_url) {
+        documentLink = `
+            <a
+                href="${escapeHtml(doc.external_url)}"
+                target="_blank"
+                rel="noopener noreferrer">
+                ${escapeHtml(title)}
+            </a>
+        `;
+    }
+
+    const section = getSectionDisplayName(doc.section);
+    const financialYear = doc.financial_year || "-";
+    const date =
+        doc.date ||
+        doc.release_date ||
+        doc.disclosure_date ||
+        doc.meeting_date ||
+        doc.created_at ||
+        "-";
+
+    const isPublished = doc.published === true || doc.published === "true" || doc.published === 1;
+    const statusBadge = isPublished
+        ? `<span class="status-badge published">Published</span>`
+        : `<span class="status-badge unpublished">Unpublished</span>`;
+
+    row.innerHTML = `
+        <td>
+            ${documentLink}
+        </td>
+        <td>
+            ${escapeHtml(section)}
+        </td>
+        <td>
+            ${escapeHtml(financialYear)}
+        </td>
+        <td>
+            ${escapeHtml(date)}
+        </td>
+        <td>
+            ${statusBadge}
+        </td>
+        <td>
+            <div class="document-actions">
+                <button
+                    type="button"
+                    class="action-btn edit-btn"
+                    onclick="openEditModal(${doc.id}, '${escapeHtml(doc.section)}')"
+                    title="Edit document">
+                    ✎ Edit
+                </button>
+                <button
+                    type="button"
+                    class="action-btn delete-btn"
+                    onclick="deleteDocument(${doc.id}, '${escapeHtml(doc.section)}')"
+                    title="Delete document">
+                    🗑 Delete
+                </button>
+            </div>
+        </td>
+    `;
+
+    return row;
+}
+
+
+function updateDocumentsPagination(totalFiltered) {
+    const paginationEl = document.getElementById("documentsPagination");
+    const pageInfoEl = document.getElementById("documentsPageInfo");
+    const prevBtn = document.getElementById("documentsPrevBtn");
+    const nextBtn = document.getElementById("documentsNextBtn");
+    const pageSizeSelect = document.getElementById("documentsPageSize");
+
+    if (!paginationEl || !pageInfoEl || !prevBtn || !nextBtn) return;
+
+    if (pageSizeSelect) {
+        pageSizeSelect.value = String(currentDocPageSize);
+    }
+
+    const totalPages = Math.max(1, Math.ceil(totalFiltered / currentDocPageSize));
+
+    if (currentDocPage > totalPages) {
+        currentDocPage = totalPages;
+    }
+    if (currentDocPage < 1) {
+        currentDocPage = 1;
+    }
+
+    const start = totalFiltered === 0 ? 0 : ((currentDocPage - 1) * currentDocPageSize) + 1;
+    const end = Math.min(currentDocPage * currentDocPageSize, totalFiltered);
+
+    pageInfoEl.textContent = `Showing ${start}–${end} of ${totalFiltered}`;
+
+    paginationEl.style.display = "flex";
+
+    prevBtn.disabled = currentDocPage <= 1;
+    nextBtn.disabled = currentDocPage >= totalPages || totalFiltered === 0;
+
+    prevBtn.style.opacity = prevBtn.disabled ? "0.45" : "1";
+    nextBtn.style.opacity = nextBtn.disabled ? "0.45" : "1";
+    prevBtn.style.cursor = prevBtn.disabled ? "not-allowed" : "pointer";
+    nextBtn.style.cursor = nextBtn.disabled ? "not-allowed" : "pointer";
+}
+
+
+function renderDocumentsTable() {
+    const tableBody = document.getElementById("documentsTableBody");
+    if (!tableBody) return;
+
+    const filtered = getFilteredDocuments();
+    const totalFiltered = filtered.length;
+    const totalPages = Math.max(1, Math.ceil(totalFiltered / currentDocPageSize));
+
+    if (currentDocPage > totalPages) {
+        currentDocPage = totalPages;
+    }
+
+    const startIndex = (currentDocPage - 1) * currentDocPageSize;
+    const pageDocs = filtered.slice(startIndex, startIndex + currentDocPageSize);
+
+    tableBody.innerHTML = "";
+
+    if (totalFiltered === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="table-empty">
+                    No documents available.
+                </td>
+            </tr>
+        `;
+        updateDocumentsPagination(0);
+        return;
+    }
+
+    pageDocs.forEach(doc => {
+        tableBody.appendChild(buildDocumentRow(doc));
+    });
+
+    updateDocumentsPagination(totalFiltered);
+}
+
+
+function applyDocumentFilters() {
+    currentDocPage = 1;
+    renderDocumentsTable();
+}
+
+
+function goDocumentsPage(page) {
+    if (page < 1) return;
+    currentDocPage = page;
+    renderDocumentsTable();
+}
+
+
+function changeDocumentsPageSize(newSize) {
+    currentDocPageSize = parseInt(newSize, 10) || 20;
+    currentDocPage = 1;
+    renderDocumentsTable();
+}
+
 
 async function loadDocuments() {
 
@@ -3890,20 +5116,19 @@ async function loadDocuments() {
 
 
     tableBody.innerHTML = `
-
         <tr>
-
             <td
-                colspan="5"
+                colspan="6"
                 class="table-empty">
-
                 Loading documents...
-
             </td>
-
         </tr>
-
     `;
+
+    const paginationEl = document.getElementById("documentsPagination");
+    if (paginationEl) {
+        paginationEl.style.display = "none";
+    }
 
 
     try {
@@ -3942,163 +5167,29 @@ async function loadDocuments() {
             await response.json();
 
 
-        tableBody.innerHTML = "";
-
-
-        if (
-            !Array.isArray(documents) ||
-            documents.length === 0
-        ) {
-
-            tableBody.innerHTML = `
-
-                <tr>
-
-                    <td
-                        colspan="5"
-                        class="table-empty">
-
-                        No documents available.
-
-                    </td>
-
-                </tr>
-
-            `;
-
-            return;
-
+                if (!Array.isArray(documents)) {
+            allDocuments = [];
+        } else {
+            allDocuments = documents;
         }
 
+        // Show the most recently uploaded (or edited) document first
+        allDocuments.sort((a, b) => {
+            const aTime = Math.max(
+                a.created_at ? new Date(a.created_at).getTime() : 0,
+                a.updated_at ? new Date(a.updated_at).getTime() : 0
+            );
+            const bTime = Math.max(
+                b.created_at ? new Date(b.created_at).getTime() : 0,
+                b.updated_at ? new Date(b.updated_at).getTime() : 0
+            );
+            return bTime - aTime;
+        });
 
-        documents.forEach(
-            doc => {
+        populateYearFilterOptions(allDocuments);
 
-
-                const row =
-                    document.createElement(
-                        "tr"
-                    );
-
-
-                const title =
-                    doc.title ||
-                    "Untitled Document";
-
-
-                let documentLink =
-                    escapeHtml(
-                        title
-                    );
-
-
-                if (doc.pdf_file) {
-
-                    documentLink = `
-
-                        <a
-                            href="${escapeHtml(doc.pdf_file)}"
-                            target="_blank"
-                            rel="noopener noreferrer">
-
-                            ${escapeHtml(title)}
-
-                        </a>
-
-                    `;
-
-                }
-
-                else if (
-                    doc.external_url
-                ) {
-
-                    documentLink = `
-
-                        <a
-                            href="${escapeHtml(doc.external_url)}"
-                            target="_blank"
-                            rel="noopener noreferrer">
-
-                            ${escapeHtml(title)}
-
-                        </a>
-
-                    `;
-
-                }
-
-
-                const section =
-                    getSectionDisplayName(
-                        doc.section
-                    );
-
-
-                const financialYear =
-                    doc.financial_year ||
-                    "-";
-
-
-                const date =
-                    doc.date ||
-                    doc.release_date ||
-                    doc.disclosure_date ||
-                    doc.meeting_date ||
-                    doc.created_at ||
-                    "-";
-
-
-                    row.innerHTML = `
-
-                        <td>
-                            ${documentLink}
-                        </td>
-
-                        <td>
-                            ${escapeHtml(section)}
-                        </td>
-
-                        <td>
-                            ${escapeHtml(financialYear)}
-                        </td>
-
-                        <td>
-                            ${escapeHtml(date)}
-                        </td>
-
-                        <td>
-                            <div class="document-actions">
-                                <button
-                                    type="button"
-                                    class="action-btn edit-btn"
-                                    onclick="openEditModal(${doc.id}, '${escapeHtml(doc.section)}')"
-                                    title="Edit document">
-                                    ✎ Edit
-                                </button>
-
-                                <button
-                                    type="button"
-                                    class="action-btn delete-btn"
-                                    onclick="deleteDocument(${doc.id}, '${escapeHtml(doc.section)}')"
-                                    title="Delete document">
-                                    🗑 Delete
-                                </button>
-                            </div>
-                        </td>
-
-                    `;
-
-
-                tableBody.appendChild(
-                    row
-                );
-
-            }
-        );
-
-
-        applyDocumentFilters();
+        currentDocPage = 1;
+        renderDocumentsTable();
 
     }
 
@@ -4111,110 +5202,24 @@ async function loadDocuments() {
         );
 
 
+        allDocuments = [];
+
         tableBody.innerHTML = `
-
             <tr>
-
                 <td
-                    colspan="5"
+                    colspan="6"
                     class="table-empty">
-
                     Unable to load documents.
-
                 </td>
-
             </tr>
-
         `;
+
+        if (paginationEl) {
+            paginationEl.style.display = "none";
+        }
 
     }
 
-}
-
-
-
-/* =========================================================
-   SEARCH + FILTER
-========================================================= */
-
-const documentSearch =
-    document.getElementById(
-        "documentSearch"
-    );
-
-
-const documentSectionFilter =
-    document.getElementById(
-        "documentSectionFilter"
-    );
-
-
-
-function applyDocumentFilters() {
-
-    const tableBody = document.getElementById("documentsTableBody");
-    if (!tableBody) return;
-
-    const searchValue = documentSearch
-        ? documentSearch.value.trim().toLowerCase()
-        : "";
-
-    const selectedSection = documentSectionFilter
-        ? documentSectionFilter.value
-        : "all";
-
-    // Children that belong under Corporate Announcements
-    const corporateChildren = [
-        "shareholder_notice",
-        "newspaper_publication",
-        "stock_exchange_disclosure"
-    ];
-
-    // Children that belong under Investor Forms
-    const investorFormChildren = [
-        "tax_declaration",
-        "unclaimed_dividend",
-        "kyc_nomination"
-    ];
-
-    const rows = tableBody.querySelectorAll("tr");
-
-    rows.forEach(row => {
-        const cells = row.querySelectorAll("td");
-        if (cells.length !== 5) return;
-
-        const rowText = row.textContent.toLowerCase();
-        const sectionText = cells[1].textContent.trim().toLowerCase();
-
-        let sectionMatches = true;
-
-        if (selectedSection !== "all") {
-            const selectedName = getSectionDisplayName(selectedSection).toLowerCase();
-
-            if (selectedSection === "corporate_announcements") {
-                // Match parent name OR any of the three children
-                sectionMatches =
-                    sectionText === selectedName ||
-                    corporateChildren.some(child =>
-                        sectionText === getSectionDisplayName(child).toLowerCase()
-                    );
-            }
-            else if (selectedSection === "investor_form") {
-                sectionMatches =
-                    sectionText === selectedName ||
-                    investorFormChildren.some(child =>
-                        sectionText === getSectionDisplayName(child).toLowerCase()
-                    );
-            }
-            else {
-                sectionMatches = sectionText === selectedName;
-            }
-        }
-
-        const searchMatches = !searchValue || rowText.includes(searchValue);
-
-        row.style.display = (searchMatches && sectionMatches) ? "" : "none";
-    });
 }
 
 
@@ -4239,6 +5244,23 @@ if (documentSectionFilter) {
 
 }
 
+if (documentYearFilter) {
+
+    documentYearFilter.addEventListener(
+        "change",
+        applyDocumentFilters
+    );
+
+}
+
+if (documentStatusFilter) {
+
+    documentStatusFilter.addEventListener(
+        "change",
+        applyDocumentFilters
+    );
+
+}
 
 
 /* =========================================================
@@ -4248,9 +5270,16 @@ if (documentSectionFilter) {
 document.addEventListener(
     "DOMContentLoaded",
     function () {
-
-        showDashboard();
-
+        // Load dynamic sections into Upload + Documents filters
+        if (typeof refreshAppSectionsFromAPI === "function") {
+            refreshAppSectionsFromAPI();
+        }
+        // Admin → Dashboard, Employee → Documents
+        if (typeof IS_ADMIN !== "undefined" && IS_ADMIN) {
+            showDashboard();
+        } else {
+            showDocuments();
+        }
     }
 );
 
@@ -4298,6 +5327,438 @@ document.addEventListener("DOMContentLoaded", function () {
             downloadBtn.innerHTML = originalText;
         }
     });
+});
+
+
+
+
+// ============================================================
+// SYNC SECTIONS ACROSS THE WHOLE APP
+// When Admin adds/edits/deletes/hides a section, these UI parts update:
+//  - Upload Document dropdown
+//  - Documents page filter
+//  - Dashboard counts (via reload statistics)
+// ============================================================
+async function refreshAppSectionsFromAPI() {
+    try {
+        const response = await fetch("{% url 'sections_list_api' %}?active_only=1", {
+            credentials: "same-origin",
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+        });
+        if (!response.ok) return;
+        const sections = await response.json();
+        if (!Array.isArray(sections)) return;
+
+        // Keep system hierarchy for upload subsections; append custom sections
+        const systemKeys = new Set(
+            (investorSections || []).map(s => s.key).filter(Boolean)
+        );
+
+        // Add/update custom sections into investorSections list (flat entries)
+        const customOnly = sections.filter(s => !s.is_system && s.is_active);
+        // Remove old custom_* entries from investorSections
+        investorSections = (investorSections || []).filter(
+            s => !(s.key && String(s.key).startsWith("custom_"))
+        );
+        customOnly.forEach(s => {
+            investorSections.push({
+                key: "custom_" + s.id,
+                name: s.name,
+                is_custom: true,
+                section_id: s.id,
+                icon: s.icon || "📁",
+                children: (s.subsections || []).map(sub => ({
+                    key: "sub_" + sub.id,
+                    name: sub.name,
+                    subsection_id: sub.id,
+                })),
+            });
+        });
+
+        // Rebuild Upload form <select id="section">
+        const uploadSelect = document.getElementById("section");
+        if (uploadSelect) {
+            const current = uploadSelect.value;
+            let html = '<option value="">Select Section</option>';
+            // Prefer active sections from API for a clean ordered list
+            sections.filter(s => s.is_active).forEach(s => {
+                if (s.is_system && s.model_key) {
+                    // Map model_key to existing upload values where possible
+                    const val = s.model_key;
+                    // corporate_announcements is composite in UI
+                    html += `<option value="${val}">${escapeHtml(s.name)}</option>`;
+                } else if (!s.is_system) {
+                    html += `<option value="custom_${s.id}">${escapeHtml(s.icon || "📁")} ${escapeHtml(s.name)}</option>`;
+                }
+            });
+            // Ensure classic composite option still present for announcements/forms if missing
+            const needed = [
+                ["corporate_announcements", "Corporate Announcements"],
+                ["investor_form", "Investor Forms & Declaration"],
+            ];
+            needed.forEach(([val, label]) => {
+                if (!html.includes(`value="${val}"`)) {
+                    html += `<option value="${val}">${label}</option>`;
+                }
+            });
+            uploadSelect.innerHTML = html;
+            if (current) uploadSelect.value = current;
+        }
+
+        // Rebuild Documents filter <select id="documentSectionFilter">
+        const filterSelect = document.getElementById("documentSectionFilter");
+        if (filterSelect) {
+            const current = filterSelect.value;
+            let html = '<option value="all">All Sections</option>';
+            sections.filter(s => s.is_active).forEach(s => {
+                if (s.is_system && s.model_key) {
+                    html += `<option value="${s.model_key}">${escapeHtml(s.name)}</option>`;
+                } else if (!s.is_system) {
+                    html += `<option value="custom_${s.id}">${escapeHtml(s.name)}</option>`;
+                }
+            });
+            const needed = [
+                ["corporate_announcements", "Corporate Announcements"],
+                ["investor_form", "Investor Forms & Declaration"],
+            ];
+            needed.forEach(([val, label]) => {
+                if (!html.includes(`value="${val}"`)) {
+                    html += `<option value="${val}">${label}</option>`;
+                }
+            });
+            filterSelect.innerHTML = html;
+            if (current) filterSelect.value = current;
+        }
+
+        // Refresh dashboard stats (includes custom section counts)
+        if (typeof loadDashboardStatistics === "function") {
+            try { loadDashboardStatistics(); } catch (e) {}
+        }
+    } catch (e) {
+        console.error("refreshAppSectionsFromAPI failed:", e);
+    }
+}
+
+// ============================================================
+// SECTIONS MANAGEMENT (Admin only) – A + B + C
+// ============================================================
+let allSectionsCache = [];
+
+function showSections(event) {
+    if (event) event.preventDefault();
+    if (!IS_ADMIN) {
+        alert("You do not have permission to manage Sections.");
+        return;
+    }
+    hideAllPages();
+    removeActiveMenu();
+    const page = document.getElementById("sectionsPage");
+    if (page) page.classList.remove("hidden");
+    document.querySelectorAll(".menu-item").forEach(item => {
+        if (item.textContent.trim().includes("Sections")) {
+            item.classList.add("active");
+        }
+    });
+    loadSections();
+}
+
+async function loadSections() {
+    const tbody = document.getElementById("sectionsTableBody");
+    if (!tbody) return;
+    tbody.innerHTML = `<tr><td colspan="7" class="table-empty">Loading sections...</td></tr>`;
+    try {
+        const response = await fetch("{% url 'sections_list_api' %}", {
+            credentials: "same-origin",
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+        });
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.message || "Failed to load sections");
+        }
+        const data = await response.json();
+        allSectionsCache = Array.isArray(data) ? data : [];
+        renderSectionsTable(allSectionsCache);
+    } catch (error) {
+        console.error(error);
+        tbody.innerHTML = `<tr><td colspan="7" class="table-empty" style="color:#ef4444;">${error.message}</td></tr>`;
+    }
+}
+
+function filterSectionsTable() {
+    const q = (document.getElementById("sectionSearch")?.value || "").trim().toLowerCase();
+    if (!q) return renderSectionsTable(allSectionsCache);
+    renderSectionsTable(allSectionsCache.filter(s =>
+        (s.name || "").toLowerCase().includes(q) ||
+        (s.slug || "").toLowerCase().includes(q) ||
+        (s.model_key || "").toLowerCase().includes(q)
+    ));
+}
+
+function renderSectionsTable(list) {
+    const tbody = document.getElementById("sectionsTableBody");
+    if (!tbody) return;
+    if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="7" class="table-empty">No sections found.</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = list.map(s => {
+        const typeBadge = s.is_system
+            ? `<span style="padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:#e0e7ff;color:#3730a3;">System</span>`
+            : `<span style="padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:#fce7f3;color:#9d174d;">Custom</span>`;
+        const statusBadge = s.is_active
+            ? `<span style="padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:#dcfce7;color:#166534;">Active</span>`
+            : `<span style="padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:#fee2e2;color:#991b1b;">Hidden</span>`;
+        const publicBadge = s.show_on_public ? "Yes" : "No";
+        const subCount = (s.subsections || []).length;
+        const safeName = (s.name || "").replace(/'/g, "\\'");
+        const deleteBtn = s.is_system
+            ? ""
+            : `<button type="button" style="padding:4px 10px;font-size:12px;border-radius:6px;border:1.5px solid #fecaca;background:#fef2f2;color:#b91c1c;cursor:pointer;"
+                        onclick="deleteSection(${s.id}, '${safeName}')">Delete</button>`;
+        const subList = (s.subsections || []).map(sub =>
+            `<div style="font-size:12px;margin:2px 0;">
+                • ${escapeHtml(sub.name)}
+                <button type="button" style="margin-left:6px;font-size:11px;border:none;background:transparent;color:#2563eb;cursor:pointer;"
+                        onclick='openEditSubsectionModal(${JSON.stringify(sub)}, ${JSON.stringify({id:s.id,name:s.name})})'>Edit</button>
+                <button type="button" style="font-size:11px;border:none;background:transparent;color:#dc2626;cursor:pointer;"
+                        onclick="deleteSubsection(${sub.id}, '${(sub.name||'').replace(/'/g,"\\'")}')">Del</button>
+            </div>`
+        ).join("") || "<span style='color:#94a3b8;font-size:12px;'>—</span>";
+
+        return `<tr>
+            <td>${s.display_order}</td>
+            <td><strong>${escapeHtml(s.icon || "")} ${escapeHtml(s.name)}</strong></td>
+            <td>${typeBadge}</td>
+            <td>${statusBadge}</td>
+            <td>${publicBadge}</td>
+            <td>
+                ${subList}
+                ${s.allow_subsections ? `<button type="button" class="primary-button" style="padding:3px 8px;font-size:11px;margin-top:4px;"
+                    onclick='openAddSubsectionModal(${JSON.stringify({id:s.id,name:s.name})})'>+ Sub-section</button>` : ""}
+            </td>
+            <td style="white-space:nowrap;">
+                <button type="button" class="primary-button" style="padding:4px 10px;font-size:12px;margin-right:4px;"
+                        onclick='openEditSectionModal(${JSON.stringify(s)})'>Edit</button>
+                <button type="button" style="padding:4px 10px;font-size:12px;border-radius:6px;border:1.5px solid #cbd5e1;background:white;cursor:pointer;margin-right:4px;"
+                        onclick="toggleSectionStatus(${s.id})">${s.is_active ? "Hide" : "Show"}</button>
+                ${deleteBtn}
+            </td>
+        </tr>`;
+    }).join("");
+}
+
+function openAddSectionModal() {
+    document.getElementById("sectionModalTitle").textContent = "Add Section";
+    document.getElementById("section_id").value = "";
+    document.getElementById("section_name").value = "";
+    document.getElementById("section_icon").value = "📁";
+    document.getElementById("section_description").value = "";
+    document.getElementById("section_display_order").value = "";
+    document.getElementById("section_is_active").checked = true;
+    document.getElementById("section_show_on_public").checked = true;
+    document.getElementById("section_allow_subsections").checked = true;
+    document.getElementById("saveSectionButton").textContent = "Create Section";
+    document.getElementById("sectionModalOverlay").classList.add("active");
+}
+
+function openEditSectionModal(s) {
+    document.getElementById("sectionModalTitle").textContent = "Edit Section";
+    document.getElementById("section_id").value = s.id;
+    document.getElementById("section_name").value = s.name || "";
+    document.getElementById("section_icon").value = s.icon || "📁";
+    document.getElementById("section_description").value = s.description || "";
+    document.getElementById("section_display_order").value = s.display_order ?? "";
+    document.getElementById("section_is_active").checked = !!s.is_active;
+    document.getElementById("section_show_on_public").checked = !!s.show_on_public;
+    document.getElementById("section_allow_subsections").checked = !!s.allow_subsections;
+    document.getElementById("saveSectionButton").textContent = "Update Section";
+    document.getElementById("sectionModalOverlay").classList.add("active");
+}
+
+function closeSectionModal() {
+    document.getElementById("sectionModalOverlay")?.classList.remove("active");
+}
+
+async function saveSection(event) {
+    event.preventDefault();
+    const id = document.getElementById("section_id").value;
+    const payload = {
+        name: document.getElementById("section_name").value.trim(),
+        icon: document.getElementById("section_icon").value.trim() || "📁",
+        description: document.getElementById("section_description").value.trim(),
+        is_active: document.getElementById("section_is_active").checked,
+        show_on_public: document.getElementById("section_show_on_public").checked,
+        allow_subsections: document.getElementById("section_allow_subsections").checked,
+    };
+    const order = document.getElementById("section_display_order").value;
+    if (order !== "") payload.display_order = parseInt(order, 10);
+    if (id) payload.id = parseInt(id, 10);
+
+    const btn = document.getElementById("saveSectionButton");
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Saving...";
+    try {
+        const url = id ? "{% url 'update_section' %}" : "{% url 'create_section' %}";
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken"),
+            },
+            credentials: "same-origin",
+            body: JSON.stringify(payload),
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.message || "Failed");
+        closeSectionModal();
+        alert(result.message || "Saved.");
+        loadSections();
+        refreshAppSectionsFromAPI();
+    } catch (e) {
+        alert(e.message || "Failed to save section.");
+    } finally {
+        btn.disabled = false;
+        btn.textContent = original;
+    }
+}
+
+async function toggleSectionStatus(id) {
+    try {
+        const response = await fetch("{% url 'toggle_section_status' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken"),
+            },
+            credentials: "same-origin",
+            body: JSON.stringify({ id }),
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.message || "Failed");
+        loadSections();
+        refreshAppSectionsFromAPI();
+    } catch (e) {
+        alert(e.message || "Failed to toggle status.");
+    }
+}
+
+async function deleteSection(id, name) {
+    if (!confirm(`Delete section "${name}"?\nAll custom documents under it will also be deleted.\nSystem sections cannot be deleted.`)) return;
+    try {
+        const response = await fetch("{% url 'delete_section' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken"),
+            },
+            credentials: "same-origin",
+            body: JSON.stringify({ id }),
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.message || "Failed");
+        alert(result.message);
+        loadSections();
+        refreshAppSectionsFromAPI();
+    } catch (e) {
+        alert(e.message || "Failed to delete section.");
+    }
+}
+
+// ---------- Sub-sections ----------
+function openAddSubsectionModal(section) {
+    document.getElementById("subsectionModalTitle").textContent = "Add Sub-section";
+    document.getElementById("subsection_id").value = "";
+    document.getElementById("subsection_section_id").value = section.id;
+    document.getElementById("subsection_section_name").value = section.name;
+    document.getElementById("subsection_name").value = "";
+    document.getElementById("subsection_display_order").value = "";
+    document.getElementById("subsection_is_active").checked = true;
+    document.getElementById("saveSubsectionButton").textContent = "Create Sub-section";
+    document.getElementById("subsectionModalOverlay").classList.add("active");
+}
+
+function openEditSubsectionModal(sub, section) {
+    document.getElementById("subsectionModalTitle").textContent = "Edit Sub-section";
+    document.getElementById("subsection_id").value = sub.id;
+    document.getElementById("subsection_section_id").value = section.id;
+    document.getElementById("subsection_section_name").value = section.name;
+    document.getElementById("subsection_name").value = sub.name || "";
+    document.getElementById("subsection_display_order").value = sub.display_order ?? "";
+    document.getElementById("subsection_is_active").checked = !!sub.is_active;
+    document.getElementById("saveSubsectionButton").textContent = "Update Sub-section";
+    document.getElementById("subsectionModalOverlay").classList.add("active");
+}
+
+function closeSubsectionModal() {
+    document.getElementById("subsectionModalOverlay")?.classList.remove("active");
+}
+
+async function saveSubsection(event) {
+    event.preventDefault();
+    const id = document.getElementById("subsection_id").value;
+    const payload = {
+        name: document.getElementById("subsection_name").value.trim(),
+        section_id: parseInt(document.getElementById("subsection_section_id").value, 10),
+        is_active: document.getElementById("subsection_is_active").checked,
+    };
+    const order = document.getElementById("subsection_display_order").value;
+    if (order !== "") payload.display_order = parseInt(order, 10);
+    if (id) payload.id = parseInt(id, 10);
+
+    const btn = document.getElementById("saveSubsectionButton");
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Saving...";
+    try {
+        const url = id ? "{% url 'update_subsection' %}" : "{% url 'create_subsection' %}";
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken"),
+            },
+            credentials: "same-origin",
+            body: JSON.stringify(payload),
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.message || "Failed");
+        closeSubsectionModal();
+        alert(result.message || "Saved.");
+        loadSections();
+        refreshAppSectionsFromAPI();
+    } catch (e) {
+        alert(e.message || "Failed to save sub-section.");
+    } finally {
+        btn.disabled = false;
+        btn.textContent = original;
+    }
+}
+
+async function deleteSubsection(id, name) {
+    if (!confirm(`Delete sub-section "${name}"?`)) return;
+    try {
+        const response = await fetch("{% url 'delete_subsection' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken"),
+            },
+            credentials: "same-origin",
+            body: JSON.stringify({ id }),
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.message || "Failed");
+        loadSections();
+        refreshAppSectionsFromAPI();
+    } catch (e) {
+        alert(e.message || "Failed to delete sub-section.");
+    }
+}
+
+document.addEventListener("click", function (e) {
+    if (e.target?.id === "sectionModalOverlay") closeSectionModal();
+    if (e.target?.id === "subsectionModalOverlay") closeSubsectionModal();
 });
 
 </script>

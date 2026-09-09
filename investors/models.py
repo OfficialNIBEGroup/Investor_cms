@@ -1,6 +1,8 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 class DocumentBase(models.Model):
     """
@@ -235,3 +237,204 @@ class AuditLog(models.Model):
         return f"{self.action} - {self.document_title} by {self.performed_by}"
 
     
+# ============================================================
+# DYNAMIC SECTIONS + SUB-SECTIONS + CUSTOM DOCUMENTS
+# ============================================================
+# A) Admin can create completely new sections
+# B) Admin can manage existing sections (name, order, show/hide)
+# C) Admin can add sub-sections under any section
+# Documents under custom sections support: PDF, external URL, published
+
+
+class Section(models.Model):
+    """
+    Top-level document section shown in dashboard / public portal.
+
+    System sections (is_system=True) map to existing models via model_key
+    e.g. annual_report → AnnualReport model.
+    Custom sections (is_system=False) store documents in CustomDocument.
+    """
+
+    name = models.CharField(max_length=150)
+    slug = models.SlugField(max_length=160, unique=True)
+    # Links to hardcoded model when is_system=True
+    model_key = models.CharField(
+        max_length=80,
+        blank=True,
+        default="",
+        help_text="Internal key for system sections, e.g. annual_report",
+    )
+    description = models.TextField(blank=True, default="")
+    icon = models.CharField(max_length=20, blank=True, default="📁")
+    is_system = models.BooleanField(
+        default=False,
+        help_text="System sections cannot be deleted",
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Inactive sections are hidden from upload / public",
+    )
+    show_on_public = models.BooleanField(
+        default=True,
+        help_text="Show this section on the public investors page",
+    )
+    allow_subsections = models.BooleanField(default=True)
+    display_order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["display_order", "name"]
+
+    def __str__(self):
+        kind = "System" if self.is_system else "Custom"
+        return f"{self.name} ({kind})"
+
+
+class SubSection(models.Model):
+    """
+    Optional child category under a Section (Option C).
+    """
+
+    section = models.ForeignKey(
+        Section,
+        on_delete=models.CASCADE,
+        related_name="subsections",
+    )
+    name = models.CharField(max_length=150)
+    slug = models.SlugField(max_length=160)
+    is_active = models.BooleanField(default=True)
+    display_order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["display_order", "name"]
+        unique_together = [("section", "slug")]
+
+    def __str__(self):
+        return f"{self.section.name} → {self.name}"
+
+
+class CustomDocument(models.Model):
+    """
+    Documents belonging to custom (non-system) sections.
+    Same core behaviour as existing document types:
+    title, PDF file, external URL, published, display order.
+    """
+
+    section = models.ForeignKey(
+        Section,
+        on_delete=models.CASCADE,
+        related_name="custom_documents",
+    )
+    subsection = models.ForeignKey(
+        SubSection,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="documents",
+    )
+    title = models.CharField(max_length=255)
+    pdf_file = models.FileField(
+        upload_to="investor_documents/custom/",
+        blank=True,
+        null=True,
+    )
+    external_url = models.URLField(blank=True, null=True)
+    published = models.BooleanField(default=True)
+    display_order = models.PositiveIntegerField(default=0)
+    # Optional free-text meta (financial year, notes, etc.)
+    extra_info = models.CharField(max_length=255, blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-display_order", "-created_at"]
+
+    def clean(self):
+        if not self.pdf_file and not self.external_url:
+            raise ValidationError(
+                "Please provide either a PDF file or an external URL."
+            )
+
+    def __str__(self):
+        return f"{self.title} [{self.section.name}]"
+
+
+# ============================================================
+# USER PROFILE + ROLE BASED ACCESS
+# ============================================================
+# We keep Django's default User model and attach a Profile
+# that stores the role of each user.
+# Roles: ADMIN, EMPLOYEE, CLIENT
+
+class Profile(models.Model):
+    """
+    Extra information for every User.
+    Main purpose: store the ROLE of the user.
+    """
+
+    # Choices for the role field
+    ROLE_CHOICES = (
+        ('ADMIN', 'Admin'),         # Full power (manage employees + documents)
+        ('EMPLOYEE', 'Employee'),   # Can upload / edit / delete documents
+        ('CLIENT', 'Client'),       # Outside user (currently no dashboard access)
+    )
+
+    # One-to-One link with Django User
+    # related_name='profile' → you can do request.user.profile
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='profile'
+    )
+
+    # The actual role
+    role = models.CharField(
+        max_length=20,
+        choices=ROLE_CHOICES,
+        default='EMPLOYEE'          # New users are Employee by default
+    )
+
+    # Optional fields you can use later
+    phone = models.CharField(max_length=15, blank=True, null=True)
+    department = models.CharField(max_length=100, blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} → {self.get_role_display()}"
+
+    # ---------- Helper properties (very useful in views & templates) ----------
+    @property
+    def is_admin(self):
+        return self.role == 'ADMIN'
+
+    @property
+    def is_employee(self):
+        return self.role == 'EMPLOYEE'
+
+    @property
+    def is_client(self):
+        return self.role == 'CLIENT'
+
+
+# ---------- Auto create Profile when a new User is created ----------
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    """
+    Whenever a new User is created, automatically create a Profile for him/her.
+    """
+    if created:
+        Profile.objects.create(user=instance)
+
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    """
+    Make sure Profile is saved whenever User is saved.
+    """
+    # This protects against users created before Profile model existed
+    if hasattr(instance, 'profile'):
+        instance.profile.save()

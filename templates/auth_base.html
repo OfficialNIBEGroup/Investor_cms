@@ -4,58 +4,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}NIBE | Investor Document Portal{% endblock %}</title>
-    <link rel="icon" type="image/png" href="{% static 'Nibe Limited Logo/NIBE Group Logo.png' %}">
+    <title>{% block title %}NIBE Limited | Investor Document Portal{% endblock %}</title>
+
+    <!-- Main login stylesheet -->
     <link rel="stylesheet" href="{% static 'Investor_Login.css' %}">
+    <!-- If your CSS is in a different path, change the above line -->
+
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
-<div class="login-wrapper">
 
-    <aside class="login-brand-panel">
+<div class="login-wrapper">
+    <!-- ==================== LEFT BRAND PANEL ==================== -->
+    <div class="login-brand-panel">
+        <div class="brand-glow"></div>
+        <div class="brand-glow-orange"></div>
+
         <div class="brand-panel-top">
-            <div class="logo-text">
-                <div class="logo-mark">NIBE</div>
-                <div class="logo-brand">LIMITED</div>
+            <div class="logo-block">
+                <img src="{% static 'Nibe Limited Logo\NIBE Group Logo.png' %}" alt="NIBE Limited" class="logo-img">
+                <div class="logo-text-group">
+                    <div class="logo-brand">NIBE Limited</div>
+                    <div class="logo-sub">Investor Document Portal</div>
+                </div>
             </div>
-            <div class="logo-sub">Investor Document Portal</div>
         </div>
 
         <div class="brand-panel-middle">
-            <h1>{% block brand_headline %}Welcome to the<br>Investor Document Portal{% endblock %}</h1>
-            <p>{% block brand_copy %}Securely access annual reports, financial results, regulatory filings and corporate announcements — all in one place.{% endblock %}</p>
+            <h1>Secure access to your <span>investor documents</span></h1>
+            <p>
+                Sign in to view filings, reports, and confidential materials.
+                All sessions are encrypted and monitored for your protection.
+            </p>
 
             <div class="brand-feature-list">
                 <div class="brand-feature">
-                    <span class="brand-feature-icon">🛡</span>
-                    <span>Enterprise-grade security</span>
+                    <span class="brand-feature-icon">📄</span>
+                    <span>Instant access to latest filings & reports</span>
                 </div>
                 <div class="brand-feature">
-                    <span class="brand-feature-icon">📁</span>
-                    <span>Documents across all investor categories</span>
+                    <span class="brand-feature-icon">🔐</span>
+                    <span>Enterprise-grade encryption & audit logs</span>
                 </div>
                 <div class="brand-feature">
-                    <span class="brand-feature-icon">🔔</span>
-                    <span>Real-time announcements &amp; filings</span>
+                    <span class="brand-feature-icon">⚡</span>
+                    <span>Real-time notifications on new documents</span>
                 </div>
             </div>
         </div>
 
         <div class="brand-panel-bottom">
+            <span class="dot"></span>
             <span>© 2026 NIBE Limited. All rights reserved.</span>
         </div>
+    </div>
 
-        <div class="brand-glow"></div>
-    </aside>
-
-    <main class="login-form-panel">
-        {% block auth_card %}{% endblock %}
-
-        <p class="login-support-text">
-            Need help accessing your account? <a href="#">Contact Investor Relations</a>
-        </p>
-    </main>
+    <!-- ==================== RIGHT FORM PANEL ==================== -->
+    <div class="login-form-panel">
+        {% block auth_card %}
+        <!-- Child templates (Investor_Login.html etc.) will inject the form here -->
+        {% endblock %}
+    </div>
 
 </div>
+
 {% block extra_js %}{% endblock %}
+
 </body>
 </html>
