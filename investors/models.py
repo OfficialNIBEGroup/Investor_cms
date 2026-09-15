@@ -1,8 +1,30 @@
+import os
+import threading
+from contextlib import contextmanager
+
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
+
+
+_upload_user = threading.local()
+
+
+@contextmanager
+def pdf_upload_user(username):
+    """Remember who is uploading so PDF registry rows can store uploaded_by."""
+    previous = getattr(_upload_user, "username", "")
+    _upload_user.username = username or ""
+    try:
+        yield
+    finally:
+        _upload_user.username = previous
+
+
+def _current_upload_user():
+    return getattr(_upload_user, "username", "") or ""
 
 class DocumentBase(models.Model):
     """
@@ -360,6 +382,135 @@ class CustomDocument(models.Model):
 
     def __str__(self):
         return f"{self.title} [{self.section.name}]"
+
+
+# ============================================================
+# UNIFIED PDF REGISTRY (all uploaded PDFs, shown in Django admin)
+# ============================================================
+
+class UploadedPDF(models.Model):
+    """
+    One row for every PDF saved on an investor document.
+    The file itself lives under MEDIA_ROOT; this table stores the DB record
+    so every upload is visible in Django admin regardless of section.
+    """
+
+    title = models.CharField(max_length=255)
+    original_filename = models.CharField(max_length=255, blank=True, default="")
+    pdf_file = models.FileField(
+        upload_to="investor_documents/",
+        blank=True,
+        null=True,
+    )
+    section = models.CharField(max_length=150)
+    uploaded_by = models.CharField(max_length=150, blank=True, default="")
+    source_model = models.CharField(max_length=100)
+    source_id = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Uploaded PDF"
+        verbose_name_plural = "All Uploaded PDFs"
+        ordering = ["-created_at"]
+        unique_together = [("source_model", "source_id")]
+
+    def __str__(self):
+        return self.title or self.original_filename or "PDF"
+
+
+PDF_SOURCE_MODELS = (
+    AnnualReport,
+    FinancialResult,
+    AnnualReturn,
+    CorporateGovernance,
+    ShareholdingPattern,
+    ShareholderNotice,
+    NewspaperPublication,
+    StockExchangeDisclosure,
+    SEBIDocument,
+    InvestorForm,
+    TaxDeclaration,
+    UnclaimedDividend,
+    SubsidiaryFinancial,
+    CustomDocument,
+)
+
+PDF_SECTION_LABELS = {
+    "AnnualReport": "Annual Report",
+    "FinancialResult": "Financial Result",
+    "AnnualReturn": "Annual Return",
+    "CorporateGovernance": "Corporate Governance",
+    "ShareholdingPattern": "Shareholding Pattern",
+    "ShareholderNotice": "Shareholder Notice",
+    "NewspaperPublication": "Newspaper Publication",
+    "StockExchangeDisclosure": "Stock Exchange Disclosure",
+    "SEBIDocument": "SEBI Document",
+    "InvestorForm": "Investor Form",
+    "TaxDeclaration": "Tax Declaration",
+    "UnclaimedDividend": "Unclaimed Dividend",
+    "SubsidiaryFinancial": "Subsidiary Financial",
+    "CustomDocument": "Custom Section",
+}
+
+
+def _pdf_section_label(sender, instance):
+    if sender is CustomDocument:
+        try:
+            return instance.section.name
+        except Exception:
+            return "Custom Section"
+    return PDF_SECTION_LABELS.get(sender.__name__, sender.__name__)
+
+
+def sync_uploaded_pdf(sender, instance, **kwargs):
+    """Keep UploadedPDF in sync whenever a document with a PDF is saved."""
+    if not instance.pk:
+        return
+
+    pdf = getattr(instance, "pdf_file", None)
+    pdf_name = getattr(pdf, "name", "") if pdf else ""
+    if not pdf_name:
+        UploadedPDF.objects.filter(
+            source_model=sender.__name__,
+            source_id=instance.pk,
+        ).delete()
+        return
+
+    username = _current_upload_user()
+    record, _created = UploadedPDF.objects.update_or_create(
+        source_model=sender.__name__,
+        source_id=instance.pk,
+        defaults={
+            "title": instance.title or os.path.basename(pdf_name),
+            "original_filename": os.path.basename(pdf_name),
+            "section": _pdf_section_label(sender, instance),
+        },
+    )
+
+    changed_fields = []
+    if record.pdf_file.name != pdf_name:
+        record.pdf_file.name = pdf_name
+        changed_fields.append("pdf_file")
+    if username and record.uploaded_by != username:
+        record.uploaded_by = username
+        changed_fields.append("uploaded_by")
+    if changed_fields:
+        record.save(update_fields=changed_fields)
+
+
+def delete_uploaded_pdf(sender, instance, **kwargs):
+    if not instance.pk:
+        return
+    UploadedPDF.objects.filter(
+        source_model=sender.__name__,
+        source_id=instance.pk,
+    ).delete()
+
+
+for _pdf_model in PDF_SOURCE_MODELS:
+    post_save.connect(sync_uploaded_pdf, sender=_pdf_model)
+    post_delete.connect(delete_uploaded_pdf, sender=_pdf_model)
 
 
 # ============================================================
