@@ -29,6 +29,7 @@ from .models import (
     Section,
     SubSection,
     CustomDocument,
+    pdf_upload_user,
 )
 from django.utils.text import slugify
 
@@ -1356,6 +1357,9 @@ def update_investor_document(request):
         document_id = int(document_id)
         obj = None
         old_snapshot = {}
+        upload_username = (
+            request.user.username if request.user.is_authenticated else ""
+        )
 
         def begin_update(model):
             nonlocal old_snapshot
@@ -1377,7 +1381,8 @@ def update_investor_document(request):
             if published_raw is not None:
                 document.published = str(published_raw).strip().lower() in ("true", "1", "yes", "on")
 
-            document.save()
+            with pdf_upload_user(upload_username):
+                document.save()
 
         # -------------------------------------------------------
         # ANNUAL REPORT
@@ -2004,238 +2009,19 @@ def upload_investor_document(request):
         pass
 
     try:
-        # ====================================================
-        # ANNUAL REPORT
-        # ====================================================
-        if effective_section == "annual_report":
-            display_order = get_next_display_order(AnnualReport)
-            AnnualReport.objects.create(
+        with pdf_upload_user(
+            request.user.username if request.user.is_authenticated else ""
+        ):
+            created = _create_investor_document(
+                request,
+                effective_section=effective_section,
+                subsection=subsection,
                 title=title,
                 pdf_file=pdf_file,
                 external_url=external_url,
-                published=is_published,
-                display_order=display_order,
-                financial_year=request.POST.get("financial_year", "").strip(),
+                is_published=is_published,
             )
-
-        # ====================================================
-        # ANNUAL RETURN
-        # ====================================================
-        elif effective_section == "annual_return":
-            display_order = get_next_display_order(AnnualReturn)
-            AnnualReturn.objects.create(
-                title=title,
-                pdf_file=pdf_file,
-                external_url=external_url,
-                published=is_published,
-                display_order=display_order,
-                financial_year=request.POST.get("financial_year", "").strip(),
-            )
-
-        # ====================================================
-        # CORPORATE GOVERNANCE
-        # ====================================================
-        elif effective_section == "corporate_governance":
-            display_order = get_next_display_order(CorporateGovernance)
-            CorporateGovernance.objects.create(
-                title=title,
-                pdf_file=pdf_file,
-                external_url=external_url,
-                published=is_published,
-                display_order=display_order,
-                financial_year=request.POST.get("financial_year", "").strip(),
-                quarter=request.POST.get("quarter", "").strip(),
-            )
-
-        # ====================================================
-        # FINANCIAL RESULT
-        # ====================================================
-        elif effective_section == "financial_result":
-            display_order = get_next_display_order(FinancialResult)
-            FinancialResult.objects.create(
-                title=title,
-                pdf_file=pdf_file,
-                external_url=external_url,
-                published=is_published,
-                display_order=display_order,
-                financial_year=request.POST.get("financial_year", "").strip(),
-                quarter=request.POST.get("quarter", "").strip(),
-                release_date=request.POST.get("release_date") or None,
-            )
-
-        # ====================================================
-        # SHAREHOLDER NOTICE  (child of Corporate Announcements)
-        # ====================================================
-        elif effective_section == "shareholder_notice":
-            display_order = get_next_display_order(ShareholderNotice)
-            ShareholderNotice.objects.create(
-                title=title,
-                pdf_file=pdf_file,
-                external_url=external_url,
-                published=is_published,
-                display_order=display_order,
-                financial_year=request.POST.get("financial_year", "").strip(),
-                notice_type=request.POST.get("notice_type", "").strip(),
-                disclosure_date=request.POST.get("disclosure_date") or None,
-                meeting_date=request.POST.get("meeting_date") or None,
-            )
-
-        # ====================================================
-        # NEWSPAPER PUBLICATION  (child of Corporate Announcements)
-        # ====================================================
-        elif effective_section == "newspaper_publication":
-            display_order = get_next_display_order(NewspaperPublication)
-            NewspaperPublication.objects.create(
-                title=title,
-                pdf_file=pdf_file,
-                external_url=external_url,
-                published=is_published,
-                display_order=display_order,
-                financial_year=request.POST.get("financial_year", "").strip(),
-                disclosure_date=request.POST.get("disclosure_date") or None,
-            )
-
-        # ====================================================
-        # STOCK EXCHANGE DISCLOSURE  (child of Corporate Announcements)
-        # ====================================================
-        elif effective_section == "stock_exchange_disclosure":
-            display_order = get_next_display_order(StockExchangeDisclosure)
-            StockExchangeDisclosure.objects.create(
-                title=title,
-                pdf_file=pdf_file,
-                external_url=external_url,
-                published=is_published,
-                display_order=display_order,
-                financial_year=request.POST.get("financial_year", "").strip(),
-                disclosure_date=request.POST.get("disclosure_date") or None,
-            )
-
-        # ====================================================
-        # SHAREHOLDING PATTERN
-        # ====================================================
-        elif effective_section == "shareholding_pattern":
-            display_order = get_next_display_order(ShareholdingPattern)
-            ShareholdingPattern.objects.create(
-                title=title,
-                pdf_file=pdf_file,
-                external_url=external_url,
-                published=is_published,
-                display_order=display_order,
-                financial_year=request.POST.get("financial_year", "").strip(),
-                quarter=request.POST.get("quarter", "").strip(),
-            )
-
-        # ====================================================
-        # SEBI DOCUMENT
-        # ====================================================
-        elif effective_section == "sebi_document":
-            display_order = get_next_display_order(SEBIDocument)
-            SEBIDocument.objects.create(
-                title=title,
-                pdf_file=pdf_file,
-                external_url=external_url,
-                published=is_published,
-                display_order=display_order,
-                category=request.POST.get("category", "").strip(),
-            )
-
-        # ====================================================
-        # INVESTOR FORMS & DECLARATION
-        # ====================================================
-        elif effective_section == "investor_form":
-
-            category = (
-                request.POST.get("category", "").strip()
-                or subsection
-                or ""
-            )
-
-            # ------------------------------------------------
-            # KYC & NOMINATION
-            # Stored in InvestorForm
-            # ------------------------------------------------
-            if category == "kyc_nomination":
-
-                display_order = get_next_display_order(
-                    InvestorForm
-                )
-
-                InvestorForm.objects.create(
-                    title=title,
-                    pdf_file=pdf_file,
-                    external_url=external_url,
-                    published=is_published,
-                    display_order=display_order,
-                    category="kyc_nomination",
-                    description=request.POST.get(
-                        "description",
-                        ""
-                    ).strip(),
-                )
-
-            # ------------------------------------------------
-            # TAX DECLARATION
-            # Stored in TaxDeclaration
-            # ------------------------------------------------
-            elif category == "tax_declaration":
-
-                display_order = get_next_display_order(
-                    TaxDeclaration
-                )
-
-                TaxDeclaration.objects.create(
-                    title=title,
-                    pdf_file=pdf_file,
-                    external_url=external_url,
-                    published=is_published,
-                    display_order=display_order,
-                    applicable_to=request.POST.get(
-                        "applicable_to",
-                        ""
-                    ).strip(),
-                    description=request.POST.get(
-                        "description",
-                        ""
-                    ).strip(),
-                )
-
-            # ------------------------------------------------
-            # UNCLAIMED DIVIDEND
-            # Stored in UnclaimedDividend
-            # ------------------------------------------------
-            elif category == "unclaimed_dividend":
-
-                display_order = get_next_display_order(
-                    UnclaimedDividend
-                )
-
-                UnclaimedDividend.objects.create(
-                    title=title,
-                    pdf_file=pdf_file,
-                    external_url=external_url,
-                    published=is_published,
-                    display_order=display_order,
-                    financial_year=request.POST.get(
-                        "financial_year",
-                        ""
-                    ).strip(),
-                    dividend_declaration_date=(
-                        request.POST.get(
-                            "dividend_declaration_date"
-                        ) or None
-                    ),
-                    dividend_type=request.POST.get(
-                        "dividend_type",
-                        ""
-                    ).strip(),
-                    iepf_transfer_due_date=(
-                        request.POST.get(
-                            "iepf_transfer_due_date"
-                        ) or None
-                    ),
-                )
-
-            else:
+            if created is False:
                 return JsonResponse(
                     {
                         "success": False,
@@ -2243,97 +2029,18 @@ def upload_investor_document(request):
                     },
                     status=400
                 )
-
-        # ====================================================
-        # TAX DECLARATION
-        # Direct section support
-        # ====================================================
-        elif effective_section == "tax_declaration":
-
-            display_order = get_next_display_order(
-                TaxDeclaration
-            )
-
-            TaxDeclaration.objects.create(
-                title=title,
-                pdf_file=pdf_file,
-                external_url=external_url,
-                published=is_published,
-                display_order=display_order,
-                applicable_to=request.POST.get(
-                    "applicable_to",
-                    ""
-                ).strip(),
-                description=request.POST.get(
-                    "description",
-                    ""
-                ).strip(),
-            )
-
-        # ====================================================
-        # UNCLAIMED DIVIDEND
-        # Direct section support
-        # ====================================================
-        elif effective_section == "unclaimed_dividend":
-
-            display_order = get_next_display_order(
-                UnclaimedDividend
-            )
-
-            UnclaimedDividend.objects.create(
-                title=title,
-                pdf_file=pdf_file,
-                external_url=external_url,
-                published=is_published,
-                display_order=display_order,
-                financial_year=request.POST.get(
-                    "financial_year",
-                    ""
-                ).strip(),
-                dividend_declaration_date=(
-                    request.POST.get(
-                        "dividend_declaration_date"
-                    ) or None
-                ),
-                dividend_type=request.POST.get(
-                    "dividend_type",
-                    ""
-                ).strip(),
-                iepf_transfer_due_date=(
-                    request.POST.get(
-                        "iepf_transfer_due_date"
-                    ) or None
-                ),
-            )
-
-        # ====================================================
-        # SUBSIDIARY FINANCIAL
-        # ====================================================
-        elif effective_section == "subsidiary_financial":
-            display_order = get_next_display_order(SubsidiaryFinancial)
-            SubsidiaryFinancial.objects.create(
-                title=title,
-                pdf_file=pdf_file,
-                external_url=external_url,
-                published=is_published,
-                display_order=display_order,
-                financial_year=request.POST.get("financial_year", "").strip(),
-                company_name=request.POST.get("company_name", "").strip(),
-                financial_type=request.POST.get("financial_type", "").strip(),
-            )
-
-        else:
-            return JsonResponse(
-                {"success": False, "message": f"Invalid section selected: {section}"},
-                status=400
-            )
+            if created is None:
+                return JsonResponse(
+                    {"success": False, "message": f"Invalid section selected: {section}"},
+                    status=400
+                )
 
         log_audit(
             request,
             title=title,
             section=effective_section,
             action="uploaded",
-            document_id=None,
+            document_id=getattr(created, "id", None),
             details="New document uploaded",
         )
 
@@ -2346,6 +2053,208 @@ def upload_investor_document(request):
             {"success": False, "message": f"Upload failed: {str(e)}"},
             status=500
         )
+
+
+def _create_investor_document(
+    request,
+    *,
+    effective_section,
+    subsection,
+    title,
+    pdf_file,
+    external_url,
+    is_published,
+):
+    """Create the section-specific document row. Returns the object, False, or None."""
+
+    if effective_section == "annual_report":
+        return AnnualReport.objects.create(
+            title=title,
+            pdf_file=pdf_file,
+            external_url=external_url,
+            published=is_published,
+            display_order=get_next_display_order(AnnualReport),
+            financial_year=request.POST.get("financial_year", "").strip(),
+        )
+
+    if effective_section == "annual_return":
+        return AnnualReturn.objects.create(
+            title=title,
+            pdf_file=pdf_file,
+            external_url=external_url,
+            published=is_published,
+            display_order=get_next_display_order(AnnualReturn),
+            financial_year=request.POST.get("financial_year", "").strip(),
+        )
+
+    if effective_section == "corporate_governance":
+        return CorporateGovernance.objects.create(
+            title=title,
+            pdf_file=pdf_file,
+            external_url=external_url,
+            published=is_published,
+            display_order=get_next_display_order(CorporateGovernance),
+            financial_year=request.POST.get("financial_year", "").strip(),
+            quarter=request.POST.get("quarter", "").strip(),
+        )
+
+    if effective_section == "financial_result":
+        return FinancialResult.objects.create(
+            title=title,
+            pdf_file=pdf_file,
+            external_url=external_url,
+            published=is_published,
+            display_order=get_next_display_order(FinancialResult),
+            financial_year=request.POST.get("financial_year", "").strip(),
+            quarter=request.POST.get("quarter", "").strip(),
+            release_date=request.POST.get("release_date") or None,
+        )
+
+    if effective_section == "shareholder_notice":
+        return ShareholderNotice.objects.create(
+            title=title,
+            pdf_file=pdf_file,
+            external_url=external_url,
+            published=is_published,
+            display_order=get_next_display_order(ShareholderNotice),
+            financial_year=request.POST.get("financial_year", "").strip(),
+            notice_type=request.POST.get("notice_type", "").strip(),
+            disclosure_date=request.POST.get("disclosure_date") or None,
+            meeting_date=request.POST.get("meeting_date") or None,
+        )
+
+    if effective_section == "newspaper_publication":
+        return NewspaperPublication.objects.create(
+            title=title,
+            pdf_file=pdf_file,
+            external_url=external_url,
+            published=is_published,
+            display_order=get_next_display_order(NewspaperPublication),
+            financial_year=request.POST.get("financial_year", "").strip(),
+            disclosure_date=request.POST.get("disclosure_date") or None,
+        )
+
+    if effective_section == "stock_exchange_disclosure":
+        return StockExchangeDisclosure.objects.create(
+            title=title,
+            pdf_file=pdf_file,
+            external_url=external_url,
+            published=is_published,
+            display_order=get_next_display_order(StockExchangeDisclosure),
+            financial_year=request.POST.get("financial_year", "").strip(),
+            disclosure_date=request.POST.get("disclosure_date") or None,
+        )
+
+    if effective_section == "shareholding_pattern":
+        return ShareholdingPattern.objects.create(
+            title=title,
+            pdf_file=pdf_file,
+            external_url=external_url,
+            published=is_published,
+            display_order=get_next_display_order(ShareholdingPattern),
+            financial_year=request.POST.get("financial_year", "").strip(),
+            quarter=request.POST.get("quarter", "").strip(),
+        )
+
+    if effective_section == "sebi_document":
+        return SEBIDocument.objects.create(
+            title=title,
+            pdf_file=pdf_file,
+            external_url=external_url,
+            published=is_published,
+            display_order=get_next_display_order(SEBIDocument),
+            category=request.POST.get("category", "").strip(),
+        )
+
+    if effective_section == "investor_form":
+        category = (
+            request.POST.get("category", "").strip()
+            or subsection
+            or ""
+        )
+
+        if category == "kyc_nomination":
+            return InvestorForm.objects.create(
+                title=title,
+                pdf_file=pdf_file,
+                external_url=external_url,
+                published=is_published,
+                display_order=get_next_display_order(InvestorForm),
+                category="kyc_nomination",
+                description=request.POST.get("description", "").strip(),
+            )
+
+        if category == "tax_declaration":
+            return TaxDeclaration.objects.create(
+                title=title,
+                pdf_file=pdf_file,
+                external_url=external_url,
+                published=is_published,
+                display_order=get_next_display_order(TaxDeclaration),
+                applicable_to=request.POST.get("applicable_to", "").strip(),
+                description=request.POST.get("description", "").strip(),
+            )
+
+        if category == "unclaimed_dividend":
+            return UnclaimedDividend.objects.create(
+                title=title,
+                pdf_file=pdf_file,
+                external_url=external_url,
+                published=is_published,
+                display_order=get_next_display_order(UnclaimedDividend),
+                financial_year=request.POST.get("financial_year", "").strip(),
+                dividend_declaration_date=(
+                    request.POST.get("dividend_declaration_date") or None
+                ),
+                dividend_type=request.POST.get("dividend_type", "").strip(),
+                iepf_transfer_due_date=(
+                    request.POST.get("iepf_transfer_due_date") or None
+                ),
+            )
+
+        return False
+
+    if effective_section == "tax_declaration":
+        return TaxDeclaration.objects.create(
+            title=title,
+            pdf_file=pdf_file,
+            external_url=external_url,
+            published=is_published,
+            display_order=get_next_display_order(TaxDeclaration),
+            applicable_to=request.POST.get("applicable_to", "").strip(),
+            description=request.POST.get("description", "").strip(),
+        )
+
+    if effective_section == "unclaimed_dividend":
+        return UnclaimedDividend.objects.create(
+            title=title,
+            pdf_file=pdf_file,
+            external_url=external_url,
+            published=is_published,
+            display_order=get_next_display_order(UnclaimedDividend),
+            financial_year=request.POST.get("financial_year", "").strip(),
+            dividend_declaration_date=(
+                request.POST.get("dividend_declaration_date") or None
+            ),
+            dividend_type=request.POST.get("dividend_type", "").strip(),
+            iepf_transfer_due_date=(
+                request.POST.get("iepf_transfer_due_date") or None
+            ),
+        )
+
+    if effective_section == "subsidiary_financial":
+        return SubsidiaryFinancial.objects.create(
+            title=title,
+            pdf_file=pdf_file,
+            external_url=external_url,
+            published=is_published,
+            display_order=get_next_display_order(SubsidiaryFinancial),
+            financial_year=request.POST.get("financial_year", "").strip(),
+            company_name=request.POST.get("company_name", "").strip(),
+            financial_type=request.POST.get("financial_type", "").strip(),
+        )
+
+    return None
 
 
 # ============================================================
@@ -3378,16 +3287,19 @@ def upload_custom_document(request):
         last = CustomDocument.objects.filter(section=section).aggregate(m=Max("display_order"))["m"]
         display_order = (last or 0) + 1
 
-        doc = CustomDocument.objects.create(
-            section=section,
-            subsection=subsection,
-            title=title,
-            pdf_file=pdf_file,
-            external_url=external_url,
-            published=published,
-            display_order=display_order,
-            extra_info=extra_info,
-        )
+        with pdf_upload_user(
+            request.user.username if request.user.is_authenticated else ""
+        ):
+            doc = CustomDocument.objects.create(
+                section=section,
+                subsection=subsection,
+                title=title,
+                pdf_file=pdf_file,
+                external_url=external_url,
+                published=published,
+                display_order=display_order,
+                extra_info=extra_info,
+            )
 
         log_audit(
             request,

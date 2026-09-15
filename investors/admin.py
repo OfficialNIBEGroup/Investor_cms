@@ -1,6 +1,7 @@
 from django import forms
 
 from django.contrib import admin
+from django.utils.html import format_html
 from .models import (
     AnnualReport,
     FinancialResult,
@@ -16,6 +17,8 @@ from .models import (
     UnclaimedDividend,
     SubsidiaryFinancial,
     AuditLog,
+    UploadedPDF,
+    pdf_upload_user,
     # DocumentBase,
 )
 
@@ -23,8 +26,37 @@ from .models import Profile
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 
+
+class PdfPreviewMixin:
+    """Show a View PDF link in list/change views and record who saved the file."""
+
+    def pdf_link(self, obj):
+        pdf = getattr(obj, "pdf_file", None)
+        if pdf:
+            return format_html(
+                '<a href="{}" target="_blank" rel="noopener noreferrer">View PDF</a>',
+                pdf.url,
+            )
+        return "—"
+
+    pdf_link.short_description = "PDF"
+    pdf_link.admin_order_field = "pdf_file"
+
+    def get_list_display(self, request):
+        display = list(super().get_list_display(request))
+        if "pdf_link" not in display:
+            if "title" in display:
+                display.insert(display.index("title") + 1, "pdf_link")
+            else:
+                display.append("pdf_link")
+        return display
+
+    def save_model(self, request, obj, form, change):
+        with pdf_upload_user(request.user.username):
+            super().save_model(request, obj, form, change)
+
 @admin.register(AnnualReport)
-class AnnualReportAdmin(admin.ModelAdmin):
+class AnnualReportAdmin(PdfPreviewMixin, admin.ModelAdmin):
     list_display = (
         "title",
         "financial_year",
@@ -50,7 +82,7 @@ class AnnualReportAdmin(admin.ModelAdmin):
 
 
 @admin.register(FinancialResult)
-class FinancialResultAdmin(admin.ModelAdmin):
+class FinancialResultAdmin(PdfPreviewMixin, admin.ModelAdmin):
     list_display = (
         "title",
         "financial_year",
@@ -78,7 +110,7 @@ class FinancialResultAdmin(admin.ModelAdmin):
 
 
 @admin.register(AnnualReturn)
-class AnnualReturnAdmin(admin.ModelAdmin):
+class AnnualReturnAdmin(PdfPreviewMixin, admin.ModelAdmin):
     list_display = (
         "title",
         "financial_year",
@@ -104,7 +136,7 @@ class AnnualReturnAdmin(admin.ModelAdmin):
 
 
 @admin.register(CorporateGovernance)
-class CorporateGovernanceAdmin(admin.ModelAdmin):
+class CorporateGovernanceAdmin(PdfPreviewMixin, admin.ModelAdmin):
     list_display = (
         "title",
         "financial_year",
@@ -133,7 +165,7 @@ class CorporateGovernanceAdmin(admin.ModelAdmin):
 
 
 @admin.register(ShareholdingPattern)
-class ShareholdingPatternAdmin(admin.ModelAdmin):
+class ShareholdingPatternAdmin(PdfPreviewMixin, admin.ModelAdmin):
     list_display = (
         "title",
         "financial_year",
@@ -162,7 +194,7 @@ class ShareholdingPatternAdmin(admin.ModelAdmin):
 
 
 @admin.register(ShareholderNotice)
-class ShareholderNoticeAdmin(admin.ModelAdmin):
+class ShareholderNoticeAdmin(PdfPreviewMixin, admin.ModelAdmin):
     list_display = (
         "title",
         "financial_year",
@@ -193,7 +225,7 @@ class ShareholderNoticeAdmin(admin.ModelAdmin):
 
 
 @admin.register(NewspaperPublication)
-class NewspaperPublicationAdmin(admin.ModelAdmin):
+class NewspaperPublicationAdmin(PdfPreviewMixin, admin.ModelAdmin):
     list_display = (
         "title",
         "financial_year",
@@ -220,7 +252,7 @@ class NewspaperPublicationAdmin(admin.ModelAdmin):
 
 
 @admin.register(StockExchangeDisclosure)
-class StockExchangeDisclosureAdmin(admin.ModelAdmin):
+class StockExchangeDisclosureAdmin(PdfPreviewMixin, admin.ModelAdmin):
     list_display = (
         "title",
         "financial_year",
@@ -247,7 +279,7 @@ class StockExchangeDisclosureAdmin(admin.ModelAdmin):
 
 
 @admin.register(SEBIDocument)
-class SEBIDocumentAdmin(admin.ModelAdmin):
+class SEBIDocumentAdmin(PdfPreviewMixin, admin.ModelAdmin):
     list_display = (
         "title",
         "category",
@@ -273,7 +305,7 @@ class SEBIDocumentAdmin(admin.ModelAdmin):
 
 
 @admin.register(InvestorForm)
-class InvestorFormAdmin(admin.ModelAdmin):
+class InvestorFormAdmin(PdfPreviewMixin, admin.ModelAdmin):
     list_display = (
         "title",
         "category",
@@ -309,7 +341,7 @@ class TaxDeclarationAdminForm(forms.ModelForm):
 
 
 @admin.register(TaxDeclaration)
-class TaxDeclarationAdmin(admin.ModelAdmin):
+class TaxDeclarationAdmin(PdfPreviewMixin, admin.ModelAdmin):
     form = TaxDeclarationAdminForm
 
     list_display = (
@@ -337,7 +369,7 @@ class TaxDeclarationAdmin(admin.ModelAdmin):
 
 
 @admin.register(UnclaimedDividend)
-class UnclaimedDividendAdmin(admin.ModelAdmin):
+class UnclaimedDividendAdmin(PdfPreviewMixin, admin.ModelAdmin):
     list_display = (
         "title",
         "financial_year",
@@ -378,7 +410,7 @@ class SubsidiaryFinancialAdminForm(forms.ModelForm):
 
 
 @admin.register(SubsidiaryFinancial)
-class SubsidiaryFinancialAdmin(admin.ModelAdmin):
+class SubsidiaryFinancialAdmin(PdfPreviewMixin, admin.ModelAdmin):
     form = SubsidiaryFinancialAdminForm
 
     list_display = (
@@ -486,7 +518,7 @@ class SubSectionAdmin(admin.ModelAdmin):
 
 
 @admin.register(CustomDocument)
-class CustomDocumentAdmin(admin.ModelAdmin):
+class CustomDocumentAdmin(PdfPreviewMixin, admin.ModelAdmin):
     list_display = (
         "title", "section", "subsection", "published",
         "display_order", "created_at",
@@ -494,6 +526,48 @@ class CustomDocumentAdmin(admin.ModelAdmin):
     list_filter = ("published", "section")
     search_fields = ("title", "extra_info")
     ordering = ("-display_order", "-created_at")
+
+
+@admin.register(UploadedPDF)
+class UploadedPDFAdmin(admin.ModelAdmin):
+    list_display = (
+        "title",
+        "pdf_link",
+        "section",
+        "original_filename",
+        "uploaded_by",
+        "created_at",
+    )
+    list_filter = ("section", "created_at")
+    search_fields = ("title", "original_filename", "section", "uploaded_by")
+    ordering = ("-created_at",)
+    date_hierarchy = "created_at"
+    readonly_fields = (
+        "title",
+        "original_filename",
+        "pdf_file",
+        "pdf_link",
+        "section",
+        "uploaded_by",
+        "source_model",
+        "source_id",
+        "created_at",
+        "updated_at",
+    )
+
+    def pdf_link(self, obj):
+        if obj.pdf_file:
+            return format_html(
+                '<a href="{}" target="_blank" rel="noopener noreferrer">View PDF</a>',
+                obj.pdf_file.url,
+            )
+        return "—"
+
+    pdf_link.short_description = "PDF"
+
+    def has_add_permission(self, request):
+        # PDFs are created when a document is uploaded (dashboard or document admin).
+        return False
 
 # @admin.register(DocumentBase)
 # class DocumentBaseAdmin(admin.ModelAdmin):
