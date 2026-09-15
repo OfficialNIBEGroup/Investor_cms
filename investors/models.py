@@ -411,7 +411,7 @@ class UploadedPDF(models.Model):
 
     class Meta:
         verbose_name = "Uploaded PDF"
-        verbose_name_plural = "Uploaded PDFs"
+        verbose_name_plural = "All Uploaded PDFs"
         ordering = ["-created_at"]
         unique_together = [("source_model", "source_id")]
 
