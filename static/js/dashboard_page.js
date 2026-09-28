@@ -19,17 +19,21 @@ async function loadDashboardStatistics() {
 
         const data = await response.json();
 
-        // Map of count element IDs → API keys (adjust keys to match your backend)
+        // Correct keys from the real API response
+        const sectionCounts = data.section_counts || {};
+        const total = data.total_documents || 0;
+
+        // Top section cards
         const countMap = {
-            countAnnualReports: data.annual_report || data.counts?.annual_report || 0,
-            countFinancialResults: data.financial_result || data.counts?.financial_result || 0,
-            countAnnualReturns: data.annual_return || data.counts?.annual_return || 0,
-            countCorporateAnnouncements: data.corporate_announcements || data.counts?.corporate_announcements || 0,
-            countCorporateGovernance: data.corporate_governance || data.counts?.corporate_governance || 0,
-            countShareholdingPattern: data.shareholding_pattern || data.counts?.shareholding_pattern || 0,
-            countSebiLodr: data.sebi_document || data.counts?.sebi_document || 0,
-            countInvestorFormsDeclaration: data.investor_form || data.counts?.investor_form || 0,
-            countSubsidiaryFinancial: data.subsidiary_financial || data.counts?.subsidiary_financial || 0,
+            countAnnualReports: sectionCounts.annual_report || 0,
+            countFinancialResults: sectionCounts.financial_result || 0,
+            countAnnualReturns: sectionCounts.annual_return || 0,
+            countCorporateAnnouncements: sectionCounts.corporate_announcements || 0,
+            countCorporateGovernance: sectionCounts.corporate_governance || 0,
+            countShareholdingPattern: sectionCounts.shareholding_pattern || 0,
+            countSebiLodr: sectionCounts.sebi_document || 0,
+            countInvestorFormsDeclaration: sectionCounts.investor_form || 0,
+            countSubsidiaryFinancial: sectionCounts.subsidiary_financial || 0,
         };
 
         Object.entries(countMap).forEach(([id, value]) => {
@@ -37,61 +41,91 @@ async function loadDashboardStatistics() {
             if (el) el.textContent = value;
         });
 
-        const total =
-            data.total ||
-            Object.values(countMap).reduce((sum, n) => sum + Number(n || 0), 0);
-
+        // Total numbers
         const summaryTotal = document.getElementById("summaryTotal");
         const donutTotal = document.getElementById("donutTotal");
         if (summaryTotal) summaryTotal.textContent = total;
         if (donutTotal) donutTotal.textContent = total;
 
-        // Build section summary grid + update donut
-        updateDonutAndSummary(data, total);
+        // Build legend + dynamic donut
+        updateDonutAndSummary(sectionCounts, total);
     } catch (error) {
         console.error("loadDashboardStatistics error:", error);
     }
 }
 
-function updateDonutAndSummary(data, total) {
+function updateDonutAndSummary(sectionCounts, total) {
     const grid = document.getElementById("sectionSummaryGrid");
     if (!grid) return;
 
-    const sections = window.investorSections || [];
-    const colors = [
+    // Prefer sections from common.js
+    let sections = window.investorSections || [];
+
+    // Fallback if investorSections is empty
+    if (!sections.length && sectionCounts) {
+        sections = Object.keys(sectionCounts).map(key => ({
+            key: key,
+            name: key.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())
+        }));
+    }
+
+    const colorClasses = [
+        "section-color-1", "section-color-2", "section-color-3", "section-color-4",
+        "section-color-5", "section-color-6", "section-color-7", "section-color-8",
+        "section-color-9", "section-color-10", "section-color-11", "section-color-12",
+        "section-color-13"
+    ];
+
+    // Colors matching the SVG circles in HTML
+    const svgColors = [
         "#38bdf8", "#a78bfa", "#818cf8", "#34d399", "#2dd4bf",
         "#60a5fa", "#f59e0b", "#fb7185", "#c084fc", "#22c55e",
-        "#14b8a6", "#6366f1", "#0ea5e9",
+        "#14b8a6", "#6366f1", "#0ea5e9"
     ];
 
     grid.innerHTML = "";
     let offset = 0;
 
+    // Reset all donut segments
+    for (let i = 1; i <= 13; i++) {
+        const seg = document.getElementById(`donutSegment${i}`);
+        if (seg) {
+            seg.setAttribute("stroke-dasharray", "0 100");
+            seg.setAttribute("stroke-dashoffset", "0");
+        }
+    }
+
     sections.forEach((section, index) => {
         const key = section.key;
-        const count =
-            (data.counts && data.counts[key]) ||
-            data[key] ||
-            0;
+        const count = Number(sectionCounts[key] || 0);
         const pct = total > 0 ? (count / total) * 100 : 0;
 
-        // Update donut segment if present
+        // Update SVG segment (this makes the donut dynamic)
         const segment = document.getElementById(`donutSegment${index + 1}`);
         if (segment) {
+            segment.setAttribute("stroke", svgColors[index % svgColors.length]);
             segment.setAttribute("stroke-dasharray", `${pct} ${100 - pct}`);
             segment.setAttribute("stroke-dashoffset", String(-offset));
             offset += pct;
         }
 
+        // Legend card
         const item = document.createElement("div");
-        item.className = "section-summary-item";
+        item.className = "section-stat";
         item.innerHTML = `
-            <span class="summary-dot" style="background:${colors[index % colors.length]}"></span>
-            <span class="summary-label">${escapeHtml(section.name)}</span>
-            <strong class="summary-count">${count}</strong>
+            <div class="section-stat-top">
+                <span class="legend-dot ${colorClasses[index % colorClasses.length]}"></span>
+                <span class="section-stat-name">${escapeHtml(section.name)}</span>
+            </div>
+            <div class="section-stat-bottom">
+                <strong>${count}</strong>
+                <span>docs</span>
+            </div>
         `;
         grid.appendChild(item);
     });
+
+    console.log("Donut updated → total:", total, "sections:", sections.length, "offset:", offset);
 }
 
 async function loadRecentDocuments() {
@@ -139,6 +173,23 @@ async function loadRecentDocuments() {
                 doc.created_at ||
                 "-";
 
+            // ----- Activity badge (UPLOADED / EDITED / DELETED) -----
+            let activity = (doc.activity || doc.action || doc.event || doc.status || "uploaded").toLowerCase();
+            let activityLabel = "Uploaded";
+            let activityClass = "uploaded";
+
+            if (activity.includes("edit") || activity === "updated") {
+                activityLabel = "Edited";
+                activityClass = "edited";
+            } else if (activity.includes("delete") || activity === "removed") {
+                activityLabel = "Deleted";
+                activityClass = "deleted";
+            } else {
+                activityLabel = "Uploaded";
+                activityClass = "uploaded";
+            }
+
+            // Link for title
             let linkHtml = escapeHtml(title);
             if (doc.pdf_file) {
                 linkHtml = `<a href="${escapeHtml(doc.pdf_file)}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}</a>`;
@@ -157,6 +208,9 @@ async function loadRecentDocuments() {
                         <span class="recent-doc-section">${escapeHtml(sectionName)}</span>
                         <span class="recent-doc-date">${escapeHtml(activityDate)}</span>
                     </div>
+                </div>
+                <div class="recent-doc-status">
+                    <span class="recent-doc-activity ${activityClass}">${activityLabel}</span>
                 </div>
             `;
             listEl.appendChild(item);

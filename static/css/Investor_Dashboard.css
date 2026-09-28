@@ -526,6 +526,7 @@ button {
     grid-template-columns: 170px minmax(0, 1fr);
     gap: 24px;
     align-items: center;
+    height: 300px;
 }
 
 /* DONUT */
