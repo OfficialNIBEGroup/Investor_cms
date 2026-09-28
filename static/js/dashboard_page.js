@@ -173,23 +173,33 @@ async function loadRecentDocuments() {
                 doc.created_at ||
                 "-";
 
-            // ----- Activity badge (UPLOADED / EDITED / DELETED) -----
-            let activity = (doc.activity || doc.action || doc.event || doc.status || "uploaded").toLowerCase();
+            // ----- Dynamic activity badge (Uploaded / Edited / Deleted) -----
             let activityLabel = "Uploaded";
             let activityClass = "uploaded";
 
-            if (activity.includes("edit") || activity === "updated") {
-                activityLabel = "Edited";
-                activityClass = "edited";
-            } else if (activity.includes("delete") || activity === "removed") {
+            // 1. Explicit deleted flag from backend (future-proof)
+            if (
+                doc.is_deleted === true ||
+                doc.deleted === true ||
+                (doc.activity && doc.activity.toLowerCase().includes("delete")) ||
+                (doc.action && doc.action.toLowerCase().includes("delete")) ||
+                (doc.status && doc.status.toLowerCase().includes("delete"))
+            ) {
                 activityLabel = "Deleted";
                 activityClass = "deleted";
-            } else {
-                activityLabel = "Uploaded";
-                activityClass = "uploaded";
+            }
+            // 2. Edited (updated later than created)
+            else if (doc.created_at && doc.updated_at) {
+                const created = new Date(doc.created_at).getTime();
+                const updated = new Date(doc.updated_at).getTime();
+
+                if (updated > created + 2000) {
+                    activityLabel = "Edited";
+                    activityClass = "edited";
+                }
             }
 
-            // Link for title
+            // Title link
             let linkHtml = escapeHtml(title);
             if (doc.pdf_file) {
                 linkHtml = `<a href="${escapeHtml(doc.pdf_file)}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}</a>`;
