@@ -1,5 +1,6 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
+from . import views
 from .views import (
     annual_reports_api,
     financial_results_api,
@@ -46,142 +47,53 @@ from .views import (
 
 
 urlpatterns = [
-    path(
-        "api/annual-reports/",
-        annual_reports_api,
-        name="annual_reports_api",
-    ),
+    # ================= PUBLIC WEBSITE PAGES =================
+    path("", views.home, name="home"),
+    path("about/", views.about, name="about"),
+    path("contact/", views.contact, name="contact"),
+    path("electronics/", views.electronics, name="electronics"),
+    path("land-systems/", views.land_systems, name="land_systems"),
+    path("naval-systems/", views.naval_systems, name="naval_systems"),
+    path("airforce-systems/", views.airforce_systems, name="airforce_systems"),
+    path("bbgpl/", views.bbgpl, name="bbgpl"),
+    path("investors/", investors_page, name="investors"),
 
-    path(
-        "api/financial-results/",
-        financial_results_api,
-        name="financial_results_api",
-    ),
+    # ================= PUBLIC APIs (for Investors page) =================
+    path("api/annual-reports/", annual_reports_api, name="annual_reports_api"),
+    path("api/financial-results/", financial_results_api, name="financial_results_api"),
+    path("api/annual-returns/", annual_returns_api, name="annual_returns_api"),
+    path("api/shareholder-notices/", shareholder_notices_api, name="shareholder_notices_api"),
+    path("api/newspaper-publications/", newspaper_publications_api, name="newspaper_publications_api"),
+    path("api/stock-exchange-disclosures/", stock_exchange_disclosures_api, name="stock_exchange_disclosures_api"),
+    path("api/corporate-governance/", corporate_governance_api, name="corporate_governance_api"),
+    path("api/shareholding-pattern/", shareholding_pattern_api, name="shareholding_pattern_api"),
+    path("api/sebi-documents/", sebi_documents_api, name="sebi_documents_api"),
+    path("api/investor-forms/", investor_forms_api, name="investor_forms_api"),
+    path("api/tax-declarations/", tax_declarations_api, name="tax_declarations_api"),
+    path("api/unclaimed-dividends/", unclaimed_dividends_api, name="unclaimed_dividends_api"),
+    path("api/subsidiary-financials/", subsidiary_financials_api, name="subsidiary_financials_api"),
+    path("api/custom-documents/", custom_documents_api, name="custom_documents_api"),
 
-    path("api/annual-returns/", 
-         annual_returns_api, 
-         name="annual_returns_api"),
+    # ================= DASHBOARD / CMS =================
+    path("dashboard_login/", dashboard_login, name="dashboard_login"),
+    path("dashboard_logout/", dashboard_logout, name="dashboard_logout"),
+    path("upload-dashboard/", upload_dashboard, name="upload_dashboard"),
 
-    path(
-    'api/shareholder-notices/',
-    shareholder_notices_api,
-    name="shareholder_notices_api"),
+    path("dashboard/", views.dashboard_view, name="dashboard"),
+    path("documents/", views.documents_view, name="documents"),
+    path("upload/", views.upload_view, name="upload"),
+    path("audit-log/", views.audit_log_view, name="audit_log"),
+    path("employees/", views.employees_view, name="employees"),
+    path("sections/", views.sections_view, name="sections"),
 
-    path(
-    'api/newspaper-publications/',
-    newspaper_publications_api,
-    name='newspaper_publications_api'),
-
-    path(
-    'api/stock-exchange-disclosures/',
-    stock_exchange_disclosures_api,
-    name='stock_exchange_disclosures_api'),
-
-    path(
-        'api/corporate-governance/',
-        corporate_governance_api,
-        name='corporate_governance_api'
-    ),
-
-    path(
-        'api/shareholding-pattern/',
-        shareholding_pattern_api,
-        name='shareholding_pattern_api'
-    ),
-
-    path(
-    'api/sebi-documents/',
-    sebi_documents_api,
-    name='sebi_documents_api'
-    ),
-
-    path(
-        'api/investor-forms/',
-        investor_forms_api,
-        name='investor_forms_api'
-    ),
-
-    path(
-    'api/tax-declarations/',
-    tax_declarations_api,
-    name='tax_declarations_api'
-    ),
-
-    path(
-    'api/unclaimed-dividends/',
-    unclaimed_dividends_api,
-    name='unclaimed_dividends_api'
-    ),
-
-    path(
-    'api/subsidiary-financials/',
-    subsidiary_financials_api,
-    name='subsidiary_financials_api'
-    ),
-
-    path(
-        "investors/",
-        investors_page,
-        name="investors_page",
-    ),
-
-    path(
-    "upload-dashboard/",
-    upload_dashboard,
-    name="upload_dashboard",
-    ),
-
-    path(
-        "api/dashboard-documents/",
-        dashboard_documents_api,
-        name="dashboard_documents_api",
-    ),
-
-    path(
-    "api/dashboard-statistics/",
-    dashboard_statistics_api,
-    name="dashboard_statistics_api",
-    ),
-    
-    path(
-        "dashboard_login/",
-        dashboard_login,
-        name="dashboard_login",
-        ),
-
-    path(
-    "dashboard_logout/",
-    dashboard_logout,
-    name="dashboard_logout",
-    ),
-
-    path(
-        "api/upload-investor-document/",
-        upload_investor_document,
-        name="upload_investor_document",
-    ),
-
-    path(
-    "api/update-investor-document/",
-    update_investor_document,
-    name="update_investor_document",
-    ),
-
-    path("api/delete-investor-document/", 
-         delete_investor_document, 
-         name="delete_investor_document"),
-
-    path(
-    "api/edit-investor-document/<int:document_id>/<str:section>/",
-    edit_investor_document,
-    name="edit_investor_document",
-    ),
-
-    path(
-        "api/download-summary-report/",
-        download_summary_report,
-        name="download_summary_report",
-    ),
+    # Dashboard APIs
+    path("api/dashboard-documents/", dashboard_documents_api, name="dashboard_documents_api"),
+    path("api/dashboard-statistics/", dashboard_statistics_api, name="dashboard_statistics_api"),
+    path("api/upload-investor-document/", upload_investor_document, name="upload_investor_document"),
+    path("api/update-investor-document/", update_investor_document, name="update_investor_document"),
+    path("api/delete-investor-document/", delete_investor_document, name="delete_investor_document"),
+    path("api/edit-investor-document/<int:document_id>/<str:section>/", edit_investor_document, name="edit_investor_document"),
+    path("api/download-summary-report/", download_summary_report, name="download_summary_report"),
 
     # Employee Management
     path("api/employees/", employees_list_api, name="employees_list_api"),
@@ -190,6 +102,21 @@ urlpatterns = [
     path("api/employees/toggle-status/", toggle_employee_status, name="toggle_employee_status"),
     path("api/employees/delete/", delete_employee, name="delete_employee"),
 
+    # Sections
+    path("api/sections/", sections_list_api, name="sections_list_api"),
+    path("api/sections/create/", create_section, name="create_section"),
+    path("api/sections/update/", update_section, name="update_section"),
+    path("api/sections/delete/", delete_section, name="delete_section"),
+    path("api/sections/toggle-status/", toggle_section_status, name="toggle_section_status"),
+    path("api/subsections/create/", create_subsection, name="create_subsection"),
+    path("api/subsections/update/", update_subsection, name="update_subsection"),
+    path("api/subsections/delete/", delete_subsection, name="delete_subsection"),
+    path("api/custom-documents/upload/", upload_custom_document, name="upload_custom_document"),
+    path("api/custom-documents/delete/", delete_custom_document, name="delete_custom_document"),
+
+    # Audit
+    path("api/audit-logs/", audit_log_api, name="audit_log_api"),
+
     # Password Reset
     path(
         "password-reset/",
@@ -197,50 +124,30 @@ urlpatterns = [
             template_name="Password_Reset.html",
             email_template_name="password_reset_email.html",
             subject_template_name="password_reset_subject.txt",
-            success_url="/password-reset/done/"
+            success_url="/password-reset/done/",
         ),
-        name="password_reset"
+        name="password_reset",
     ),
     path(
         "password-reset/done/",
         auth_views.PasswordResetDoneView.as_view(
             template_name="password_reset_done.html"
         ),
-        name="password_reset_done"
+        name="password_reset_done",
     ),
     path(
         "password-reset-confirm/<uidb64>/<token>/",
         auth_views.PasswordResetConfirmView.as_view(
             template_name="password_reset_confirm.html",
-            success_url="/password-reset-complete/"
+            success_url="/password-reset-complete/",
         ),
-        name="password_reset_confirm"
+        name="password_reset_confirm",
     ),
     path(
         "password-reset-complete/",
         auth_views.PasswordResetCompleteView.as_view(
             template_name="password_reset_complete.html"
         ),
-        name="password_reset_complete"
+        name="password_reset_complete",
     ),
-
-    path("api/audit-logs/", audit_log_api, name="audit_log_api"),
-
-    # Section management (Admin CRUD + list for Admin/Employee)
-    path("api/sections/", sections_list_api, name="sections_list_api"),
-    path("api/sections/create/", create_section, name="create_section"),
-    path("api/sections/update/", update_section, name="update_section"),
-    path("api/sections/delete/", delete_section, name="delete_section"),
-    path("api/sections/toggle-status/", toggle_section_status, name="toggle_section_status"),
-
-    # Sub-sections
-    path("api/subsections/create/", create_subsection, name="create_subsection"),
-    path("api/subsections/update/", update_subsection, name="update_subsection"),
-    path("api/subsections/delete/", delete_subsection, name="delete_subsection"),
-
-    # Custom section documents
-    path("api/custom-documents/", custom_documents_api, name="custom_documents_api"),
-    path("api/custom-documents/upload/", upload_custom_document, name="upload_custom_document"),
-    path("api/custom-documents/delete/", delete_custom_document, name="delete_custom_document"),
 ]
-

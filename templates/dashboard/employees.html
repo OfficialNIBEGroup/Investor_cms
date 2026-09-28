@@ -1,0 +1,157 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% load static %}
+
+{% block title %}Employees | NIBE Investor Portal{% endblock %}
+
+{% block content %}
+<section id="employeesPage" class="page-section">
+
+    <div class="page-heading">
+        <div>
+            <span class="welcome-label">USER MANAGEMENT</span>
+            <h2>Employees</h2>
+            <p>Manage dashboard users, roles and access.</p>
+        </div>
+
+        <button type="button"
+                class="primary-button"
+                onclick="openAddEmployeeModal()"
+                style="margin-top: 12px;">
+            + Add User
+        </button>
+    </div>
+
+    <div class="dashboard-card documents-table-card">
+
+        <div class="search-row">
+            <input type="text"
+                   id="employeeSearch"
+                   placeholder="Search by Employee ID, name or email..."
+                   oninput="filterEmployeesTable()">
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Employee ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Joined</th>
+                        <th>Last Login</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="employeesTableBody">
+                    <tr>
+                        <td colspan="8" class="table-empty">Loading employees...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</section>
+{% endblock %}
+
+{% block modals %}
+<!-- ADD / EDIT EMPLOYEE MODAL -->
+<div class="modal-overlay" id="employeeModalOverlay">
+    <div class="edit-modal" style="max-width: 520px;">
+
+        <div class="edit-modal-header">
+            <h3 id="employeeModalTitle">Add User</h3>
+            <button type="button" class="modal-close-btn" onclick="closeEmployeeModal()">×</button>
+        </div>
+
+        <form id="employeeForm" onsubmit="saveEmployee(event)">
+            <div class="edit-modal-body">
+
+                <input type="hidden" id="employee_id" value="">
+
+                <div class="form-group full-width">
+                    <label for="employee_username">
+                        Employee ID <span style="color:#ef4444;">*</span>
+                    </label>
+                    <input type="text"
+                           id="employee_username"
+                           name="username"
+                           placeholder="e.g. EMP001"
+                           required
+                           autocomplete="off">
+                    <small id="usernameHelp">Used for login. Cannot be changed after creation.</small>
+                </div>
+
+                <div class="form-group full-width" style="display: flex; gap: 12px;">
+                    <div style="flex: 1;">
+                        <label for="employee_first_name">First Name</label>
+                        <input type="text" id="employee_first_name" name="first_name" placeholder="First name">
+                    </div>
+                    <div style="flex: 1;">
+                        <label for="employee_last_name">Last Name</label>
+                        <input type="text" id="employee_last_name" name="last_name" placeholder="Last name">
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="employee_email">Email</label>
+                    <input type="email" id="employee_email" name="email" placeholder="user@example.com">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="employee_role">
+                        Role <span style="color:#ef4444;">*</span>
+                    </label>
+                    <select id="employee_role" name="role" required>
+                        <option value="EMPLOYEE">Employee – Documents &amp; Upload only</option>
+                        <option value="ADMIN">Admin – Full system access</option>
+                        <option value="CLIENT">Client – Public website only</option>
+                    </select>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="employee_password">
+                        Password
+                        <span id="passwordRequiredMark" style="color:#ef4444;">*</span>
+                    </label>
+                    <input type="password"
+                           id="employee_password"
+                           name="password"
+                           placeholder="Min. 6 characters"
+                           autocomplete="new-password">
+                    <small id="passwordHelp">
+                        Required when creating. Leave blank when editing to keep current password.
+                    </small>
+                </div>
+
+                <div class="form-group full-width">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;">
+                        <input type="checkbox" id="employee_is_active" checked style="width: auto;">
+                        Active account
+                    </label>
+                </div>
+
+            </div>
+
+            <div class="edit-modal-footer"
+                 style="display: flex; justify-content: flex-end; gap: 10px; padding: 16px 20px; border-top: 1px solid #e2e8f0;">
+                <button type="button" class="secondary-button" onclick="closeEmployeeModal()"
+                        style="padding: 8px 16px; border-radius: 8px; border: 1.5px solid #cbd5e1; background: white; cursor: pointer;">
+                    Cancel
+                </button>
+                <button type="submit" class="primary-button" id="saveEmployeeButton">
+                    Save User
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/employees_page.js' %}"></script>
+{% endblock %}

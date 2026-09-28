@@ -1,0 +1,676 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Naval Systems | NIBE LIMITED{% endblock %}
+
+{% block content %}
+
+<!--==========================================================
+                NAVAL SYSTEMS NAVIGATION
+===========================================================-->
+<section id="products-navigation" class="naval-nav-section">
+    <div class="naval-nav-container">
+        <div class="naval-nav-heading">
+            <span class="naval-nav-tag">NAVAL SYSTEMS</span>
+            <h2>Engineering Maritime Combat Excellence</h2>
+            <p>
+                From mine counter measure solutions to multi-mission autonomous naval systems
+                and universal rocket launching systems, NIBE's naval portfolio
+                extends precision, autonomy and strike power across the maritime domain.
+            </p>
+        </div>
+
+        <div class="naval-system-nav">
+            <a href="#mcm-suite">Mine Counter Measure Solutions</a>
+            <a href="#seagull-usv">Autonomous Surface Vessel</a>
+            <a href="#trigon">SuryaAstra - Ship Mounted Universal Rocket Launcher</a>
+            <a href="#counter">Counter-UAS</a>
+            <a href="#traps">Containerised Towed Sonar</a>
+            <a href="#naval">Naval Ammunitions</a>
+            <a href="#sattelite">Satellite Based Intelligence</a>
+        </div>
+    </div>
+</section>
+
+<!--==========================================================
+        MCM SUITE SECTION
+===========================================================-->
+<section id="mcm-suite" class="mcm-section">
+    <div class="mcm-container">
+        <div class="mcm-image">
+            <img src="{% static 'images/naval-systems/Mine Counter Measure.jpg' %}" alt="Mine Counter Measure Suite">
+        </div>
+        <div class="mcm-content">
+            
+            <h2>Mine Counter Measure (MCM) Suite</h2>
+            <p>
+                An integrated naval solution designed for detection, classification, identification
+                and neutralization of underwater mines using autonomous platforms, advanced sonar
+                systems and intelligent mission control technologies.
+            </p>
+        </div>
+    </div>
+
+    <div class="af-detail-wrap">
+        <h3 class="af-subhead">Suite Components</h3>
+        <div class="mcm-components">
+            <div class="component-card">
+                <h3>Mission Control System (MCS)</h3>
+                <p>Provides centralised command, control and mission planning by co-ordinating all autonomous platforms and sensors throughout the mission.</p>
+            </div>
+            <div class="component-card">
+                <h3>Autonomous Surface Vessel (USV)</h3>
+                <p>Performs autonomous mine hunting operations while keeping personnel and naval platforms away from hazardous areas.</p>
+            </div>
+            <div class="component-card">
+                <h3>Heavy Weight Autonomous Underwater Vehicle (HWAUV)</h3>
+                <p>Detects, classifies and identifies underwater mines using advanced navigation and sensing technologies.</p>
+            </div>
+            <div class="component-card">
+                <h3>Synthetic Aperture Sonar</h3>
+                <p>Produces ultra-high-resolution seabed imagery for precise mine detection over large underwater search areas.</p>
+            </div>
+            <div class="component-card">
+                <h3>Mine Identification & Disposal System</h3>
+                <p>Remotely operated system used to visually identify and safely neutralize underwater explosive threats.</p>
+            </div>
+            <div class="component-card">
+                <h3>Launch & Recovery System</h3>
+                <p>Enables safe deployment and recovery of USVs, AUVs and sonar payloads for efficient maritime operations.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!--==========================================================
+        SEAGULL USV SECTION
+===========================================================-->
+<section id="seagull-usv" class="seagull-section">
+    <div class="seagull-container">
+        <div class="seagull-image">
+            <img src="{% static 'images/naval-systems/Seagull.jpg' %}" alt="Seagull Unmanned Surface Vessel">
+        </div>
+        <div class="seagull-content">
+            
+            <h2>Autonomous Surface Vessel</h2>
+            <h5>Multi-mission autonomous naval platform</h5>
+            <p>
+                ★ Fully autonomous multi-mission platform designed for maritime warfare, 
+                integrating advanced sonar systems and modular payloads for versatile maritime operations.<br>
+                ★ Designed for extended endurance — Operates continuously for more than <strong>four days</strong> at sea.<br>
+                ★ Constructed from lightweight composites and aluminum materials as a <strong>12-metre</strong> vessel, easily deployable from Ports or Motherships.<br>
+                ★ Transportable within a standard 40-feet container while meeting international maritime and military specifications.
+            </p>
+        </div>
+    </div>
+
+    <div class="af-detail-wrap">
+        <h3 class="af-subhead">Multi-Mission Capabilities</h3>
+        <div class="seagull-features">
+            <div class="feature-box">
+                <h4>Multi-Mission Operations</h4>
+                <p>MCM, ASW, Maritime Security including ISR, Hydrography and more.</p>
+            </div>
+            <div class="feature-box">
+                <h4>Mission Payloads</h4>
+                <p>Modular and switchable payload suites with advanced sonar systems.</p>
+            </div>
+            <div class="feature-box">
+                <h4>Autonomous Endurance</h4>
+                <p>Operates continuously for over four days without crew.</p>
+            </div>
+            <div class="feature-box">
+                <h4>Rapid Deployment</h4>
+                <p>Deployable from Port or Mothership and transportable in a 40 ft container.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!--==========================================================
+        TRIGON / SURYAASTRA SECTION
+===========================================================-->
+<section id="trigon" class="trigon-section">
+    <div class="trigon-container">
+        <div class="trigon-image">
+            <img src="{% static 'images/naval-systems/TRIGON.jpg' %}" alt="SuryaAstra Ship Mounted Launcher">
+        </div>
+        <div class="trigon-content">
+           
+            <h2>SuryaAstra - Ship Mounted Universal Rocket Launcher System</h2>
+            <p>
+                A universal multi-mission rocket launcher engineered for long-range
+                precision strike missions across land and maritime domains while 
+                integrating seamlessly with modern command and control systems.
+            </p>
+        </div>
+
+        <div class="trigon-video-wrapper">
+            <video id="trigonVideo" 
+                   src="{% static 'videos/naval-systems/trigon.mp4' %}" 
+                   class="scroll-autoplay-video"
+                   autoplay muted playsinline controls preload="auto">
+            </video>
+        </div>
+    </div>
+
+    <div class="af-detail-wrap">
+        <h3 class="af-subhead">Launcher Capabilities</h3>
+        <div class="trigon-features">
+            <div class="component-card">
+                <h3>Multi-Mission Launcher</h3>
+                <p>Supports multiple missile types with range varying from 150km to 300km through interchangeable Launch Pod Containers (LPCs).</p>
+            </div>
+            <div class="component-card">
+                <h3>Long-Range Precision Strike</h3>
+                <p>Engagement ranges up to 300 km with optimized trajectories for exceptional precision and battlefield effectiveness.</p>
+            </div>
+            <div class="component-card">
+                <h3>Dual-Domain Engagement</h3>
+                <p>Effective against both land and maritime targets, from hardened ground assets to fast-moving vessels.</p>
+            </div>
+            <div class="component-card">
+                <h3>C2 Integration</h3>
+                <p>Fully compatible with customer command and control systems for seamless operational integration.</p>
+            </div>
+            <div class="component-card">
+                <h3>Maximum Flexibility</h3>
+                <p>One launcher for multiple missions, eliminating the need for dedicated land and naval strike systems.</p>
+            </div>
+            <div class="component-card">
+                <h3>Force Multiplication</h3>
+                <p>Enhances naval strike capability while leveraging the proven land-based ecosystem.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!--==================================================
+        COUNTER-UAS SECTION
+===================================================-->
+<section id="counter" class="counteruas-section">
+    <div class="counter-container">
+        <div class="counter-images">
+            <img src="{% static 'images/naval-systems/naval video cuas.png' %}" alt="Counter UAS System">
+            <img src="{% static 'images/naval-systems/naval system cuas.png' %}" alt="Counter UAS Portfolio">
+        </div>
+        <div class="counter-content">
+            
+            <h2>Counter-UAS</h2>
+            <h5>Integrated Counter-Unmanned Aerial System</h5>
+            <p>
+                ★ Self-contained Counter-UAS (CUAS) mobile force protection solution integrating radar and electro-optical sensors for drone detection, tracking and interception.<br>
+                ★ 360° surveillance radar combined with high-performance electro-optical sensors featuring embedded Automatic Target Recognition (ATR) and Automatic Target Tracking (ATT).<br>
+                ★ Fully integrated interception solution supporting <strong>Dual 7.62 mm CUAS RCWS and 30 mm CUAS Turret </strong> for layered defence.<br>
+                ★ Multi-layer detection and protection architecture capable of countering a wide spectrum of drone threats with rapid response capability.<br>
+                ★ Lightweight dual-use solution designed for seamless integration on 4×4 light tactical and armoured vehicles.<br>
+                ★ Cost-effective engagement with low cost per shot and AI-driven fully automated engagement process for faster response and improved operational efficiency.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!--==========================================================
+        TRAPS CONTAINERISED SONAR
+===========================================================-->
+<section id="traps" class="traps-section">
+    <div class="traps-container">
+        <div class="traps-image">
+            <img src="{% static 'images/naval-systems/TRAPS.jpg' %}" alt="TRAPS Containerised Sonar">
+        </div>
+        <div class="traps-content">
+            
+            <h2>Containerised Sonar</h2>
+            <h5>Towed Reelable Active Passive Sonar System</h5>
+            <p>
+                A compact containerised towed array sonar solution integrating winch handling, sonar electronics, operator consoles and remote control capabilities into a single One TEU container for rapid deployment and efficient maritime surveillance operations.
+            </p>
+        </div>
+    </div>
+
+    <div class="af-detail-wrap">
+        
+        <div class="traps-config-row">
+            <ul class="af-list">
+                <h3 class="af-subhead">System Configuration</h3>
+                <p>☆ Sonar assembly stowed on the winch & handling system<br>
+                ☆ Complete system containerised inside one TEU container<br>
+                ☆ Winch & handling system with remote control capability<br>
+                ☆ Integrated sonar electronics rack with local RecView subsystem<br>
+                ☆ Power amplifier<br>
+                ☆ Dedicated sonar operator unit<br>
+                ☆ RecView subsystem with remote WHS control</p>
+
+
+                {% comment %} <li>☆ Sonar assembly stowed on the winch & handling system</li>
+                <li>☆ Complete system containerised inside one TEU container</li>
+                <li>☆ Winch & handling system with remote control capability</li>
+                <li>☆ Integrated sonar electronics rack with local RecView subsystem</li>
+                <li>☆ Power amplifier</li>
+                <li>☆ Dedicated sonar operator unit</li>
+                <li>☆ RecView subsystem with remote WHS control</li> {% endcomment %}
+            </ul>
+            <div class="traps-config-image">
+                <img src="{% static 'images/naval-systems/TRAPS_2.jpg' %}" alt="TRAPS Winch Handling System">
+                
+            </div>
+        </div>
+
+        <h3 class="af-subhead">Technical Specifications</h3>
+        <div class="af-spec-grid">
+            <div><strong>11.5 t</strong><span>System Weight</span></div>
+            <div><strong>13.86 m²</strong><span>Footprint</span></div>
+            <div><strong>150 km</strong><span>Range — Exceeds 2nd CZ</span></div>
+            <div><strong>VLF–HF</strong><span>Active Frequencies</span></div>
+            <div><strong>5–5500 Hz</strong><span>Passive Capability</span></div>
+            <div><strong>10–300 m</strong><span>Operating Depth</span></div>
+            <div><strong>Sea State 6</strong><span>Deployment / Recovery Limit</span></div>
+            <div><strong>No AOB</strong><span>In-Line Tow — No Active Over-Boarding System Required</span></div>
+        </div>
+    </div>
+</section>
+
+<!--==========================================================
+        NAVAL AMMUNITION
+===========================================================-->
+<section class="naval-ammo-intro" id="naval">
+    <div class="naval-ammo-intro-container">
+        <h2>Naval Ammunition</h2>
+        <div class="naval-ammo-intro-image">
+            <img src="{% static 'images/naval-systems/30mm Naval Ammunation.jpg' %}" alt="Naval Ammunition">
+        </div>
+        <p>
+            With its high accuracy and devastating firepower, our state-of-the-art
+            naval ammunition stand out as an optimal choice for the protection of
+            military and civilian assets.
+        </p>
+    </div>
+</section>
+
+<!-- 30x173mm TP-T M200 -->
+<section class="m200-section">
+    <div class="m200-container">
+        <div class="m200-image">
+            <img src="{% static 'images/naval-systems/30x173mm TP-T, M200.jpg' %}" alt="30x173mm TP-T M200">
+        </div>
+        <div class="m200-content">
+           
+            <h2>30x173mm TP-T, M200</h2>
+            <h5>Training Practice – Tracer Ammunition</h5>
+            <p>
+               The <strong>30x173mm TP-T M200</strong> training ammunition is fully compatible with all 
+               <strong>30x173mm NATO standard cannons,</strong> providing reliable ballistic performance 
+               for operational training and qualification exercises while replicating live ammunition characteristics.
+            </p>
+        </div>
+    </div>
+<br><br>
+     <h3 class="af-subhead">Technical Specifications</h3>
+        <div class="af-spec-grid">
+            <div><strong>290 mm</strong><span>Cartridge Length</span></div>
+            <div><strong>670 g</strong><span>Cartridge Weight</span></div>
+            <div><strong>139 mm</strong><span>Projectile Length</span></div>
+            <div><strong>360 g</strong><span>Projectile Weight</span></div>
+            <div><strong>160 g</strong><span>Propellant Weight</span></div>
+            <div><strong>1100 m/s</strong><span>Muzzle Velocity</span></div>
+            <div><strong>400 MPa</strong><span>Chamber Pressure</span></div>
+            <div><strong>0.4 × 0.4 mils</strong><span>Accuracy @ 1000 m</span></div>
+            <div><strong>-46°C to +63°C</strong><span>Firing Temperature</span></div>
+            <div><strong>-54°C to +71°C</strong><span>Storage Temperature</span></div>
+        </div>
+</section>
+
+<!-- 30x173mm HE-T M201 -->
+<section id="m201" class="m201-section">
+    <div class="m201-container">
+        <div class="m201-image">
+            <img src="{% static 'images/naval-systems/30x173mm HE-T, M201.jpg' %}" alt="30x173mm HE-T M201">
+        </div>
+        <div class="m201-content">
+           
+            <h2>30x173mm HE-T, M201</h2>
+            <h5>High Explosive – Tracer Ammunition</h5>
+            <p>
+                The <strong>30x173mm HE-T M201 </strong>ammunition is fully 
+                compatible with all <strong>30x173mm NATO standard cannons,</strong> delivering 
+                superior high-explosive effects against light armoured vehicles, soft targets 
+                and battlefield fortifications while maintaining excellent ballistic accuracy.
+            </p>
+        </div>
+    </div>
+<br><br>
+     <h3 class="af-subhead">Technical Specifications</h3>
+        <div class="af-spec-grid">
+            <div><strong>290 mm</strong><span>Cartridge Length</span></div>
+            <div><strong>670 g</strong><span>Cartridge Weight</span></div>
+            <div><strong>166 mm</strong><span>Projectile Length</span></div>
+            <div><strong>380 g</strong><span>Projectile Weight</span></div>
+            <div><strong>40 g</strong><span>HE (A7) Charge</span></div>
+            <div><strong>160 g</strong><span>Propellant Weight</span></div>
+            <div><strong>1100 m/s</strong><span>Muzzle Velocity</span></div>
+            <div><strong>400 MPa</strong><span>Chamber Pressure</span></div>
+            <div><strong>0.5 × 0.5 mils</strong><span>Accuracy @ 1000 m</span></div>
+            <div><strong>-46°C to +63°C</strong><span>Firing Temperature</span></div>
+        </div>
+</section>
+
+<!-- HE-Proximity -->
+<section id="HE-Proximity" class="m209-section">
+    <div class="m209-container">
+        <div class="m209-image">
+            <img src="{% static 'images/naval-systems/HE-Proximity.jpg' %}" alt="30x173mm HE-Proximity">
+        </div>
+        <div class="m209-content">
+            
+            <h2>30x173mm HE-Proximity</h2>
+            <h5>High Explosive Proximity Ammunition</h5>
+            <p>
+                ★ Modern battlefields are witnessing an unprecedented rise in the use of drones 
+                and unmanned aerial vehicles (UAVs), creating new threats for military and critical 
+                infrastructure protection.<br>
+                ★ The <strong>30x173mm HE-Proximity M209</strong> is an advanced programmable high-explosive proximity 
+                round developed for modern air-defence and counter-UAS operations.<br>
+                ★ Designed for seamless integration with modern 30mm weapon systems, the proximity ammunition delivers 
+                unmatched effectiveness against drones, UAVs and other aerial threats through precision proximity sensing
+                and controlled fragmentation.
+            </p>
+        </div>
+    </div>
+
+      <!-- ADDITIONAL DETAILS -->
+        <div class="af-detail-wrap">
+            <h3 class="af-subhead">
+                Threat Engagement Capability
+            </h3>
+            <div class="ammo30-grid">
+                <div class="ammo-card">
+                    <div class="ammo-icon">
+                        <i class="fa-solid fa-helicopter"></i>
+                    </div>
+                    <h4>UAVs</h4>
+                    <p>
+                        High-probability interception of reconnaissance
+                        and tactical UAVs.
+                    </p>
+                </div>
+                <div class="ammo-card">
+                    <div class="ammo-icon">
+                        <i class="fa-solid fa-plane"></i>
+                    </div>
+                    <h4>Large Drones</h4>
+                    <p>
+                        Precision proximity detonation against
+                        medium and large drone platforms.
+                    </p>
+                </div>
+                <div class="ammo-card">
+                    <div class="ammo-icon">
+                        <i class="fa-solid fa-drone"></i>
+                    </div>
+                    <h4>Small Drones</h4>
+                    <p>
+                        Highly effective against fast-moving,
+                        low-signature quadcopters and mini UAVs.
+                    </p>
+                </div>
+            </div>
+        </div>
+<br><br>
+    <!--==================================================
+                    TECHNICAL DETAILS
+    ===================================================-->
+    <h3 class="af-subhead">Technical Specifications</h3>
+        <div class="af-spec-grid">
+            <div><strong>980 m/s</strong><span>Muzzle Velocity</span></div>
+            <div><strong>10 m/s</strong><span>Target Velocity</span></div>
+            <div><strong>150–2000 m</strong><span>Effective Range</span></div>
+            <div><strong>&lt;0.6°</strong><span>Accuracy @1000 m</span></div>
+            <div><strong>Proximity</strong><span>Operational Mode</span></div>
+            <div><strong>&gt;20 m</strong><span>Safety Distance</span></div>
+            <div><strong>80 ms</strong><span>Operational Readiness</span></div>
+            <div><strong>&lt;5 sec</strong><span>Self Destruction</span></div>
+            <div><strong>460 g</strong><span>Projectile Mass</span></div>
+            <div><strong>15 Years</strong><span>Storage Life</span></div>
+            <div><strong>-46°C to +71°C</strong><span>Storage Temperature</span></div>
+            <div><strong>5200 bar</strong><span>Maximum Pressure</span></div>
+        </div>
+    </div>
+</section>
+
+<!-- 76mm Ammunition -->
+<section id="76mm" class="ammo76-section">
+    <div class="ammo76-container">
+        <div class="ammo76-image">
+            <img src="{% static 'images/naval-systems/76mm OM 76-62 Guns.jpg' %}" alt="76mm Naval Ammunition">
+        </div>
+        <div class="ammo76-content">
+           
+            <h2>76mm Ammunition for OM 76/62 Guns</h2>
+           
+            <p>
+                ★ The <strong>76mm HE-M77 Naval Ammunition</strong> is a
+                high-explosive round developed for the
+                <strong>OM 76/62 naval gun system</strong>. Designed for
+                outstanding ballistic performance, it delivers effective
+                engagement against surface targets, naval threats and
+                low-flying aerial targets.<br>
+                ★ Featuring a robust steel body, high-explosive filler and
+                precision impact fuze, the round provides excellent blast
+                and fragmentation effects while maintaining compatibility
+                with all standard <strong>OM 76/62 naval gun systems.</strong>
+            </p>
+        </div>
+    </div>
+
+    
+    <!--==========================================
+            KEY FEATURES
+    ===========================================-->
+
+    <h3 class="af-subhead">Technical Specifications</h3>
+        <div class="af-spec-grid">
+            <div><strong>12.4 kg</strong><span>Complete Round Weight</span></div>
+            <div><strong>6.2 kg</strong><span>Projectile Weight</span></div>
+            <div><strong>16,200 m</strong><span>Maximum Range</span></div>
+            <div><strong>930 m/s</strong><span>Muzzle Velocity</span></div>
+            <div><strong>HE</strong><span>High Fragmentation Effect</span></div>
+        </div>
+
+   
+    <!--==========================================
+            KEY BENEFITS
+    ===========================================-->
+
+    <div class="af-detail-wrap">
+
+        <h3 class="af-subhead">
+            Operational Advantages
+        </h3>
+
+        <div class="ammo76-benefits">
+
+            <div class="benefit-box">
+
+                <i class="fas fa-crosshairs"></i>
+
+                <h4>High Accuracy</h4>
+
+                <p>
+                    Provides exceptional accuracy against
+                    surface and maritime targets.
+                </p>
+
+            </div>
+
+            <div class="benefit-box">
+
+                <i class="fas fa-bomb"></i>
+
+                <h4>High Fragmentation</h4>
+
+                <p>
+                    Powerful blast and fragmentation
+                    effects for maximum target neutralization.
+                </p>
+
+            </div>
+
+            <div class="benefit-box">
+
+                <i class="fas fa-anchor"></i>
+
+                <h4>Naval Compatible</h4>
+
+                <p>
+                    Fully compatible with all
+                    OM 76/62 naval gun systems.
+                </p>
+
+            </div>
+
+            <div class="benefit-box">
+
+                <i class="fas fa-shield-alt"></i>
+
+                <h4>Mission Ready</h4>
+
+                <p>
+                    Reliable ammunition for
+                    naval defence and coastal security missions.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!--==================================================
+        SATELLITE BASED INTELLIGENCE
+===================================================-->
+<section id="sattelite" class="satellite-section">
+    <br>
+    <div class="satellite-header">
+        <span class="product-tag">SPACE SYSTEM</span>
+        <h2>Satellite Based Intelligence</h2>
+        <h5>Optical • SAR • RF / SIGINT Intelligence</h5>
+    </div>
+
+    <div class="satellite-image">
+        <p style="font-size:30px; color:#16213E; margin:15px 0; width:100%; text-align:center;">
+            Chakan Plant from the Satellite
+        </p>
+        <img src="{% static 'images/naval-systems/chakan_1.png' %}" alt="Chakan Plant from Satellite">
+        
+    </div>
+
+    <div class="satellite-content">
+        <div class="satellite-item">
+            <div class="satellite-left">
+                <h3>Optical Intelligence</h3>
+                <span>( 35 cm resolution )</span>
+            </div>
+            <div class="satellite-right">
+                <p>The planned constellation of more than 15 satellites in inclined
+                    orbit provides continuous coverage of sovereign areas of interest.
+                    Delivering imagery with up to <strong>35 cm resolution</strong>,
+                    the system enables precise identification of terrain, assets, and
+                    infrastructure changes. These capabilities support defence
+                    surveillance, border monitoring, urban planning, agriculture,
+                    disaster management, and advanced geospatial intelligence.</p>
+            </div>
+        </div>
+        <div class="satellite-item">
+            <div class="satellite-left">
+                <h3>SAR Intelligence</h3>
+                <span>( sub-0.5m resolution )</span>
+            </div>
+            <div class="satellite-right">
+                <p>A constellation of 6+ Synthetic Aperture Radar (SAR) satellites
+                    provides all-weather, day-and-night imaging capabilities.
+                    Combining ultra-high resolution with wide-area coverage, the
+                    system enables persistent surveillance of borders, maritime
+                    regions, critical infrastructure, and adversary activity. With
+                    sub-0.5 metre resolution, it can detect ships, illegal fishing,
+                    dark vessels, and oil spills even during heavy cloud cover or
+                    nighttime operations.</p>
+            </div>
+        </div>
+        <div class="satellite-item">
+            <div class="satellite-left">
+                <h3>RF / SIGINT</h3>
+                <span>( 30 MHz to 18 GHz )</span>
+            </div>
+            <div class="satellite-right">
+                <p>The RF/SIGINT constellation comprises planned clusters of three
+                    satellites, covering frequencies from <strong>30 MHz to 18 GHz</strong>.
+                    Supporting VHF, UHF, L, S, C, X, and Ku bands, the system captures
+                    the majority of man-made radio frequency emissions. It is designed
+                    for Electronic Intelligence (ELINT), Communications Intelligence
+                    (COMINT), and Signals Intelligence (SIGINT) missions across land,
+                    naval, and airborne operational environments.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Back to Top Button -->
+<button id="scrollToProductsBtn" class="scroll-to-products" aria-label="Back to Products" title="Back to Products">
+    <i class="fa-solid fa-arrow-up"></i>
+    <span>TOP</span>
+</button>
+
+{% endblock %}
+      
+
+{% block footer %}
+<footer class="land-footer">
+    <div class="land-footer-main">
+        <div class="footer-logo">
+            <img src="{% static 'images/logo/Nibe Limited Logo2.png' %}" alt="NIBE Limited">
+        </div>
+
+        <div class="footer-column">
+            <h4>Business Enquiries</h4>
+            <p><strong>Capt (IN) Mukesh Dhoundiyal (Retd)</strong></p>
+            <p>GM - Business Development<br>(Naval Systems)</p>
+            <a href="tel:+912069133799">Corporate Office Pune: 020 6913 3799</a>
+            <a href="mailto:contactus@nibelimited.com">contactus@nibelimited.com</a>
+        </div>
+
+        <div class="footer-column">
+            <h4>Mumbai Corporate Office</h4>
+            <p>
+                202, C-Wing, Windfall,<br>
+                Sahar Plaza Complex, J.B. Nagar,<br>
+                Marol, M.V. Road, Andheri (East),<br>
+                Mumbai, Maharashtra - 400059
+            </p>
+        </div>
+
+        <div class="footer-column">
+            <h4>Pune Corporate Office</h4>
+            <p>
+                6th - 8th Floor,
+                The Melange, <br>Fugewadi,
+                Seva Nagar, Dapodi,<br>
+                Pimpri-Chinchwad,<br>
+                Pune, Maharashtra - 411012
+            </p>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>© 2026 NIBE Limited. All Rights Reserved.</p>
+        <div class="footer-social">
+            <a href="https://www.instagram.com/nibelimited" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.linkedin.com/company/nibe-limited-com/" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+            <a href="https://x.com/Nibe_Limited" target="_blank"><i class="fab fa-x-twitter"></i></a>
+            <a href="https://www.facebook.com/nibelimited" target="_blank"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.youtube.com/@Nibe_Limited" target="_blank"><i class="fab fa-youtube"></i></a>
+        </div>
+    </div>
+</footer>
+{% endblock %}

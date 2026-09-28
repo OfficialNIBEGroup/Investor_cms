@@ -2316,16 +2316,17 @@ def dashboard_login(request):
 def redirect_based_on_role(user):
     """
     After login, send user to the correct place according to role.
-    ADMIN / EMPLOYEE → Dashboard
+    ADMIN / EMPLOYEE → New Dashboard
     CLIENT           → Public website
     """
     if not hasattr(user, 'profile'):
+        from .models import Profile
         Profile.objects.create(user=user, role='EMPLOYEE')
 
     role = user.profile.role
 
     if role in ['ADMIN', 'EMPLOYEE']:
-        return redirect('upload_dashboard')
+        return redirect('documents')   # New dashboard (Documents page)
 
     # CLIENT (or any other role)
     return redirect('https://www.nibelimited.com')
@@ -3351,3 +3352,120 @@ def delete_custom_document(request):
         return JsonResponse({"success": False, "message": "Document not found."}, status=404)
     except Exception as e:
         return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib.auth import logout
+
+def get_dashboard_context(request, active_tab):
+    user = request.user
+
+    # Safety: make sure Profile exists
+    if not hasattr(user, 'profile'):
+        from .models import Profile
+        Profile.objects.create(user=user, role='EMPLOYEE')
+
+    # Correct way to get the role
+    role = user.profile.role
+    is_admin = role == "ADMIN"
+
+    # Protect admin-only pages
+    if active_tab in ["dashboard", "audit_log", "employees", "sections"] and not is_admin:
+        return None  # caller will redirect
+
+    display_name = user.get_full_name() or user.username
+    initials = "".join([n[0] for n in display_name.split()[:2]]).upper() or "U"
+
+    return {
+        "active_tab": active_tab,
+        "is_admin": is_admin,
+        "user_role": role,
+        "display_name": display_name,
+        "username": user.username,
+        "user_initials": initials,
+    }
+
+
+@login_required
+def dashboard_view(request):
+    context = get_dashboard_context(request, "dashboard")
+    if context is None:
+        return redirect("documents")
+    return render(request, "dashboard/dashboard.html", context)
+
+
+@login_required
+def documents_view(request):
+    context = get_dashboard_context(request, "documents")
+    return render(request, "dashboard/documents.html", context)
+
+
+@login_required
+def upload_view(request):
+    context = get_dashboard_context(request, "upload")
+    return render(request, "dashboard/upload.html", context)
+
+
+@login_required
+def audit_log_view(request):
+    context = get_dashboard_context(request, "audit_log")
+    if context is None:
+        return redirect("documents")
+    return render(request, "dashboard/audit_log.html", context)
+
+
+@login_required
+def employees_view(request):
+    context = get_dashboard_context(request, "employees")
+    if context is None:
+        return redirect("documents")
+    return render(request, "dashboard/employees.html", context)
+
+
+@login_required
+def sections_view(request):
+    context = get_dashboard_context(request, "sections")
+    if context is None:
+        return redirect("documents")
+    return render(request, "dashboard/sections.html", context)
+
+
+# ============================================================
+# PUBLIC WEBSITE PAGES
+# ============================================================
+
+def home(request):
+    return render(request, "index.html")
+
+
+def about(request):
+    return render(request, "about.html")
+
+
+def contact(request):
+    return render(request, "contact.html")
+
+
+def electronics(request):
+    return render(request, "electronics.html")
+
+
+def land_systems(request):
+    return render(request, "land_systems.html")
+
+
+def naval_systems(request):
+    return render(request, "naval_systems.html")
+
+
+def airforce_systems(request):
+    return render(request, "airforce_systems.html")
+
+
+def bbgpl(request):
+    return render(request, "bbgpl.html")
+
+
+def investors_page(request):
+    return render(request, "Investors.html")

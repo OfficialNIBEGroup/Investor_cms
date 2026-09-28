@@ -1,0 +1,184 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% load static %}
+
+{% block title %}Documents | NIBE Investor Portal{% endblock %}
+
+{% block content %}
+<section id="documentsPage" class="page-section">
+
+    <div class="page-heading">
+        <div>
+            <span class="welcome-label">DOCUMENT MANAGEMENT</span>
+            <h2>All Documents</h2>
+            <p>View documents added to the investor portal.</p>
+        </div>
+
+        <a href="{% url 'upload' %}" class="primary-button">
+            ＋ Upload Document
+        </a>
+    </div>
+
+    <div class="dashboard-card documents-table-card">
+
+        <div class="search-row">
+            <input type="text" id="documentSearch" placeholder="Search documents...">
+
+            <select id="documentSectionFilter">
+                <option value="all">All Sections</option>
+                <option value="annual_report">Annual Report</option>
+                <option value="financial_result">Financial Results</option>
+                <option value="annual_return">Annual Returns</option>
+                <option value="corporate_announcements">Corporate Announcements</option>
+                <option value="corporate_governance">Corporate Governance</option>
+                <option value="shareholding_pattern">Shareholding Pattern</option>
+                <option value="sebi_document">Disclosure under Regulations 46 of SEBI LODR</option>
+                <option value="investor_form">Investor Forms & Declaration</option>
+                <option value="subsidiary_financial">Subsidiary Financial</option>
+            </select>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Document</th>
+                        <th>Section</th>
+                        <th>
+                            <div>
+                                <select id="documentYearFilter" class="table-filter-select">
+                                    <option value="all">Financial Year</option>
+                                </select>
+                            </div>
+                        </th>
+                        <th>Date</th>
+                        <th>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <select id="documentStatusFilter" class="table-filter-select">
+                                    <option value="all">Status</option>
+                                    <option value="published">Published</option>
+                                    <option value="unpublished">Unpublished</option>
+                                </select>
+                            </div>
+                        </th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="documentsTableBody">
+                    <tr>
+                        <td colspan="6" class="table-empty">Loading documents...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="documentsPagination"
+             style="display: none; margin-top: 0; padding: 14px 16px; border-top: 1px solid #e2e8f0; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 13px; color: #64748b; font-weight: 500;">Per page</span>
+                    <select id="documentsPageSize"
+                            onchange="changeDocumentsPageSize(this.value)"
+                            style="padding: 6px 28px 6px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: white; color: #1e293b; cursor: pointer; outline: none;">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
+                <span id="documentsPageInfo" style="font-size: 13px; color: #94a3b8;"></span>
+            </div>
+
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <button type="button" id="documentsPrevBtn"
+                        onclick="goDocumentsPage(currentDocPage - 1)"
+                        style="padding: 6px 14px; font-size: 13px; border-radius: 8px; border: 1.5px solid #cbd5e1; background: white; color: #334155; cursor: pointer;">
+                    ← Previous
+                </button>
+                <button type="button" id="documentsNextBtn"
+                        onclick="goDocumentsPage(currentDocPage + 1)"
+                        style="padding: 6px 14px; font-size: 13px; border-radius: 8px; border: 1.5px solid #cbd5e1; background: white; color: #334155; cursor: pointer;">
+                    Next →
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+</section>
+{% endblock %}
+
+{% block modals %}
+<!-- EDIT DOCUMENT MODAL -->
+<div class="modal-overlay" id="editModalOverlay">
+    <div class="edit-modal">
+
+        <div class="edit-modal-header">
+            <h3>Edit Document</h3>
+            <button type="button" class="modal-close-btn" onclick="closeEditModal()">×</button>
+        </div>
+
+        <form id="editDocumentForm" enctype="multipart/form-data">
+            <div class="edit-modal-body">
+
+                <input type="hidden" id="edit_document_id" name="document_id">
+                <input type="hidden" id="edit_section" name="section">
+
+                <div class="form-group full-width">
+                    <label>Section</label>
+                    <input type="text" id="edit_section_display" readonly
+                           style="background:#f1f5f9; cursor:not-allowed;">
+                </div>
+
+                <div id="editDynamicFields" class="dynamic-fields full-width">
+                    <!-- Fields injected by JavaScript -->
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Replace PDF (optional)</label>
+                    <input type="file" id="edit_pdf_file" name="pdf_file" accept=".pdf">
+                    <small>Leave empty to keep the current file</small>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="edit_external_url">External URL</label>
+                    <input type="url" id="edit_external_url" name="external_url"
+                           placeholder="https://example.com/document">
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Publish Status <span>*</span></label>
+                    <div style="display: flex; gap: 24px; margin-top: 8px; align-items: center;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; color: #1e293b;">
+                            <input type="radio" name="published" value="true" checked
+                                   style="width: 16px; height: 16px; accent-color: #2563eb;">
+                            Published
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; color: #1e293b;">
+                            <input type="radio" name="published" value="false"
+                                   style="width: 16px; height: 16px; accent-color: #2563eb;">
+                            Unpublished
+                        </label>
+                    </div>
+                    <small style="display: block; margin-top: 6px; color: #64748b;">
+                        Only <strong>Published</strong> documents will appear on the public Investor page.
+                    </small>
+                </div>
+
+            </div>
+
+            <div class="edit-modal-footer">
+                <button type="button" class="secondary-button" onclick="closeEditModal()">
+                    Cancel
+                </button>
+                <button type="submit" class="primary-button" id="saveEditButton">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/documents_page.js' %}"></script>
+{% endblock %}

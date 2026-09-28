@@ -1,0 +1,171 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% load static %}
+
+{% block title %}Sections | NIBE Investor Portal{% endblock %}
+
+{% block content %}
+<section id="sectionsPage" class="page-section">
+
+    <div class="page-heading">
+        <div>
+            <span class="welcome-label">CONTENT STRUCTURE</span>
+            <h2>Sections</h2>
+            <p>Create custom sections, manage existing ones, and add sub-sections.</p>
+        </div>
+
+        <button type="button"
+                class="primary-button"
+                onclick="openAddSectionModal()"
+                style="margin-top: 12px;">
+            + Add Section
+        </button>
+    </div>
+
+    <div class="dashboard-card documents-table-card">
+        <div class="search-row">
+            <input type="text"
+                   id="sectionSearch"
+                   placeholder="Search sections..."
+                   oninput="filterSectionsTable()">
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order</th>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Public</th>
+                        <th>Sub-sections</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="sectionsTableBody">
+                    <tr>
+                        <td colspan="7" class="table-empty">Loading sections...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</section>
+{% endblock %}
+
+{% block modals %}
+<!-- ADD / EDIT SECTION MODAL -->
+<div class="modal-overlay" id="sectionModalOverlay">
+    <div class="edit-modal" style="max-width: 520px;">
+        <div class="edit-modal-header">
+            <h3 id="sectionModalTitle">Add Section</h3>
+            <button type="button" class="modal-close-btn" onclick="closeSectionModal()">×</button>
+        </div>
+        <form id="sectionForm" onsubmit="saveSection(event)">
+            <div class="edit-modal-body">
+                <input type="hidden" id="section_id" value="">
+
+                <div class="form-group full-width">
+                    <label>Section Name <span style="color:#ef4444;">*</span></label>
+                    <input type="text" id="section_name" required placeholder="e.g. ESG Reports">
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Icon (emoji)</label>
+                    <input type="text" id="section_icon" placeholder="📁" maxlength="10">
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Description</label>
+                    <textarea id="section_description" rows="2" placeholder="Optional description"></textarea>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Display Order</label>
+                    <input type="number" id="section_display_order" min="0" placeholder="Auto if empty">
+                </div>
+
+                <div class="form-group full-width">
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                        <input type="checkbox" id="section_is_active" checked style="width:auto;">
+                        Active (visible in system)
+                    </label>
+                </div>
+
+                <div class="form-group full-width">
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                        <input type="checkbox" id="section_show_on_public" checked style="width:auto;">
+                        Show on public website
+                    </label>
+                </div>
+
+                <div class="form-group full-width">
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                        <input type="checkbox" id="section_allow_subsections" checked style="width:auto;">
+                        Allow sub-sections
+                    </label>
+                </div>
+            </div>
+            <div class="edit-modal-footer"
+                 style="display:flex;justify-content:flex-end;gap:10px;padding:16px 20px;border-top:1px solid #e2e8f0;">
+                <button type="button" onclick="closeSectionModal()"
+                        style="padding:8px 16px;border-radius:8px;border:1.5px solid #cbd5e1;background:white;cursor:pointer;">
+                    Cancel
+                </button>
+                <button type="submit" class="primary-button" id="saveSectionButton">Save Section</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ADD / EDIT SUB-SECTION MODAL -->
+<div class="modal-overlay" id="subsectionModalOverlay">
+    <div class="edit-modal" style="max-width: 480px;">
+        <div class="edit-modal-header">
+            <h3 id="subsectionModalTitle">Add Sub-section</h3>
+            <button type="button" class="modal-close-btn" onclick="closeSubsectionModal()">×</button>
+        </div>
+        <form id="subsectionForm" onsubmit="saveSubsection(event)">
+            <div class="edit-modal-body">
+                <input type="hidden" id="subsection_id" value="">
+                <input type="hidden" id="subsection_section_id" value="">
+
+                <div class="form-group full-width">
+                    <label>Parent Section</label>
+                    <input type="text" id="subsection_section_name" readonly style="background:#f1f5f9;">
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Sub-section Name <span style="color:#ef4444;">*</span></label>
+                    <input type="text" id="subsection_name" required placeholder="e.g. Q1 Disclosures">
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Display Order</label>
+                    <input type="number" id="subsection_display_order" min="0" placeholder="Auto if empty">
+                </div>
+
+                <div class="form-group full-width">
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                        <input type="checkbox" id="subsection_is_active" checked style="width:auto;">
+                        Active
+                    </label>
+                </div>
+            </div>
+            <div class="edit-modal-footer"
+                 style="display:flex;justify-content:flex-end;gap:10px;padding:16px 20px;border-top:1px solid #e2e8f0;">
+                <button type="button" onclick="closeSubsectionModal()"
+                        style="padding:8px 16px;border-radius:8px;border:1.5px solid #cbd5e1;background:white;cursor:pointer;">
+                    Cancel
+                </button>
+                <button type="submit" class="primary-button" id="saveSubsectionButton">Save Sub-section</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/sections_page.js' %}"></script>
+{% endblock %}

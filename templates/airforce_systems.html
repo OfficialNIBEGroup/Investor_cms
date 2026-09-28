@@ -1,0 +1,478 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Air Systems | NIBE LIMITED{% endblock %}
+
+{% block content %}
+
+<!--==========================================================
+                AIR SYSTEMS NAVIGATION
+===========================================================-->
+<section id="products-navigation" class="af-nav-section bg-offwhite">
+    <div class="af-nav-container">
+        <div class="af-nav-heading">
+            <span class="land-nav-tag">AIR SYSTEMS</span>
+            <h2>Precision Air-Domain Strike Solutions</h2>
+            <p>
+                Helicopter-launched precision rockets, loitering munitions, universal
+                launch systems and layered counter-UAS — extending NIBE's air-domain
+                reach for the Indian Air Force.
+            </p>
+        </div>
+
+        <div class="af-system-nav">
+            <a href="#Vayuastra">VayuAstra Series</a>
+            <a href="#vajr">Vajr 70mm</a>
+            <a href="#cuas">Counter-UAS</a>
+            <a href="#puls">SuryaAstra</a>
+            <a href="#core">Shared Rocket Core</a>
+            <a href="#sattelite">Satellite Based Intelligence</a>
+        </div>
+    </div>
+</section>
+
+<!--==================================================
+        VayuAstra SECTION
+===================================================-->
+<section id="Vayuastra" class="skystriker-section bg-white">
+    <div class="skystriker-container">
+        <div class="skystriker-image">
+            <img src="{% static 'images/air-systems/VayuAstra.jpeg' %}" alt="VayuAstra Loitering Munition">
+        </div>
+        <div class="skystriker-content">
+            
+            <h2>VayuAstra Series — <br> 100 km / 1000 km / 2000 km variant Loitering Munition</h2>
+            <h5>Now extending to NLOS — electro-optical guided tactical loitering munition</h5>
+            <p>
+                ★ Precision engagement against high-value targets with long-range strike capability, man-in-the-loop control and terminal accuracy.<br>
+                ★ In service today with the Indian Army — available with integrated <strong>5 kg</strong> and <strong>10 kg</strong> warhead options.<br>
+                ★ Strike range of up to approximately <strong>100 km</strong>, with high-speed terminal dive capability up to <strong>250 km/h</strong>.<br>
+                ★ Man-in-the-loop targeting with abort and re-attack capability for maximum mission flexibility.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!--==================================================
+        VAJR 70mm SECTION
+===================================================-->
+<section id="vajr" class="gatr-section bg-offwhite">
+    <div class="gatr-container">
+        
+        <div class="gatr-content">
+            
+            <h2>Vajr — 70mm Laser-Guided Rocket</h2>
+            <p>
+                ★ Upgrades in-service 70mm rocket pods into a precision, laser-guided munition, qualified for LCH, Mi-17, Mi-35/25 and ALH helicopter fleets.<br>
+                ★ Semi-Active Laser (SAL) seeker with LOBL & LOAL engagement capability and all-party body lasing support using UAVs, ground troops or other helicopters.<br>
+                ★ Blast-fragmentation and penetration warhead — 6 kg warhead with 600 g explosive content, programmable fuse delay (0–100 msec) and an 8 m lethal radius..<br>
+                ★ Integrates with Smart Rocket Launcher systems without requiring aircraft avionics modifications.
+            </p>
+        </div>
+
+        <div class="gatr-image">
+            <img src="{% static 'images/air-systems/70mm-GATR.png' %}" alt="Vajr 70mm Laser-Guided Rocket">
+        </div>
+    </div>
+
+  <div class="af-detail-wrap">
+    <!-- Two-column section -->
+    <div class="af-two-col" style="display: flex; gap: 2rem; margin-bottom: 2rem;">
+        
+        <!-- Left side: GATR Advantages -->
+        <div class="af-col-right" style="flex: 1;">
+            <h3 class="af-subhead">Platform Integration</h3>
+            <ul class="af-list">
+                <li>1. 3-tube launcher — 25 kg configuration</li>
+                <li>2. 7-tube launcher — 38 kg configuration with MIL-STD-1553/1760 and ARINC 429 interface</li>
+                <li>3. 19-tube Apache-compatible launcher — 65 kg configuration using Hellfire protocol</li>
+                <li>4. NATO and Eastern pylon interface compatibility</li>
+            </ul>
+        </div>
+  
+
+        <!-- Right side: Platform Integration -->
+        <div class="af-col-left" style="flex: 1;">
+            <h3 class="af-subhead">GATR Advantages</h3>
+            <ul class="af-list">
+                <li>1. Less than 1 meter CEP accuracy at 10 km operational range</li>
+                <li>2. Engagement capability against A/G, A/A, aircraft, UAVs and drones</li>
+                <li>3. LOBL and LOAL operational flexibility</li>
+                <li>4. All-party laser designation capability</li>
+                <li>5. Penetration capability against 200 mm reinforced concrete and light armor</li>
+                <li>6. Programmable fuse delay and trajectory shaping</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Performance Specifications at the end -->
+    <h3 class="af-subhead" style="padding-left:335px;">Performance Specifications</h3>
+    <div class="af-spec-grid">
+        <div><strong>&lt; 1 m</strong><span>CEP90 Hit Accuracy</span></div>
+        <div><strong>10 km</strong><span>Maximum Operational Range</span></div>
+        <div><strong>100 km/h</strong><span>Moving Target Engagement</span></div>
+        <div><strong>200 mm</strong><span>RC Concrete Penetration</span></div>
+    </div>
+</div>
+</section>
+
+<!--==================================================
+        COUNTER-UAS SECTION
+===================================================-->
+<section id="cuas" class="cuas-section bg-white">
+    <div class="cuas-intro">
+        <div class="cuas-image-card">
+            <img src="{% static 'images/air-systems/C-UAS-Technology.jpg' %}" alt="C-UAS Counter-Drone Technology">
+        </div>
+        <div class="cuas-content">
+            
+            <h2>Counter-UAS</h2>
+            <p class="cuas-subtitle">
+                Layered Hard-Kill, Soft-Kill & Directed-Energy Defence — a multi-sensor,
+                multi-effector shield built to counter drones, loitering munitions and swarm 
+                attacks around airfields, radar installations and forward operating bases.
+
+                ★ Detects and engages drones, loitering munitions and swarm threats within seconds, at ranges up to 15 km.<br>
+                ★ 360° DAiR radar, wideband SIGINT (400 MHz–6 GHz) and EO/IR sensors fused into a single AI-driven threat picture.<br>
+                ★ Soft-kill RF jamming and command-link takeover to safely redirect or land hostile UAS without kinetic engagement.<br>
+                ★ Layered hard-kill effectors for close to extended-range intercepts.<br>
+                ★ Fixed, transportable and vehicle-mounted configurations.
+            </p>
+            <ul class="cuas-list">
+                <li></li>
+            </ul>
+        </div>
+    </div>
+
+<div class="cuas-description">
+
+    <!-- ===== TOP ROW ===== -->
+    <div class="af-two-col" style="display: flex; gap: 2.5rem; margin-bottom: 2rem;">
+        
+        <!-- Left: Detection & Sensor Fusion -->
+        <div style="flex: 1;">
+            <h3 class="af-subhead">Detection & Sensor Fusion</h3>
+            <ul class="af-list">
+                <li>☆ 360° DAiR radar for wide-area air surveillance</li>
+                <li>☆ Wideband SIGINT coverage from 400 MHz to 6 GHz</li>
+                <li>☆ EO/IR sensors with slew-to-cue capability</li>
+                <li>☆ Acoustic detection through SkyTrap sensing technology</li>
+                <li>☆ AI-fused air picture with automated threat classification</li>
+            </ul>
+        </div>
+
+        <!-- Right: Engagement Sequence -->
+        <div style="flex: 1;">
+            <h3 class="af-subhead">Engagement Sequence</h3>
+            <p style="padding-left: 35px;">
+                ☆ External Command & Control (C2) cueing <br>
+                ☆ Weapon-system radar final tracking <br>
+                ☆ Electro-optical target acquisition and bring-on-target <br>
+                ☆ Automated interception followed by battle-damage assessment to close the engagement loop.
+            </p>
+        </div>
+    </div>
+
+    <!-- ===== MIDDLE ROW ===== -->
+    <div class="af-two-col" style="display: flex; gap: 2.5rem; margin-bottom: 2rem;">
+        
+        <!-- Left: Hard-Kill Capabilities -->
+        <div style="flex: 1;">
+            <h3 class="af-subhead">Hard-Kill Capabilities</h3>
+            <ul class="af-list">
+                <li>1. Dual 7.62mm Remote Controlled Weapon Station (RCWS) with 1,500 rounds per minute firing capability</li>
+                <li>2. 30mm turret with radar-proximity-fused smart ammunition</li>
+                <li>3. GATR-based VSHORAD missile capability with engagement range up to 5 km</li>
+            </ul>
+        </div>
+
+        <!-- Right: Soft-Kill Capabilities -->
+        <div style="flex: 1;">
+            <h3 class="af-subhead">Soft-Kill Capabilities</h3>
+            <ul class="af-list">
+                <li>1. RF jamming using barrage and frequency-sweep techniques</li>
+                <li>2. Command-link takeover capability to redirect or safely land hostile unmanned aircraft without kinetic engagement</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- ===== BOTTOM SECTION ===== -->
+    <div class="af-two-col" style="display: flex; gap: 2.5rem;">
+        
+        <!-- Left: Deployment Configuration -->
+        <div style="flex: 1;">
+            <h3 class="af-subhead">Deployment Configuration</h3>
+            <p style="padding-left: 35px;">
+                1. Fixed-site, transportable and vehicle-mounted configurations <br>
+                2. Common architecture supporting 4x4 to 6x6 vehicle platforms <br>
+                3. Scalable deployment from soldier-portable to complete airbase-perimeter networks
+            </p>
+        </div>
+
+        <!-- Right: Directed Energy -->
+        <div style="flex: 1;">
+            <h3 class="af-subhead">Directed Energy</h3>
+            <p style="padding-left: 35px;">A high-energy laser effector is under development as a fourth, ammunition-free hard-kill layer designed for sustained and low-cost-per-shot defeat of drone and swarm threats.</p>
+        </div>
+    </div>
+
+</div>
+</section>
+
+<!--==================================================
+        SURYAASTRA / PULS SECTION
+===================================================-->
+<section id="puls" class="puls-section bg-offwhite">
+    <div class="puls-container">
+        <div class="puls-image">
+            <img src="{% static 'images/air-systems/PULS.png' %}" alt="SuryaAstra Universal Launcher">
+        </div>
+        <div class="puls-content">
+          
+            <h2>SuryaAstra — Universal Launcher for Air Force Strike Munitions</h2>
+            <p>
+                ★ SuryaAstra is a modular, containerised launcher
+                 designed to deploy multiple munition families from
+                 a single road-mobile platform. The system extends 
+                 its air-domain strike role by enabling the launch 
+                 of VayuAstra loitering munitions alongside rockets 
+                 and long-range missiles.<br>
+                ★ Long range missiles provide strike capability 
+                against targets up to 300 km with a Circular Error 
+                Probable (CEP) of approximately 10 metres. 
+                The system is in service with the Indian Army, 
+                with field evaluation trials conducted at the 
+                Chandipur range in May 2026.
+            </p>
+        </div>
+    </div>
+
+    <div class="puls-description">
+    <!-- Two-column layout -->
+    <div class="af-two-col">
+        <!-- LEFT -->
+        <div class="af-col-left">
+            <h3 class="af-subhead">Multi-Munition, Multi-Domain Capability</h3>
+            <ul class="af-list">
+                <p style="padding-left: 35px;">
+                    ☆ Interchangeable containerised pods enable rapid switching between different munition types<br>
+                    ☆ Supports deployment of SkyStriker loitering munitions, guided rockets and long-range missiles<br>
+                    ☆ Single launcher and fire-control architecture reduces logistics requirements<br>
+                    ☆ Provides full strike-range coverage from tactical to long-range engagement missions
+                </p>
+                
+            </ul>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="af-col-right">
+            <h3 class="af-subhead">Why It Matters for VayuAstra</h3>
+            <p style="padding-left: 35px;">
+                Launching VayuAstra from a universal rapid-reload platform
+                provides the Air Force with persistent loitering-strike 
+                capability alongside traditional stand-off rocket systems. 
+                A single C4I-networked launcher, operated by one crew, can
+                deliver multiple strike effects based on mission requirements.
+            </p>
+        </div>
+    </div>
+
+    <!-- BOTTOM: Strike Capability -->
+    <h3 class="af-subhead" style="padding-left: 455px;">Strike Capability</h3>
+    <div class="af-spec-grid" >
+        <div><strong>300 km</strong><span>Maximum Range</span></div>
+        <div><strong>10 m</strong><span>CEP Accuracy</span></div>
+        <div><strong>Multi</strong><span>Munition Compatibility</span></div>
+        <div><strong>Road</strong><span>Mobile Launcher Platform</span></div>
+    </div>
+</div>
+</section>
+
+<!--==================================================
+        SHARED ROCKET CORE
+===================================================-->
+<section id="core" class="core-section bg-white">
+    <div class="core-container">
+        <div class="core-image">
+            <img src="{% static 'images/air-systems/Rampage missile.png' %}" alt="RamAstra / Rampage Missile">
+        </div>
+        <div class="core-content">
+           
+            <h2>SuryaAstra and RamAstra Share a Common Long-Range Rocket Core</h2>
+            <p>
+                ★ SuryaAstra and RamAstra are based on a common 
+                long-range rocket architecture, enabling shared 
+                technologies, modular deployment and simplified 
+                logistics across land, air and maritime domains.
+            </p>
+        </div>
+    </div>
+
+    <div class="core-description">
+        <h3 class="af-subhead" style="padding-left: 335px;">Multi-Domain Rocket Family</h3>
+        <div class="af-spec-grid" style="padding-left: 235px;">
+            <div><strong>300 km</strong><span>LAND — SuryaAstra</span></div>
+            <div><strong>250 km</strong><span>AIR — RamAstra</span></div>
+            <div><strong>700 km</strong><span>Extended-range RamAstra (Future)</span></div>
+        </div>
+    </div>
+
+    <div class="core-description">
+    <!-- Two-column layout -->
+    <div class="af-two-col">
+        <!-- LEFT -->
+        <div class="af-col-left">
+            <h3 class="af-subhead">Common Technology Advantages</h3>
+            <p style="padding-left:34px">
+                1. Shared propulsion and rocket architecture across multiple launch platforms<br>
+                2. Common technology base reducing development and maintenance complexity<br>
+                3. Simplified logistics through modular ammunition compatibility<br>
+                4. High reliability through proven long-range strike systems
+            </p>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="af-col-right">
+            <h3 class="af-subhead">Make-in-India Roadmap</h3>
+            <p style="padding-left:34px">
+                Domestic manufacturing of the shared long-range rocket family, including 
+                SuryaAstra and RamAstra variants, is planned in India. The initiative builds 
+                on NIBE's existing expertise in energetics and precision-munition technologies.<br>
+                In parallel, NIBE is working towards Indian manufacturing of the extended-range 
+                700 km-class RamAstra variant, expanding indigenous stand-off strike capability 
+                for the Indian Air Force.
+            </p>
+        </div>
+    </div>
+</div>
+</section>
+
+<!--==================================================
+        SATELLITE BASED INTELLIGENCE
+===================================================-->
+<section id="sattelite" class="satellite-section bg-offwhite">
+    <br>
+    <div class="satellite-header">
+        <span class="product-tag">SPACE SYSTEM</span>
+        <h2>Satellite Based Intelligence</h2>
+        <h5>Optical • SAR • RF / SIGINT Intelligence</h5>
+    </div>
+
+    <div class="satellite-image">
+        <p style="font-size:30px; color:#16213E; margin:15px 0; width:100%; text-align:center;">
+            Chakan Plant from the Satellite
+        </p>
+        <img src="{% static 'images/air-systems/chakan_1.png' %}" alt="Chakan Plant from Satellite">
+        
+    </div>
+
+    <div class="satellite-content">
+        <div class="satellite-item">
+            <div class="satellite-left">
+                <h3>Optical Intelligence</h3>
+                <span>( 35 cm resolution )</span>
+            </div>
+            <div class="satellite-right">
+                <p>The planned constellation of more than 15 satellites in inclined
+                    orbit provides continuous coverage of sovereign areas of interest.
+                    Delivering imagery with up to <strong> 35 cm resolution,</strong> the system 
+                    enables precise identification of terrain, assets, and infrastructure
+                    changes. These capabilities support defence surveillance, border monitoring, 
+                    urban planning, agriculture, disaster management, and advanced geospatial intelligence.</p>
+            </div>
+        </div>
+
+        <div class="satellite-item">
+            <div class="satellite-left">
+                <h3>SAR Intelligence</h3>
+                <span>( sub-0.5m resolution )</span>
+            </div>
+            <div class="satellite-right">
+                <p>A constellation of 6+ Synthetic Aperture Radar (SAR) satellites 
+                    provides all-weather, day-and-night imaging capabilities. Combining 
+                    ultra-high resolution with wide-area coverage, the system enables 
+                    persistent surveillance of borders, maritime regions, critical 
+                    infrastructure, and adversary activity. With sub-0.5 metre resolution,
+                    it can detect ships, illegal fishing, dark vessels, and oil spills 
+                    even during heavy cloud cover or nighttime operations.</p>
+            </div>
+        </div>
+
+        <div class="satellite-item">
+            <div class="satellite-left">
+                <h3>RF / SIGINT</h3>
+                <span>( 30 MHz to 18 GHz )</span>
+            </div>
+            <div class="satellite-right">
+                <p>The RF/SIGINT constellation comprises planned clusters 
+                    of three satellites, covering frequencies from 
+                    <strong>30 MHz to 18 GHz.</strong> Supporting VHF, 
+                    UHF, L, S, C, X, and Ku bands, the system captures 
+                    the majority of man-made radio frequency emissions.
+                     It is designed for Electronic Intelligence (ELINT), 
+                     Communications Intelligence (COMINT), and Signals 
+                     Intelligence (SIGINT) missions across land, naval, 
+                     and airborne operational environments.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Back to Top Button -->
+<button id="scrollToProductsBtn" class="scroll-to-products" aria-label="Back to Products" title="Back to Products">
+    <i class="fa-solid fa-arrow-up"></i>
+    <span>TOP</span>
+</button>
+
+{% endblock %}
+
+
+{% block footer %}
+<footer class="land-footer">
+    <div class="land-footer-main">
+        <div class="footer-logo">
+            <img src="{% static 'images/logo/Nibe Limited Logo2.png' %}" alt="NIBE Limited">
+        </div>
+
+        <div class="footer-column">
+            <h4>Business Enquiries</h4>
+            <p><strong>Wg Cdr Mohit Rawat (Retd)</strong></p>
+            <p>GM - Business Development<br>(Air Systems)</p>
+            <a href="tel:+912069133799">Corporate Office Pune: 020 6913 3799</a>
+            <a href="mailto:contactus@nibelimited.com">contactus@nibelimited.com</a>
+        </div>
+
+        <div class="footer-column">
+            <h4>Mumbai Corporate Office</h4>
+            <p>
+                202, C-Wing, Windfall,<br>
+                Sahar Plaza Complex, J.B. Nagar,<br>
+                Marol, M.V. Road, Andheri (East),<br>
+                Mumbai, Maharashtra - 400059
+            </p>
+        </div>
+
+        <div class="footer-column">
+            <h4>Pune Corporate Office</h4>
+            <p>
+                6th - 8th Floor,
+                The Melange, <br>Fugewadi,
+                Seva Nagar, Dapodi,<br>
+                Pimpri-Chinchwad,<br>
+                Pune, Maharashtra - 411012
+            </p>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>© 2026 NIBE Limited. All Rights Reserved.</p>
+        <div class="footer-social">
+            <a href="https://www.instagram.com/nibelimited" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.linkedin.com/company/nibe-limited-com/" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+            <a href="https://x.com/Nibe_Limited" target="_blank"><i class="fab fa-x-twitter"></i></a>
+            <a href="https://www.facebook.com/nibelimited" target="_blank"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.youtube.com/@Nibe_Limited" target="_blank"><i class="fab fa-youtube"></i></a>
+        </div>
+    </div>
+</footer>
+{% endblock %}

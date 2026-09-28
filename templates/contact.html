@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}CONTACT US | NIBE LIMITED{% endblock %}
+
+{% block content %}
+
+<!-- Contact Hero -->
+
+<section class="contact-hero" style="text-align: -webkit-center;">
+
+    <h1>Contact Us</h1>
+
+    <p>
+        We're here to assist you with any inquiries, feedback,
+        or assistance you may need. Whether you have questions
+        about products, services, or general information,
+        our dedicated team is ready to help.
+    </p>
+
+</section>
+
+<!-- Contact Section -->
+
+<section class="contact-section">
+
+    <!-- Left Side -->
+    <div class="contact-info">
+
+        <div class="info-card blue">
+
+            <h3>Phone Number</h3>
+
+            <p><b>Chakan Plant:</b><br> +91 21356 37999</p>
+            <p><b>Corporate Office Pune:</b><br> +91 020 6913 3799</p>
+            <p><b>Mumbai Office:</b> <br>+91 2262 094 999</p>
+
+            <span>
+                Call our team directly for technical assistance,
+                business inquiries and appointments.
+            </span>
+
+            <h3>E-mail</h3>
+
+            <p>contactus@nibelimited.com</p>
+
+            <span>
+                Send us your project requirements and our
+                experts will respond shortly.
+            </span>
+
+        </div>
+
+  
+
+    </div>
+
+    <!-- Right Side -->
+    <div class="contact-form">
+
+        <h2>Send Us a Message</h2>
+
+        <p>
+            For any inquiries, please fill the form below
+            and our team will reach out within 24-48 hours.
+        </p>
+
+        <form>
+
+            <div class="row">
+                <input type="text" placeholder="Name">
+                <input type="email" placeholder="Email">
+            </div>
+
+            <div class="row">
+                <input type="text" placeholder="Phone No.">
+                <input type="text" placeholder="Subject">
+            </div>
+
+            <select>
+                <option>Select Inquiry Type</option>
+                <option>Business Inquiry</option>
+                <option>Career</option>
+                <option>Supplier</option>
+                <option>Investor</option>
+            </select>
+
+            <textarea placeholder="Message"></textarea>
+
+            <button type="submit">Submit</button>
+
+        </form>
+
+    </div>
+
+</section>
+
+<!-- Office Locations -->
+
+<section class="office-locations">
+
+    <div class="office-card">
+
+        <h3>Mumbai</h3>
+
+        <h4>NIBE Limited (Corporate Office 1)</h4>
+
+        <iframe
+            src="https://maps.google.com/maps?q=Andheri%20East%20Mumbai&t=&z=15&ie=UTF8&iwloc=&output=embed"
+            loading="lazy">
+        </iframe>
+
+       
+
+    </div>
+
+    <div class="office-card">
+
+        <h3>Pune</h3>
+
+        <h4>NIBE Limited (Corporate Office 2)</h4>
+
+        <iframe
+            src="https://maps.google.com/maps?q=Seva%20Nagar%20Dapodi%20Pune&t=&z=15&ie=UTF8&iwloc=&output=embed"
+            loading="lazy">
+        </iframe>
+
+    </div>
+
+</section>
+
+
+
+{% endblock %}

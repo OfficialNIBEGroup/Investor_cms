@@ -1,0 +1,147 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    
+    <title>{% block title %}NIBE LIMITED{% endblock %}</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'images/logo/NIBE Group Logo.png' %}">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'css/Style.css' %}">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- ================= HEADER / NAVBAR ================= -->
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <img src="{% static 'images/logo/NIBE Group Logo.png' %}" alt="NIBE Logo" fetchpriority="high" decoding="async" loading="eager">
+            </div>
+
+            <ul class="nav-links">
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'about' %}">About Us</a></li>
+
+                <li class="mega-menu">
+                    <a href="#">Divisions <i class="fa-solid fa-chevron-down"></i></a>
+
+                    <div class="mega-menu-content">
+                        <div class="mega-column">
+                            <h4 class="sub-heading mt">
+                                <a href="{% url 'home' %}">NIBE LIMITED</a>
+                            </h4>
+                            <ul class="mega-sub-list">
+                                <li><a href="{% url 'land_systems' %}">Land Systems</a></li>
+                                <li><a href="{% url 'airforce_systems' %}">Air Systems</a></li>
+                                <li><a href="{% url 'naval_systems' %}">Naval Systems</a></li>
+                            </ul>
+                        </div>
+
+                        <div class="mega-column">
+                            
+                            <h4 class="sub-heading mt">
+                                <a href="{% url 'electronics' %}">NDAL</a>
+                            </h4>
+                            <ul class="mega-sub-list">
+                                <li><a href="{% url 'electronics' %}">Electronics</a></li>
+                            </ul>
+
+                            <h4 class="sub-heading mt">
+                                <a href="{% url 'bbgpl' %}">BIO ENERGY</a>
+                            </h4>
+
+                            <h4 class="sub-heading mt">
+                                <a href="https://www.nibespace.com/" target="_blank">NIBE SPACE</a>
+                            </h4>
+                        </div>
+                    </div>
+                </li>
+
+                <li><a href="{% url 'investors' %}">Investors</a></li>
+                <li><a href="{% url 'contact' %}">Contact Us</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- ================= MAIN CONTENT ================= -->
+    {% block content %}
+    {% endblock %}
+
+<!-- ================= FOOTER ================= -->
+{% block footer %}
+<footer class="land-footer">
+    <div class="land-footer-main">
+        <div class="footer-logo">
+            <img src="{% static 'images/logo/Nibe Limited Logo2.png' %}" alt="NIBE Limited">
+        </div>
+
+        <div class="footer-column">
+            <h4>Registered Office</h4>
+            <p>
+                Address: Plot No E, <br>
+                Industrial Area, <br>
+                MIDC Phase-III, Kharabwadi, <br>
+                Chakan, Maharashtra 410501
+            </p>
+        </div>
+
+        <div class="footer-column">
+            <h4>Mumbai Corporate Office</h4>
+            <p>
+                202, C-Wing, Windfall,<br>
+                Sahar Plaza Complex, J.B. Nagar,<br>
+                Marol, M.V. Road, Andheri (East),<br>
+                Mumbai, Maharashtra - 400059
+            </p>
+        </div>
+
+        <div class="footer-column">
+            <h4>Pune Corporate Office</h4>
+            <p>
+                6th - 8th Floor,
+                The Melange, <br>Fugewadi,
+                Seva Nagar, Dapodi,<br>
+                Pimpri-Chinchwad,<br>
+                Pune, Maharashtra - 411012
+            </p>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>© 2026 NIBE Limited. All Rights Reserved.</p>
+        <div class="footer-social">
+            <a href="https://www.instagram.com/nibelimited" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.linkedin.com/company/nibe-limited-com/" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+            <a href="https://x.com/Nibe_Limited" target="_blank"><i class="fab fa-x-twitter"></i></a>
+            <a href="https://www.facebook.com/nibelimited" target="_blank"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.youtube.com/@Nibe_Limited" target="_blank"><i class="fab fa-youtube"></i></a>
+        </div>
+    </div>
+</footer>
+{% endblock %}
+
+    <!-- Main JS -->
+    <script src="{% static 'js/Main.js' %}"></script>
+    
+    <!-- image-perf.js (if you have it) -->
+    <script src="{% static 'js/image-perf.js' %}" defer></script>
+
+    <!-- Sitewide scroll-reveal (Adani-style card animation), public pages only -->
+    <script src="{% static 'js/site_reveal.js' %}"></script>
+
+   
+</body>
+</html>

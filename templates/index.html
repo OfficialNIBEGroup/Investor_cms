@@ -1,0 +1,565 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home | NIBE LIMITED{% endblock %}
+
+{% block content %}
+
+<!-- ================= HERO - Cloudy Mountains + Flying Fighter Plane ================= -->
+
+<section class="hero hero-home">
+
+    <iframe class="hero-bg-video"
+        src="https://www.youtube-nocookie.com/embed/9p2vTZ5hX-s?autoplay=1&mute=1&loop=1&playlist=9p2vTZ5hX-s&playsinline=1&controls=0&rel=0"
+        title="NIBE Limited Background Video"
+        frameborder="0"
+        allow="autoplay; fullscreen"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen>
+    </iframe>
+
+    <div class="hero-overlay"></div>
+
+    <div class="breaking-news">
+        <div class="breaking-label">
+            <span class="pulse"></span>
+            Latest Update
+        </div>
+        <div class="breaking-track">
+            <div class="breaking-text">
+                <b>18 September 2026 | NIBE Group and France’s Naval Group Forge Strategic 
+                    Partnership to Drive Advanced Naval Technologies, Shipbuilding, Autonomous 
+                    Systems and Defence Platforms for a Stronger Indian Maritime Ecosystem</b>
+            </div>
+        </div>
+    </div>
+
+    <div class="hero-content">
+        <h1>Advancing India's Defence Legacy through Innovation and Manufacturing Excellence</h1>
+    </div>
+</section>
+
+
+<!-- ================= ABOUT INTRO ================= -->
+<section class="about-section bg-white">
+    <div class="about-container">
+        <div class="about-right">
+            <p>
+                We are a defence manufacturing firm creating a range of critical
+                systems and components to strengthen India's self-reliance in
+                defence production.
+            </p>
+        </div>
+        <div class="about-left">
+            <img loading="lazy" src="{% static 'images/logo/NIBE Group Logo.png' %}" alt="NIBE Limited Logo">
+        </div>
+    </div>
+</section>
+
+<!-- ================= ABOUT US SECTION ================= -->
+<section class="about bg-offwhite">
+    <div class="about-us">
+        <h2>ABOUT US</h2>
+    </div>
+
+    <section class="about-company-section">
+        <div class="content-box">
+            <p>
+                Nibe Limited is a NSE-listed defence manufacturing company,
+                dedicated to strengthening India's self-reliance under the Atma
+                Nirbhar Bharat initiative of the honorable Prime Minister Shri Narendra Modi.
+            </p>
+            <div class="image-box">
+                <img loading="lazy" src="{% static 'images/home/Img.jpg' %}" alt="Nibe Defence Manufacturing">
+            </div>
+        </div>
+
+        <div class="right-side">
+            <div class="video-box">
+                <video autoplay muted loop playsinline>
+                    <source src="{% static 'videos/Index about us vdo.mp4' %}" type="video/mp4">
+                </video>
+            </div>
+
+            <!--<div class="video-box1">
+                <iframe 
+                    src="https://www.youtube.com/embed/-j5Zg35Gu3s?autoplay=1&mute=1&controls=0&rel=0&loop=1&playlist=-j5Zg35Gu3s"
+                    title="YouTube video player"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    allowfullscreen>
+                </iframe>
+            </div>-->
+
+            <div class="bottom-boxes">
+                <div class="sub-box1">
+                    <h3>Our Partners</h3>
+                    <div class="logo-slider">
+                        <div class="logo-track">
+                            <div class="logo-item"><img loading="lazy" src="{% static 'images/partners/Adani.png' %}" alt="Adani"></div>
+                            <div class="logo-item"><img loading="lazy" src="{% static 'images/partners/Bharat Electronics.png' %}" alt="Bharat Electronics"></div>
+                            <div class="logo-item"><img loading="lazy" src="{% static 'images/partners/BSE.png' %}" alt="BSE"></div>
+                            <div class="logo-item"><img loading="lazy" src="{% static 'images/partners/DRDO.png' %}" alt="DRDO"></div>
+                            <div class="logo-item"><img loading="lazy" src="{% static 'images/partners/HSL.png' %}" alt="HSL"></div>
+                            <div class="logo-item"><img loading="lazy" src="{% static 'images/partners/Indian Airforce.png' %}" alt="Airforce"></div>
+                            <div class="logo-item"><img loading="lazy" src="{% static 'images/partners/Indian Army.png' %}" alt="Army"></div>
+                            <div class="logo-item"><img loading="lazy" src="{% static 'images/partners/Indian Navay.png' %}" alt="Navy"></div>
+                            <div class="logo-item"><img loading="lazy" src="{% static 'images/partners/L &  T Defence.png' %}" alt="L&T"></div>
+                            <div class="logo-item"><img loading="lazy" src="{% static 'images/partners/NSE.png' %}" alt="NSE"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sub-box2">
+                    <p>
+                        From advanced weapon systems to critical infrastructure,
+                        Nibe Limited combines precision engineering with cutting-edge
+                        technology to support India's defence sector with innovative,
+                        reliable solutions.
+                    </p>
+                    <div class="md-info">
+                        <img loading="lazy" src="{% static 'images/home/Nibe Sir Photo.jpg' %}" alt="Ganesh Nibe">
+                        <div>
+                            <strong>Ganesh Nibe</strong><br>
+                            <span>Managing Director (MD)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Slider -->
+    <section class="gallery-slider">
+        <div class="slider-track">
+            <img loading="lazy" src="{% static 'images/home/slider/img1.jpg' %}" alt="">
+            <img loading="lazy" src="{% static 'images/home/slider/img2.jpg' %}" alt="">
+            <img loading="lazy" src="{% static 'images/home/slider/img3.jpg' %}" alt="">
+            <img loading="lazy" src="{% static 'images/home/slider/img4.jpg' %}" alt="">
+            <img loading="lazy" src="{% static 'images/home/slider/img5.jpg' %}" alt="">
+            <img loading="lazy" src="{% static 'images/home/slider/img6.jpg' %}" alt="">
+            <img loading="lazy" src="{% static 'images/home/slider/img7.jpg' %}" alt="">
+            <img loading="lazy" src="{% static 'images/home/slider/img8.jpg' %}" alt="">
+            <img loading="lazy" src="{% static 'images/home/slider/img9.jpg' %}" alt="">
+            <img loading="lazy" src="{% static 'images/home/slider/img10.jpg' %}" alt="">
+
+            <!-- Duplicate -->
+            <img loading="lazy" src="{% static 'images/home/slider/img1.jpg' %}" alt="">
+            <img loading="lazy" src="{% static 'images/home/slider/img2.jpg' %}" alt="">
+            <img loading="lazy" src="{% static 'images/home/slider/img3.jpg' %}" alt="">
+            <img loading="lazy" src="{% static 'images/home/slider/img4.jpg' %}" alt="">
+            <img loading="lazy" src="{% static 'images/home/slider/img5.jpg' %}" alt="">
+            <img loading="lazy" src="{% static 'images/home/slider/img6.jpg' %}" alt="">
+            <img loading="lazy" src="{% static 'images/home/slider/img7.jpg' %}" alt="">
+            <img loading="lazy" src="{% static 'images/home/slider/img8.jpg' %}" alt="">
+            <img loading="lazy" src="{% static 'images/home/slider/img9.jpg' %}" alt="">
+            <img loading="lazy" src="{% static 'images/home/slider/img10.jpg' %}" alt="">
+        </div>
+    </section>
+</section>
+
+
+<!-- ================= TRIAL VIDEOS ================= -->
+<section class="trial-videos-section">
+    <div class="trial-videos-header">
+        <span class="trial-tag">Proven Performance</span>
+        <h2>Trial Videos</h2>
+        <p>Watch real-world trial footage of our key defence systems — precision, reliability and mission readiness demonstrated.</p>
+    </div>
+
+    <div class="trial-videos-grid">
+
+        <!-- SuryaAstra -->
+        <a href="{% url 'land_systems' %}#suryaastra" class="trial-card">
+            <div class="trial-poster">
+                <img loading="lazy" src="{% static 'images/trials/suryaastra-poster.jpg' %}" alt="SuryaAstra Trial">
+                
+                <span class="trial-badge">Suryaastra Trial</span>
+            </div>
+            <div class="trial-card-body">
+                <h3>SuryaAstra</h3>
+                <p class="trial-subtitle">Long Range Surface-to-Air Missile</p>
+                <ul class="trial-highlights">
+                    <li>Successful long-range engagement</li>
+                    <li>All-weather guidance validated</li>
+                    <li>High agility manoeuvres demonstrated</li>
+                </ul>
+                <span class="trial-btn">View Trial Details →</span>
+            </div>
+        </a>
+
+        <!-- GarudAstra -->
+        <a href="{% url 'land_systems' %}#garudastra" class="trial-card">
+            <div class="trial-poster">
+                <img loading="lazy" src="{% static 'images/trials/garudastra-poster.jpg' %}" alt="GarudAstra Trial">
+                <div class="play-overlay">
+                    <span class="play-icon">▶</span>
+                </div>
+                <span class="trial-badge">Garudastra Trial</span>
+            </div>
+            <div class="trial-card-body">
+                <h3>GarudAstra</h3>
+                <p class="trial-subtitle">Combat UAV / Air-to-Surface System</p>
+                <ul class="trial-highlights">
+                    <li>Endurance & range proven</li>
+                    <li>Precision strike validated</li>
+                    <li>Platform integration successful</li>
+                </ul>
+                <span class="trial-btn">View Trial Details →</span>
+            </div>
+        </a>
+
+        <!-- VayuAstra -->
+        <a href="{% url 'land_systems' %}#vayuastra" class="trial-card">
+            <div class="trial-poster">
+                <img loading="lazy" src="{% static 'images/trials/vayuastra-poster.jpg' %}" alt="VayuAstra Trial">
+               
+                <span class="trial-badge">Vayuastra Trial</span>
+            </div>
+            <div class="trial-card-body">
+                <h3>VayuAstra</h3>
+                <p class="trial-subtitle">Air-to-Air / Air Defence Interceptor</p>
+                <ul class="trial-highlights">
+                    <li>High-speed target engagement</li>
+                    <li>Hit-to-kill accuracy confirmed</li>
+                    <li>Advanced seeker performance</li>
+                </ul>
+                <span class="trial-btn">View Trial Details →</span>
+            </div>
+        </a>
+
+        <!-- Optional 4th card -->
+        {% comment %} <a href="{% url 'land_systems' %}" class="trial-card">
+            <div class="trial-poster">
+                <img loading="lazy" src="{% static 'images/trials/bhuastra-poster.jpg' %}" alt="BhuAstra Trial">
+                
+                <span class="trial-badge">Ground System Trial</span>
+            </div>
+            <div class="trial-card-body">
+                <h3>BhuAstra</h3>
+                <p class="trial-subtitle">Ground-Based Air Defence</p>
+                <ul class="trial-highlights">
+                    <li>Live fire test completed</li>
+                    <li>Multi-target engagement</li>
+                    <li>Operational readiness confirmed</li>
+                </ul>
+                <span class="trial-btn">View Trial Details →</span>
+            </div>
+        </a> {% endcomment %}
+
+    </div>
+</section>
+
+
+<!-- ================= SPEECH VIDEOS ================= -->
+<section class="speech-video-section bg-white">
+    <div class="speech-video-header">
+        <span class="speech-tag">Featured Address</span>
+        <h2>Hon'ble Defence Minister<br>Shri Rajnath Singh</h2>
+        <p>Watch the inauguration of ammunition park at Shirdi highlighting India's growing strength in indigenous defence manufacturing.</p>
+    </div>
+    {% comment %} <div class="speech-video-wrapper">
+        <div class="speech-video-box">
+            <video autoplay muted loop playsinline>
+                <source src="{% static 'videos/Nibe insta draft.mp4' %}" type="video/mp4">
+            </video>
+        </div>
+    </div> {% endcomment %}
+
+    <div class="speech-video-wrapper">
+       <div class="speech-video-box">
+            <iframe 
+                width="600" 
+                height="315" 
+                src="https://www.youtube.com/embed/LO-SX7ymZs0?autoplay=1&mute=1" 
+                title="YouTube video player" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                referrerpolicy="strict-origin-when-cross-origin" 
+                allowfullscreen>
+                </iframe>
+        </div>
+    </div>
+
+</section>
+
+<section class="speech-video-section bg-offwhite">
+    <div class="speech-video-header">
+        
+        <h2>Chairman & Managing Director<br>Mr. Ganesh Nibe</h2>
+        <p>Celebrating Foundation Day 2026 with a special message from our Chairman & Managing Director</p>
+    </div>
+    <div class="speech-video-wrapper">
+        <div class="speech-video-box">
+            <iframe 
+                width="600" 
+                height="315" 
+                src="https://www.youtube.com/embed/RKk38ePzb3A?autoplay=1&mute=1&controls=0" 
+                title="YouTube video player" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowfullscreen
+                referrerpolicy="strict-origin-when-cross-origin">
+            </iframe>
+        </div>
+    </div>
+</section>
+
+<!-- ================= OUR DIVISIONS ================= -->
+<section class="visions bg-white">
+    <div class="visions-header">
+        <h2>OUR DIVISIONS</h2>
+    </div>
+
+    <div class="slider-container">
+        <button class="slider-btn prev">&#10094;</button>
+        <div class="vision-slider" id="visionSlider">
+
+            <!-- NIBE SPACE -->
+            <div class="vision-card">
+                <img loading="lazy" src="{% static 'images/divisions/space.jpg' %}" alt="NIBE Space">
+                <h3>
+                    <a href="https://www.nibespace.com/" target="_blank" class="division-link">
+                        NIBE SPACE (NSPL)
+                    </a>
+                </h3>
+                <p>Delivering advanced satellite technology and Earth observation solutions for real-time intelligence and enhanced national security.</p>
+            </div>
+
+            <!-- LAND SYSTEMS -->
+            <div class="vision-card">
+                <img loading="lazy" src="{% static 'images/divisions/Land Systems.jpg' %}" alt="Land Systems">
+                <h3>
+                    <a href="{% url 'land_systems' %}" class="division-link">
+                        LAND SYSTEMS
+                    </a>
+                </h3>
+                <p>Our Land Systems portfolio features SuryaAstra, Garudastra, the Vayuastra Series, Counter-UAS, 30mm Proximity Fuze, Silver Bullet, Pinaka, and Satellite-Based Intelligence technologies for advanced defence operations.</p>
+            </div>
+
+            <!-- AIR SYSTEMS -->
+            <div class="vision-card">
+                <img loading="lazy" src="{% static 'images/divisions/GATR.jpg' %}" alt="Air Systems">
+                <h3>
+                    <a href="{% url 'airforce_systems' %}" class="division-link">
+                        AIR SYSTEMS
+                    </a>
+                </h3>
+                <p>Advanced air combat solutions featuring GATR, Counter-UAS, SkyStriker, PULS, and Shared Rocket Core technologies for precision strike, force protection, and mission success.</p>
+            </div>
+
+            <!-- NAVAL SYSTEMS -->
+            <div class="vision-card">
+                <img loading="lazy" src="{% static 'images/divisions/Seagull Photo.jpg' %}" alt="Naval Systems">
+                <h3>
+                    <a href="{% url 'naval_systems' %}" class="division-link">
+                        NAVAL SYSTEMS
+                    </a>
+                </h3>
+                <p>Engineered for modern maritime warfare, our Naval Systems integrate autonomous platforms, mine countermeasure technologies, advanced rocket launch systems, and high-performance naval ammunition.</p>
+            </div>
+
+            <!-- DEFENCE ELECTRONICS -->
+            <div class="vision-card">
+                <img loading="lazy" src="{% static 'images/divisions/defence-electronics.jpg' %}" alt="Defence Electronics">
+                <h3>
+                    <a href="{% url 'electronics' %}" class="division-link">
+                        DEFENCE ELECTRONICS (NDAL)
+                    </a>
+                </h3>
+                <p>Specializing in advanced embedded systems, military software, and smart weapon integration.</p>
+            </div>
+
+            <!-- BIO ENERGY -->
+            <div class="vision-card">
+                <img loading="lazy" src="{% static 'images/divisions/BBGPL.jpg' %}" alt="Bio Energy">
+                <h3>
+                    <a href="{% url 'bbgpl' %}" class="division-link">
+                        BIO ENERGY
+                    </a>
+                </h3>
+                <p>Bharat Bio Gas Private Limited delivers sustainable CBG infrastructure, transforming agricultural waste into clean fuel and organic fertilizers.</p>
+            </div>
+
+        </div>
+        <button class="slider-btn next">&#10095;</button>
+    </div>
+</section>
+
+
+
+
+<!-- ================= CAPABILITIES (Defence Manufacturing) ================= -->
+<section class="capabilities-section bg-offwhite">
+    <div class="capabilities-left">
+        <h2 class="main-heading">OUR CAPABILITIES</h2>
+        <p class="capability-category"><span>01.</span> Defence Manufacturing</p>
+
+        <div class="accordion">
+            <div class="accordion-item">
+                <button type="button" class="accordion-header" data-image="{% static 'images/capabilities/laser-cutting-1.jpg' %}">
+                    Cutting <span>+</span>
+                </button>
+                <div class="accordion-content">
+                    <p>Advanced laser/plasma cutting and CNC bending systems with monthly capabilities up to 5000 tons and 1200 tons respectively.</p>
+                    <div style="display:flex; gap:10px;">
+                        <img loading="lazy" src="{% static 'images/capabilities/Cutting1.jpg' %}" style="width:50%; margin:0;" alt="">
+                        <img loading="lazy" src="{% static 'images/capabilities/Cutting2.jpg' %}" style="width:50%; margin:0;" alt="">
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <button type="button" class="accordion-header" data-image="{% static 'images/capabilities/fabrication.jpg' %}">
+                    Fabrication <span>+</span>
+                </button>
+                <div class="accordion-content">
+                    <p>Large-scale fabrication facilities spanning 550,000 square feet, enabling mass production with rigorous quality control.</p>
+                    <img loading="lazy" src="{% static 'images/capabilities/fabricationn.jpg' %}" alt="">
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <button type="button" class="accordion-header" data-image="{% static 'images/capabilities/welding.jpg' %}">
+                    Automated Welding <span>+</span>
+                </button>
+                <div class="accordion-content">
+                    <p>Fully/semi-automated welding stations with KUKA & IGM robots for high-precision, repeatable welding.</p>
+                    <img loading="lazy" src="{% static 'images/capabilities/welding.jpg' %}" alt="">
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <button type="button" class="accordion-header" data-image="{% static 'images/capabilities/laser-cutting-1.jpg' %}">
+                    VMC Machining <span>+</span>
+                </button>
+                <div class="accordion-content">
+                    <p>High-capacity Zayer machines (12M and 16M) for machining large defence components with unparalleled accuracy.</p>
+                    <div style="display:flex; gap:10px;">
+                        <img loading="lazy" src="{% static 'images/capabilities/VMC machine back.jpg' %}" style="width:50%; margin:0;" alt="">
+                        <img loading="lazy" src="{% static 'images/capabilities/VMC machine front.jpg' %}" style="width:50%; margin:0;" alt="">
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <button type="button" class="accordion-header" data-image="{% static 'images/capabilities/cnc.jpg' %}">
+                    Bending <span>+</span>
+                </button>
+                <div class="accordion-content">
+                    <p>Engineered for large-scale metal fabrication, this CNC Hydraulic Press Brake performs precise bending of long sheet metal sections up to 10 meters.</p>
+                    <img loading="lazy" src="{% static 'images/capabilities/bending machine.jpg' %}" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="capabilities-right">
+        <img id="mainCapabilityImage" loading="lazy" src="{% static 'images/capabilities/Home.jpg' %}" alt="Defence Manufacturing">
+    </div>
+</section>
+
+<!-- ================= ENGINEERING & DESIGN ================= -->
+<section class="capabilities-section bg-offwhite">
+    <div class="capabilities-left">
+        <p class="capability-category"><span>02.</span> Engineering and Design</p>
+
+        <div class="accordion">
+            <div class="accordion-item">
+                <button type="button" class="accordion-header" data-image="{% static 'images/engineering/AutoCAD.jpg' %}">
+                    CAD and SolidWorks <span>+</span>
+                </button>
+                <div class="accordion-content">
+                    <p>Industry-standard software for Developing details 2D and 3D models that guide accurate production processes.</p>
+                    <img loading="lazy" src="{% static 'images/engineering/AutoCAD.jpg' %}" alt="">
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <button type="button" class="accordion-header" data-image="{% static 'images/engineering/Sigma-Nest.jpg' %}">
+                    Nesting Software (Sigma Nest, TruTops) <span>+</span>
+                </button>
+                <div class="accordion-content">
+                    <p>Nesting software for material optimazation, reducing waste and enhancing production efficiency.</p>
+                    <img loading="lazy" src="{% static 'images/engineering/nesting.jpg' %}" alt="">
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <button type="button" class="accordion-header" data-image="{% static 'images/engineering/E-Drawings.jpg' %}">
+                    E-Drawing <span>+</span>
+                </button>
+                <div class="accordion-content">
+                    <p>Visual tools for collaborative design, enabling seamless integration from design to fabrication.</p>
+                    <img loading="lazy" src="{% static 'images/engineering/desiging.jpg' %}" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="capabilities-right">
+        <img id="mainEngineeringImage" loading="lazy" src="{% static 'images/engineering/EnggDesign.png' %}" alt="Engineering and Design">
+    </div>
+</section>
+
+<!-- ================= RESEARCH & DEVELOPMENT ================= -->
+<section class="capabilities-section bg-offwhite">
+    <div class="capabilities-left">
+        <p class="capability-category"><span>03.</span> Research and Development</p>
+
+        <div class="accordion">
+            <div class="accordion-item">
+                <button type="button" class="accordion-header" data-image="{% static 'images/rnd/Embedded Systems.jpg' %}">
+                    Embedded Systems Development <span>+</span>
+                </button>
+                <div class="accordion-content">
+                    <p>Designing high-performance Electronics for use in complex defence applications under extreme conditions.</p>
+                    <img loading="lazy" src="{% static 'images/rnd/Embedded System.jpg' %}" alt="">
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <button type="button" class="accordion-header" data-image="{% static 'images/rnd/Power-Electronics.jpg' %}">
+                    Power Electronics Innovation <span>+</span>
+                </button>
+                <div class="accordion-content">
+                    <p>Advanced power systems to support reliable and efficient energy solutions for defence equipments.</p>
+                    <img loading="lazy" src="{% static 'images/rnd/Power Electronics.jpg' %}" alt="">
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <button type="button" class="accordion-header" data-image="{% static 'images/rnd/Smart Weapon.jpg' %}">
+                    Smart Weapon Systems <span>+</span>
+                </button>
+                <div class="accordion-content">
+                    <p>Developing responsive, technologically advanced weapon systems for modern defence needs.</p>
+                    <div style="display:flex; gap:10px;">
+                        <img loading="lazy" src="{% static 'images/rnd/karamyogi 1.jpg' %}" style="width:50%; margin:0;" alt="">
+                        <img loading="lazy" src="{% static 'images/rnd/karamyogi 3.jpg' %}" style="width:50%; margin:0;" alt="">
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <button type="button" class="accordion-header" data-image="{% static 'images/rnd/Electronic Warfare.jpg' %}">
+                    Electronics Warfare Capabilities <span>+</span>
+                </button>
+                <div class="accordion-content">
+                    <p>Focused R&D into electronic Warfare solutions, enhancing defence resilience against cyber and physical threats.</p>
+                    <div style="display:flex; gap:10px;">
+                        <img loading="lazy" src="{% static 'images/rnd/radar vehicle 1.jpg' %}" style="width:50%; margin:0;" alt="">
+                        <img loading="lazy" src="{% static 'images/rnd/radar vehicle 2.jpg' %}" style="width:50%; margin:0;" alt="">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="capabilities-right">
+        <img id="mainReserachImage" loading="lazy" src="{% static 'images/rnd/research and devlopment wing.jpg' %}" alt="Research and Development">
+    </div>
+</section>
+
+{% endblock %}

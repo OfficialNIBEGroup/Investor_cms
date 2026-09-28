@@ -1,0 +1,138 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="{% static 'Nibe Limited Logo/NIBE Group Logo.png' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NIBE | Investor Document Portal{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/Investor_Dashboard.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+<div class="dashboard-wrapper">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-text">
+                <img class="logo-mark-img"
+                     src="{% static 'Nibe Limited Logo/NIBE Group Logo.png' %}"
+                     alt="NIBE Limited logo">
+            </div>
+            <div class="logo-sub">Investor Document Portal</div>
+        </div>
+
+        <nav class="sidebar-navigation">
+            {% if is_admin %}
+            <a href="{% url 'dashboard' %}"
+               class="menu-item {% if active_tab == 'dashboard' %}active{% endif %}">
+                <span class="menu-icon">⌂</span>
+                <span>Dashboard</span>
+            </a>
+            {% endif %}
+
+            <a href="{% url 'documents' %}"
+               class="menu-item {% if active_tab == 'documents' %}active{% endif %}">
+                <span class="menu-icon">▤</span>
+                <span>Documents</span>
+            </a>
+
+            <a href="{% url 'upload' %}"
+               class="menu-item {% if active_tab == 'upload' %}active{% endif %}">
+                <span class="menu-icon">🢁</span>
+                <span>Upload Document</span>
+            </a>
+
+            {% if is_admin %}
+            <a href="{% url 'audit_log' %}"
+               class="menu-item {% if active_tab == 'audit_log' %}active{% endif %}">
+                <span class="menu-icon">📋</span>
+                <span>Audit Log</span>
+            </a>
+
+            <a href="{% url 'employees' %}"
+               class="menu-item {% if active_tab == 'employees' %}active{% endif %}">
+                <span class="menu-icon">👥</span>
+                <span>Employees</span>
+            </a>
+
+            <a href="{% url 'sections' %}"
+               class="menu-item {% if active_tab == 'sections' %}active{% endif %}">
+                <span class="menu-icon">📂</span>
+                <span>Sections</span>
+            </a>
+            {% endif %}
+        </nav>
+
+        <div class="sidebar-secure">
+            <div class="secure-icon">✓</div>
+            <div class="secure-text">
+                <strong>Secure Access</strong>
+                <span>Your data is protected with<br>enterprise-grade security.</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <!-- TOP HEADER -->
+        <header class="top-header">
+            <div class="header-left">
+                <button class="mobile-menu-button" onclick="toggleSidebar()">☰</button>
+                <h1>
+                    Welcome back,
+                    <span class="muted">{{ display_name|default:user.username|default:"User" }}</span>
+                </h1>
+            </div>
+            <div class="header-right">
+                <span style="font-size: 13px; color: #64748b; margin-right: 8px;">
+                    {% if user_role %}{{ user_role }}{% endif %}
+                </span>
+                <a href="{% url 'dashboard_logout' %}" class="logout-btn">Log out</a>
+                <div class="header-avatar" title="{{ username|default:user.username }}">
+                    {{ user_initials|default:"U" }}
+                </div>
+            </div>
+        </header>
+
+        {% block content %}{% endblock %}
+    </main>
+</div>
+
+<!-- Shared modals that appear on multiple pages can stay here or be moved to specific templates -->
+{% block modals %}{% endblock %}
+
+<script>
+  window.CURRENT_USER_ROLE = "{{ user_role|default:'EMPLOYEE' }}";
+  window.IS_ADMIN = {{ is_admin|default:False|yesno:"true,false" }};
+  window.DASHBOARD_URLS = {
+    documentsApi: "{% url 'dashboard_documents_api' %}",
+    uploadDocument: "{% url 'upload_investor_document' %}",
+    uploadCustomDocument: "{% url 'upload_custom_document' %}",
+    editDocument: "{% url 'edit_investor_document' document_id=0 section='section' %}".replace("/0/section/", "/"),
+    deleteDocument: "{% url 'delete_investor_document' %}",
+    dashboardStats: "{% url 'dashboard_statistics_api' %}",
+    recentDocuments: "{% url 'dashboard_documents_api' %}",
+    downloadSummaryReport: "{% url 'download_summary_report' %}",
+    auditLogApi: "{% url 'audit_log_api' %}",
+    employeesList: "{% url 'employees_list_api' %}",
+    createEmployee: "{% url 'create_employee' %}",
+    updateEmployee: "{% url 'update_employee' %}",
+    toggleEmployeeStatus: "{% url 'toggle_employee_status' %}",
+    deleteEmployee: "{% url 'delete_employee' %}",
+    sectionsListApi: "{% url 'sections_list_api' %}",
+    createSection: "{% url 'create_section' %}",
+    updateSection: "{% url 'update_section' %}",
+    toggleSectionStatus: "{% url 'toggle_section_status' %}",
+    deleteSection: "{% url 'delete_section' %}",
+    createSubsection: "{% url 'create_subsection' %}",
+    updateSubsection: "{% url 'update_subsection' %}",
+    deleteSubsection: "{% url 'delete_subsection' %}",
+  };
+</script>
+<script src="{% static 'js/dashboard_common.js' %}"></script>
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

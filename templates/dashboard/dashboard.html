@@ -1,0 +1,233 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% load static %}
+
+{% block title %}Dashboard | NIBE Investor Portal{% endblock %}
+
+{% block content %}
+<section id="dashboardPage" class="page-section">
+
+    <div class="dashboard-intro">
+        <div>
+            <span class="welcome-label">INVESTOR DOCUMENT PORTAL</span>
+            <h2>Investor Document Dashboard</h2>
+            <p>
+                Manage all investor documents across
+                the NIBE Limited investor relations portal.
+            </p>
+        </div>
+    </div>
+
+    <div class="section-overview-card">
+        <div class="section-overview-header">
+            <div>
+                <span class="welcome-label">DOCUMENT LIBRARY</span>
+            </div>
+        </div>
+
+        <div class="document-section-grid">
+
+            <div class="document-section-card">
+                <div class="section-card-icon">📄</div>
+                <div class="section-card-content">
+                    <h3>Annual Report</h3>
+                    <strong id="countAnnualReports">0</strong>
+                    <span>Documents</span>
+                </div>
+            </div>
+
+            <div class="document-section-card">
+                <div class="section-card-icon">📊</div>
+                <div class="section-card-content">
+                    <h3>Financial Results</h3>
+                    <strong id="countFinancialResults">0</strong>
+                    <span>Documents</span>
+                </div>
+            </div>
+
+            <div class="document-section-card">
+                <div class="section-card-icon">📄</div>
+                <div class="section-card-content">
+                    <h3>Annual Returns</h3>
+                    <strong id="countAnnualReturns">0</strong>
+                    <span>Documents</span>
+                </div>
+            </div>
+
+            <div class="document-section-card">
+                <div class="section-card-icon">📢</div>
+                <div class="section-card-content">
+                    <h3>Corporate Announcements</h3>
+                    <strong id="countCorporateAnnouncements">0</strong>
+                    <span>Documents</span>
+                </div>
+            </div>
+
+            <div class="document-section-card">
+                <div class="section-card-icon">🏛</div>
+                <div class="section-card-content">
+                    <h3>Corporate Governance</h3>
+                    <strong id="countCorporateGovernance">0</strong>
+                    <span>Documents</span>
+                </div>
+            </div>
+
+            <div class="document-section-card">
+                <div class="section-card-icon">📈</div>
+                <div class="section-card-content">
+                    <h3>Shareholding Pattern</h3>
+                    <strong id="countShareholdingPattern">0</strong>
+                    <span>Documents</span>
+                </div>
+            </div>
+
+            <div class="document-section-card">
+                <div class="section-card-icon">⚖</div>
+                <div class="section-card-content">
+                    <h3>Disclosure under Regulations<br>46 of SEBI LODR</h3>
+                    <strong id="countSebiLodr">0</strong>
+                    <span>Documents</span>
+                </div>
+            </div>
+
+            <div class="document-section-card">
+                <div class="section-card-icon">📋</div>
+                <div class="section-card-content">
+                    <h3>Investor Forms & Declaration</h3>
+                    <strong id="countInvestorFormsDeclaration">0</strong>
+                    <span>Documents</span>
+                </div>
+            </div>
+
+            <div class="document-section-card">
+                <div class="section-card-icon">🏢</div>
+                <div class="section-card-content">
+                    <h3>Subsidiary Financial</h3>
+                    <strong id="countSubsidiaryFinancial">0</strong>
+                    <span>Documents</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+
+        <div class="dashboard-card recent-documents">
+            <div class="card-header">
+                <div class="card-header-left">
+                    <div class="card-header-icon">📄</div>
+                    <div>
+                        <h3>Recent Documents</h3>
+                    </div>
+                </div>
+                <a href="{% url 'documents' %}" class="view-all-btn">
+                    View all documents →
+                </a>
+            </div>
+
+            <div id="recentDocumentsList" class="recent-documents-list"></div>
+
+            <div id="recentDocumentsEmpty" class="empty-state">
+                <div class="empty-icon-wrap">
+                    <span class="empty-folder">📁</span>
+                    <span class="empty-check">✓</span>
+                </div>
+                <h4>No recent documents</h4>
+                <p>Upload or select documents to see them here.</p>
+                <a href="{% url 'documents' %}" class="soft-button">
+                    📁 Browse Documents
+                </a>
+            </div>
+        </div>
+
+        <div class="dashboard-card summary-card">
+            <div class="card-header">
+                <div class="card-header-left">
+                    <div class="card-header-icon">◔</div>
+                    <div>
+                        <h3>Document Summary</h3>
+                        <p>Overview of your document library</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="summary-content">
+                <div class="summary-total">
+                    <div class="summary-total-icon">📁</div>
+                    <div>
+                        <span>Total Documents</span>
+                        <strong id="summaryTotal">0</strong>
+                    </div>
+                </div>
+
+                <div class="summary-main">
+                    <div class="donut-wrap">
+                        <svg id="summaryDonut" class="donut-svg" viewBox="0 0 36 36">
+                            <circle cx="18" cy="18" r="15.5" fill="none" stroke="#e7edf4" stroke-width="4.5"></circle>
+                            <circle id="donutSegment1" cx="18" cy="18" r="15.5" fill="none" stroke="#38bdf8" stroke-width="4.5" stroke-dasharray="0 100" stroke-dashoffset="0"></circle>
+                            <circle id="donutSegment2" cx="18" cy="18" r="15.5" fill="none" stroke="#a78bfa" stroke-width="4.5" stroke-dasharray="0 100" stroke-dashoffset="0"></circle>
+                            <circle id="donutSegment3" cx="18" cy="18" r="15.5" fill="none" stroke="#818cf8" stroke-width="4.5" stroke-dasharray="0 100" stroke-dashoffset="0"></circle>
+                            <circle id="donutSegment4" cx="18" cy="18" r="15.5" fill="none" stroke="#34d399" stroke-width="4.5" stroke-dasharray="0 100" stroke-dashoffset="0"></circle>
+                            <circle id="donutSegment5" cx="18" cy="18" r="15.5" fill="none" stroke="#2dd4bf" stroke-width="4.5" stroke-dasharray="0 100" stroke-dashoffset="0"></circle>
+                            <circle id="donutSegment6" cx="18" cy="18" r="15.5" fill="none" stroke="#60a5fa" stroke-width="4.5" stroke-dasharray="0 100" stroke-dashoffset="0"></circle>
+                            <circle id="donutSegment7" cx="18" cy="18" r="15.5" fill="none" stroke="#f59e0b" stroke-width="4.5" stroke-dasharray="0 100" stroke-dashoffset="0"></circle>
+                            <circle id="donutSegment8" cx="18" cy="18" r="15.5" fill="none" stroke="#fb7185" stroke-width="4.5" stroke-dasharray="0 100" stroke-dashoffset="0"></circle>
+                            <circle id="donutSegment9" cx="18" cy="18" r="15.5" fill="none" stroke="#c084fc" stroke-width="4.5" stroke-dasharray="0 100" stroke-dashoffset="0"></circle>
+                            <circle id="donutSegment10" cx="18" cy="18" r="15.5" fill="none" stroke="#22c55e" stroke-width="4.5" stroke-dasharray="0 100" stroke-dashoffset="0"></circle>
+                            <circle id="donutSegment11" cx="18" cy="18" r="15.5" fill="none" stroke="#14b8a6" stroke-width="4.5" stroke-dasharray="0 100" stroke-dashoffset="0"></circle>
+                            <circle id="donutSegment12" cx="18" cy="18" r="15.5" fill="none" stroke="#6366f1" stroke-width="4.5" stroke-dasharray="0 100" stroke-dashoffset="0"></circle>
+                            <circle id="donutSegment13" cx="18" cy="18" r="15.5" fill="none" stroke="#0ea5e9" stroke-width="4.5" stroke-dasharray="0 100" stroke-dashoffset="0"></circle>
+                        </svg>
+                        <div class="donut-center">
+                            <strong id="donutTotal">0</strong>
+                            <span>Total</span>
+                        </div>
+                    </div>
+
+                    <div id="sectionSummaryGrid" class="section-summary-grid">
+                        <!-- Filled by JavaScript -->
+                    </div>
+                </div>
+
+                <div class="summary-download">
+                    <button type="button" id="downloadSummaryBtn" class="soft-button summary-download-button">
+                        ↓ Download Summary Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-card quick-actions">
+        <div class="card-header">
+            <div>
+                <h3>Quick Actions</h3>
+                <p>Frequently used document management actions</p>
+            </div>
+        </div>
+
+        <div class="quick-action-grid">
+            <a href="{% url 'upload' %}" class="quick-action">
+                <div class="quick-action-icon">🢁</div>
+                <div>
+                    <strong>Upload Document</strong>
+                    <span>Add a new investor document</span>
+                </div>
+            </a>
+
+            <a href="{% url 'documents' %}" class="quick-action">
+                <div class="quick-action-icon">▤</div>
+                <div>
+                    <strong>View Documents</strong>
+                    <span>Browse uploaded documents</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/dashboard_page.js' %}"></script>
+{% endblock %}
