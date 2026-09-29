@@ -204,3 +204,55 @@ class AuditLogStatusTests(TestCase):
         self.assertTrue(
             AuditLog.objects.filter(action="deleted", document_title="Policy B").exists()
         )
+
+    def test_legacy_delete_url_removes_document_and_writes_log(self):
+        response = self.client.post(
+            reverse(
+                "delete_investor_document_legacy",
+                args=[self.doc.id, "annual_report"],
+            ),
+            data=json.dumps({"id": self.doc.id, "section": "annual_report"}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["success"])
+        self.assertFalse(AnnualReport.objects.filter(id=self.doc.id).exists())
+
+        activity = self.client.get(reverse("recent_document_activity_api"))
+        self.assertEqual(activity.status_code, 200)
+        self.assertIn("no-store", activity["Cache-Control"])
+        self.assertIn("deleted", {item["action"] for item in activity.json()})
+
+        audit = self.client.get(reverse("audit_log_api"))
+        self.assertEqual(audit.status_code, 200)
+        self.assertEqual(audit.json()["results"][0]["action"], "deleted")
+
+    def test_empty_pdf_input_still_saves_title(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        response = self.client.post(
+            reverse("update_investor_document"),
+            data={
+                "document_id": self.doc.id,
+                "section": "annual_report",
+                "title": "Title Kept With Blank File",
+                "financial_year": "2024-25",
+                "external_url": "https://example.com/report.pdf",
+                "published": "true",
+                "pdf_file": SimpleUploadedFile("blank.pdf", b"", content_type="application/pdf"),
+            },
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        self.doc.refresh_from_db()
+        self.assertEqual(self.doc.title, "Title Kept With Blank File")
+        self.assertFalse(self.doc.pdf_file)
+
+    def test_documents_page_save_and_delete_use_working_urls(self):
+        response = self.client.get(reverse("documents"))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("no-store", response["Cache-Control"])
+        html = response.content.decode()
+        self.assertIn(reverse("update_investor_document"), html)
+        self.assertIn(reverse("delete_investor_document"), html)
+        self.assertIn("window.deleteDocument", html)
+        self.assertIn('name="csrfmiddlewaretoken"', html)

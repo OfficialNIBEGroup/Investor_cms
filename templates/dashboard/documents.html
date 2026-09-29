@@ -117,8 +117,9 @@
             <button type="button" class="modal-close-btn" onclick="closeEditModal()">×</button>
         </div>
 
-        <form id="editDocumentForm" enctype="multipart/form-data">
+        <form id="editDocumentForm" method="post" action="{% url 'update_investor_document' %}" enctype="multipart/form-data">
             <div class="edit-modal-body">
+                {% csrf_token %}
 
                 <input type="hidden" id="edit_document_id" name="document_id">
                 <input type="hidden" id="edit_section" name="section">
@@ -180,5 +181,123 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/documents_page.js' %}"></script>
+<script src="{% static 'js/documents_page.js' %}?v=20260929d"></script>
+<script>
+(function () {
+    const UPDATE_URL = "{% url 'update_investor_document' %}";
+    const DELETE_URL = "{% url 'delete_investor_document' %}";
+
+    function csrfToken() {
+        const input = document.querySelector('#editDocumentForm input[name="csrfmiddlewaretoken"]');
+        if (input && input.value) return input.value;
+        if (typeof getCookie === "function") return getCookie("csrftoken") || "";
+        return "";
+    }
+
+    function bindEditForm() {
+        const form = document.getElementById("editDocumentForm");
+        if (!form || form.dataset.saveBound === "1") return;
+
+        const fresh = form.cloneNode(true);
+        fresh.dataset.saveBound = "1";
+        form.parentNode.replaceChild(fresh, form);
+
+        fresh.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const btn = document.getElementById("saveEditButton");
+            const original = btn ? btn.textContent : "Save Changes";
+            const formData = new FormData(fresh);
+            if (!formData.get("csrfmiddlewaretoken")) {
+                formData.set("csrfmiddlewaretoken", csrfToken());
+            }
+            const file = formData.get("pdf_file");
+            if (file && typeof file === "object" && !file.name) {
+                formData.delete("pdf_file");
+            }
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = "Saving...";
+            }
+
+            try {
+                const response = await fetch(UPDATE_URL, {
+                    method: "POST",
+                    credentials: "same-origin",
+                    headers: {
+                        "X-CSRFToken": csrfToken(),
+                        "X-Requested-With": "XMLHttpRequest",
+                        Accept: "application/json",
+                    },
+                    body: formData,
+                });
+                const raw = await response.text();
+                let result = {};
+                try {
+                    result = JSON.parse(raw);
+                } catch (parseError) {
+                    throw new Error("Save failed. The server did not confirm the update.");
+                }
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || "Failed to save changes.");
+                }
+
+                alert(result.message || "Document updated successfully.");
+                if (typeof closeEditModal === "function") closeEditModal();
+                if (typeof loadDocuments === "function") await loadDocuments();
+                if (typeof loadDashboardStatistics === "function") loadDashboardStatistics();
+                if (typeof loadRecentDocuments === "function") loadRecentDocuments();
+            } catch (error) {
+                alert(error.message || "Failed to save changes.");
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = original;
+                }
+            }
+        });
+    }
+
+    window.deleteDocument = async function (documentId, section) {
+        if (!confirm("Delete this document permanently?\nThis cannot be undone.")) return;
+
+        try {
+            const response = await fetch(DELETE_URL, {
+                method: "POST",
+                credentials: "same-origin",
+                headers: {
+                    "X-CSRFToken": csrfToken(),
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                body: JSON.stringify({
+                    document_id: documentId,
+                    section: section,
+                }),
+            });
+            const raw = await response.text();
+            let result = {};
+            try {
+                result = JSON.parse(raw);
+            } catch (parseError) {
+                throw new Error("Delete failed. Refresh the page and try again.");
+            }
+            if (!response.ok || !result.success) {
+                throw new Error(result.message || "Failed to delete document.");
+            }
+
+            alert(result.message || "Document deleted.");
+            if (typeof loadDocuments === "function") await loadDocuments();
+            if (typeof loadDashboardStatistics === "function") loadDashboardStatistics();
+            if (typeof loadRecentDocuments === "function") loadRecentDocuments();
+        } catch (error) {
+            alert(error.message || "Failed to delete document.");
+        }
+    };
+
+    document.addEventListener("DOMContentLoaded", bindEditForm);
+})();
+</script>
 {% endblock %}

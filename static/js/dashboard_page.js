@@ -149,8 +149,9 @@ async function loadRecentDocuments() {
     if (emptyEl) emptyEl.style.display = "none";
 
     try {
+        const recentUrl = window.DASHBOARD_URLS.recentDocuments || "/api/recent-document-activity/";
         const response = await fetch(
-            window.DASHBOARD_URLS.recentDocuments || "/api/recent-document-activity/",
+            `${recentUrl}${recentUrl.includes("?") ? "&" : "?"}limit=8&t=${Date.now()}`,
             {
                 method: "GET",
                 headers: {

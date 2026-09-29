@@ -1445,6 +1445,13 @@ def update_investor_document(request):
     pdf_file    = request.FILES.get("pdf_file")
     external_url = request.POST.get("external_url", "").strip() or None
 
+    # An untouched file input is submitted as an empty part. Ignore it so the
+    # current PDF stays in place and the rest of the form can still save.
+    if pdf_file is not None and (
+        not (getattr(pdf_file, "name", "") or "").strip() or pdf_file.size == 0
+    ):
+        pdf_file = None
+
     if pdf_file:
         file_name = pdf_file.name.lower()
         if not file_name.endswith(".pdf"):
@@ -1452,8 +1459,15 @@ def update_investor_document(request):
                 {"success": False, "message": "Only PDF files are allowed."},
                 status=400,
             )
-        content_type = getattr(pdf_file, "content_type", "") or ""
-        if content_type and content_type not in ("application/pdf", "application/x-pdf"):
+        content_type = (getattr(pdf_file, "content_type", "") or "").split(";")[0].strip().lower()
+        allowed_types = {
+            "",
+            "application/pdf",
+            "application/x-pdf",
+            "application/octet-stream",
+            "binary/octet-stream",
+        }
+        if content_type not in allowed_types:
             return JsonResponse(
                 {"success": False, "message": "Invalid file type. Please upload a valid PDF."},
                 status=400,
@@ -1688,9 +1702,26 @@ def update_investor_document(request):
             details=details,
         )
 
+        obj.refresh_from_db()
+        saved = {
+            "id": obj.id,
+            "section": section,
+            "title": obj.title,
+            "published": bool(obj.published),
+            "external_url": obj.external_url,
+            "pdf_file": obj.pdf_file.url if obj.pdf_file else None,
+            "updated_at": obj.updated_at.isoformat() if obj.updated_at else None,
+        }
+        if hasattr(obj, "financial_year"):
+            saved["financial_year"] = obj.financial_year
+        if hasattr(obj, "extra_info"):
+            saved["extra_info"] = obj.extra_info
+            saved["financial_year"] = obj.extra_info
+
         return JsonResponse({
             "success": True,
-            "message": "Document updated successfully."
+            "message": "Document updated successfully.",
+            "document": saved,
         })
 
     except Exception as e:
@@ -1703,6 +1734,7 @@ def update_investor_document(request):
 # DASHBOARD DOCUMENTS API
 # ============================================================
 
+@never_cache
 @login_required(login_url="dashboard_login")
 @role_required(['ADMIN', 'EMPLOYEE'])
 def dashboard_documents_api(request):
@@ -2501,7 +2533,7 @@ def redirect_based_on_role(user):
 
 @login_required(login_url="dashboard_login")
 @role_required(['ADMIN', 'EMPLOYEE'])
-def delete_investor_document(request):
+def delete_investor_document(request, document_id=None, section=None):
 
     if request.method != "POST":
         return JsonResponse(
@@ -2522,8 +2554,12 @@ def delete_investor_document(request):
         else:
             body = request.POST
 
-        document_id = body.get("document_id") or body.get("id")
-        section = (body.get("section") or "").strip()
+        if hasattr(body, "get"):
+            if document_id in (None, ""):
+                document_id = body.get("document_id") or body.get("id")
+            if not (section or "").strip():
+                section = body.get("section")
+        section = str(section or "").strip()
 
         if not document_id or not section:
             return JsonResponse(
@@ -2968,6 +3004,7 @@ def delete_employee(request):
     except Exception as e:
         return JsonResponse({"success": False, "message": str(e)}, status=500)
 
+@never_cache
 @login_required(login_url="dashboard_login")
 @role_required(['ADMIN', 'EMPLOYEE'])
 def recent_document_activity_api(request):
@@ -3008,6 +3045,7 @@ def recent_document_activity_api(request):
     return JsonResponse(data, safe=False)
 
 
+@never_cache
 @login_required(login_url="dashboard_login")
 @role_required(['ADMIN'])
 def audit_log_api(request):
@@ -3600,6 +3638,7 @@ def get_dashboard_context(request, active_tab):
     }
 
 
+@never_cache
 @login_required
 def dashboard_view(request):
     context = get_dashboard_context(request, "dashboard")
@@ -3608,6 +3647,7 @@ def dashboard_view(request):
     return render(request, "dashboard/dashboard.html", context)
 
 
+@never_cache
 @login_required
 def documents_view(request):
     context = get_dashboard_context(request, "documents")
@@ -3620,6 +3660,7 @@ def upload_view(request):
     return render(request, "dashboard/upload.html", context)
 
 
+@never_cache
 @login_required
 def audit_log_view(request):
     context = get_dashboard_context(request, "audit_log")

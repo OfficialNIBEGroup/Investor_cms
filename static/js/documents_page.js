@@ -283,7 +283,8 @@ async function loadDocuments() {
     if (paginationEl) paginationEl.style.display = "none";
 
     try {
-        const response = await fetch(window.DASHBOARD_URLS.documentsApi || "/api/dashboard/documents/", {
+        const documentsUrl = window.DASHBOARD_URLS.documentsApi || "/api/dashboard-documents/";
+        const response = await fetch(`${documentsUrl}${documentsUrl.includes("?") ? "&" : "?"}t=${Date.now()}`, {
             method: "GET",
             headers: {
                 "X-Requested-With": "XMLHttpRequest",

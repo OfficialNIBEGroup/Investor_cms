@@ -93,6 +93,12 @@ urlpatterns = [
     path("api/upload-investor-document/", upload_investor_document, name="upload_investor_document"),
     path("api/update-investor-document/", update_investor_document, name="update_investor_document"),
     path("api/delete-investor-document/", delete_investor_document, name="delete_investor_document"),
+    # Older documents page appended /<id>/<section>/ and posted {"id", "section"}.
+    path(
+        "api/delete-investor-document/<int:document_id>/<str:section>/",
+        delete_investor_document,
+        name="delete_investor_document_legacy",
+    ),
     path("api/edit-investor-document/<int:document_id>/<str:section>/", edit_investor_document, name="edit_investor_document"),
     path("api/download-summary-report/", download_summary_report, name="download_summary_report"),
 

@@ -20,7 +20,7 @@ window.IS_ADMIN = window.IS_ADMIN === true || window.CURRENT_USER_ROLE === "ADMI
 /* ------------------------------------------------------------------ */
 window.DASHBOARD_URLS = window.DASHBOARD_URLS || {
     // Documents
-    documentsApi: "/api/dashboard/documents/",
+    documentsApi: "/api/dashboard-documents/",
     uploadDocument: "/api/upload-investor-document/",
     uploadCustomDocument: "/api/upload-custom-document/",
     editDocument: "/api/edit-investor-document/",          // append id/section
@@ -28,12 +28,12 @@ window.DASHBOARD_URLS = window.DASHBOARD_URLS || {
     deleteDocument: "/api/delete-investor-document/",
 
     // Dashboard stats
-    dashboardStats: "/api/dashboard/statistics/",
+    dashboardStats: "/api/dashboard-statistics/",
     recentDocuments: "/api/recent-document-activity/",
     downloadSummaryReport: "/api/download-summary-report/",
 
     // Audit
-    auditLogApi: "/api/audit-log/",
+    auditLogApi: "/api/audit-logs/",
 
     // Employees
     employeesList: "/api/employees/",
