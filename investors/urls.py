@@ -15,6 +15,7 @@ from .views import (
     tax_declarations_api,
     unclaimed_dividends_api,
     subsidiary_financials_api,
+    public_investor_documents,
     investors_page,
     upload_dashboard,
     dashboard_login,
@@ -73,6 +74,7 @@ urlpatterns = [
     path("api/tax-declarations/", tax_declarations_api, name="tax_declarations_api"),
     path("api/unclaimed-dividends/", unclaimed_dividends_api, name="unclaimed_dividends_api"),
     path("api/subsidiary-financials/", subsidiary_financials_api, name="subsidiary_financials_api"),
+    path("api/public-investor-documents/", public_investor_documents, name="public_investor_documents"),
     path("api/custom-documents/", custom_documents_api, name="custom_documents_api"),
 
     # ================= DASHBOARD / CMS =================

@@ -256,3 +256,101 @@ class AuditLogStatusTests(TestCase):
         self.assertIn(reverse("delete_investor_document"), html)
         self.assertIn("window.deleteDocument", html)
         self.assertIn('name="csrfmiddlewaretoken"', html)
+
+
+class PublicInvestorPageTests(TestCase):
+    def test_page_loads_documents_from_the_admin_panel(self):
+        response = self.client.get(reverse("investors"))
+        self.assertEqual(response.status_code, 200)
+        html = response.content.decode()
+        self.assertIn("investorMenu", html)
+        self.assertIn("investors_documents.js", html)
+        self.assertIn(reverse("public_investor_documents"), html)
+        self.assertNotIn("drive.google.com", html)
+        self.assertNotIn("sharepoint.com", html)
+
+    def test_only_published_admin_documents_are_returned(self):
+        from datetime import date
+
+        from .models import FinancialResult
+
+        AnnualReport.objects.create(
+            title="Public Annual Report",
+            financial_year="2024-25",
+            external_url="https://example.com/annual.pdf",
+            published=True,
+        )
+        AnnualReport.objects.create(
+            title="Hidden Annual Report",
+            financial_year="2023-24",
+            external_url="https://example.com/hidden.pdf",
+            published=False,
+        )
+        FinancialResult.objects.create(
+            title="Quarter One Results",
+            financial_year="2024-25",
+            quarter="Q1",
+            release_date=date(2024, 8, 14),
+            external_url="https://example.com/q1.pdf",
+            published=True,
+        )
+
+        response = self.client.get(reverse("public_investor_documents"))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("no-store", response["Cache-Control"])
+        sections = {item["key"]: item for item in response.json()["sections"]}
+
+        annual_titles = [doc["title"] for doc in sections["annual_report"]["documents"]]
+        self.assertIn("Public Annual Report", annual_titles)
+        self.assertNotIn("Hidden Annual Report", annual_titles)
+
+        results = sections["financial_result"]["documents"]
+        self.assertEqual(results[0]["title"], "Quarter One Results")
+        self.assertEqual(results[0]["quarter"], "Q1")
+        self.assertEqual(results[0]["release_date"], "14-08-2024")
+
+    def test_hidden_system_section_is_omitted_and_custom_section_is_included(self):
+        from .models import CustomDocument, Section
+
+        Section.objects.create(
+            name="Annual Reports",
+            slug="annual-reports",
+            model_key="annual_report",
+            is_system=True,
+            is_active=True,
+            show_on_public=False,
+        )
+        AnnualReport.objects.create(
+            title="Should Stay Hidden",
+            financial_year="2024-25",
+            external_url="https://example.com/annual.pdf",
+            published=True,
+        )
+        custom = Section.objects.create(
+            name="Board Notes",
+            slug="board-notes",
+            is_system=False,
+            is_active=True,
+            show_on_public=True,
+        )
+        CustomDocument.objects.create(
+            section=custom,
+            title="Published Note",
+            external_url="https://example.com/note.pdf",
+            published=True,
+        )
+        CustomDocument.objects.create(
+            section=custom,
+            title="Draft Note",
+            external_url="https://example.com/draft.pdf",
+            published=False,
+        )
+
+        response = self.client.get(reverse("public_investor_documents"))
+        sections = response.json()["sections"]
+        keys = [item["key"] for item in sections]
+        self.assertNotIn("annual_report", keys)
+
+        board = next(item for item in sections if item["key"] == f"custom_{custom.id}")
+        self.assertEqual(board["name"], "Board Notes")
+        self.assertEqual([doc["title"] for doc in board["documents"]], ["Published Note"])

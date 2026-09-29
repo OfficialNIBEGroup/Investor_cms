@@ -731,6 +731,226 @@ def subsidiary_financials_api(request):
     return JsonResponse(data, safe=False)
 
 
+def _public_date(value):
+    if not value:
+        return ""
+    if hasattr(value, "strftime"):
+        return value.strftime("%d-%m-%Y")
+    return str(value)
+
+
+def _public_file_url(request, obj):
+    pdf = getattr(obj, "pdf_file", None)
+    if not pdf:
+        return None
+    try:
+        return request.build_absolute_uri(pdf.url)
+    except Exception:
+        return None
+
+
+def _public_document(request, obj, bucket=""):
+    """One published document, shaped for the public Investors page."""
+    return {
+        "id": obj.id,
+        "title": obj.title or "Untitled",
+        "financial_year": getattr(obj, "financial_year", "") or "",
+        "quarter": getattr(obj, "quarter", "") or "",
+        "category": getattr(obj, "category", "") or "",
+        "company_name": getattr(obj, "company_name", "") or "",
+        "financial_type": getattr(obj, "financial_type", "") or "",
+        "notice_type": getattr(obj, "notice_type", "") or "",
+        "extra_info": getattr(obj, "extra_info", "") or "",
+        "description": getattr(obj, "description", "") or "",
+        "applicable_to": getattr(obj, "applicable_to", "") or "",
+        "dividend_type": getattr(obj, "dividend_type", "") or "",
+        "release_date": _public_date(getattr(obj, "release_date", None)),
+        "disclosure_date": _public_date(getattr(obj, "disclosure_date", None)),
+        "meeting_date": _public_date(getattr(obj, "meeting_date", None)),
+        "pdf_file": _public_file_url(request, obj),
+        "external_url": getattr(obj, "external_url", None) or None,
+        "display_order": getattr(obj, "display_order", 0) or 0,
+        "bucket": bucket,
+    }
+
+
+def _published(model):
+    return model.objects.filter(published=True).order_by("-display_order", "-id")
+
+
+@never_cache
+def public_investor_documents(request):
+    """
+    Published investor documents for the public Investors page.
+    Sections hidden in the admin panel are left out. Custom sections
+    marked visible on the public site are included.
+    """
+    ensure_system_sections()
+
+    hidden = set()
+    names = {}
+    for row in Section.objects.filter(is_system=True):
+        if not row.model_key:
+            continue
+        names[row.model_key] = row.name
+        if not row.is_active or not row.show_on_public:
+            hidden.add(row.model_key)
+
+    def visible(key):
+        return key not in hidden
+
+    def named(key, fallback):
+        return names.get(key) or fallback
+
+    sections = []
+
+    def add_section(key, name, icon, layout, documents):
+        sections.append({
+            "key": key,
+            "name": name,
+            "icon": icon,
+            "layout": layout,
+            "documents": documents,
+        })
+
+    if visible("annual_report"):
+        add_section(
+            "annual_report",
+            named("annual_report", "Annual Reports"),
+            "fa-file-lines",
+            "year_table",
+            [_public_document(request, obj) for obj in _published(AnnualReport)],
+        )
+
+    if visible("financial_result"):
+        add_section(
+            "financial_result",
+            named("financial_result", "Financial Results"),
+            "fa-chart-line",
+            "financial_results",
+            [_public_document(request, obj) for obj in _published(FinancialResult)],
+        )
+
+    if visible("annual_return"):
+        add_section(
+            "annual_return",
+            named("annual_return", "Annual Returns"),
+            "fa-rotate",
+            "year_table",
+            [_public_document(request, obj) for obj in _published(AnnualReturn)],
+        )
+
+    announcement_docs = []
+    if visible("shareholder_notice"):
+        announcement_docs.extend(
+            _public_document(request, obj, "shareholder_notice")
+            for obj in _published(ShareholderNotice)
+        )
+    if visible("newspaper_publication"):
+        announcement_docs.extend(
+            _public_document(request, obj, "newspaper_publication")
+            for obj in _published(NewspaperPublication)
+        )
+    if visible("stock_exchange_disclosure"):
+        announcement_docs.extend(
+            _public_document(request, obj, "stock_exchange_disclosure")
+            for obj in _published(StockExchangeDisclosure)
+        )
+    if any(visible(key) for key in (
+        "shareholder_notice",
+        "newspaper_publication",
+        "stock_exchange_disclosure",
+    )):
+        add_section(
+            "corporate_announcements",
+            "Corporate Announcements",
+            "fa-bullhorn",
+            "announcements",
+            announcement_docs,
+        )
+
+    if visible("corporate_governance"):
+        add_section(
+            "corporate_governance",
+            named("corporate_governance", "Corporate Governance"),
+            "fa-landmark",
+            "by_year",
+            [_public_document(request, obj) for obj in _published(CorporateGovernance)],
+        )
+
+    if visible("shareholding_pattern"):
+        add_section(
+            "shareholding_pattern",
+            named("shareholding_pattern", "Shareholding Pattern"),
+            "fa-chart-pie",
+            "by_year",
+            [_public_document(request, obj) for obj in _published(ShareholdingPattern)],
+        )
+
+    if visible("sebi_document"):
+        add_section(
+            "sebi_document",
+            named("sebi_document", "Disclosure under Regulation 46 of SEBI LODR"),
+            "fa-shield-halved",
+            "sebi",
+            [_public_document(request, obj) for obj in _published(SEBIDocument)],
+        )
+
+    form_docs = []
+    if visible("investor_form"):
+        form_docs.extend(
+            _public_document(request, obj, obj.category or "kyc_nomination")
+            for obj in _published(InvestorForm)
+        )
+    if visible("tax_declaration"):
+        form_docs.extend(
+            _public_document(request, obj, "tax_declaration")
+            for obj in _published(TaxDeclaration)
+        )
+    if visible("unclaimed_dividend"):
+        form_docs.extend(
+            _public_document(request, obj, "unclaimed_dividend")
+            for obj in _published(UnclaimedDividend)
+        )
+    if any(visible(key) for key in ("investor_form", "tax_declaration", "unclaimed_dividend")):
+        add_section(
+            "investor_form",
+            named("investor_form", "Investor Forms & Declarations"),
+            "fa-file-signature",
+            "investor_forms",
+            form_docs,
+        )
+
+    if visible("subsidiary_financial"):
+        add_section(
+            "subsidiary_financial",
+            named("subsidiary_financial", "Subsidiary Financials"),
+            "fa-sitemap",
+            "subsidiary",
+            [_public_document(request, obj) for obj in _published(SubsidiaryFinancial)],
+        )
+
+    custom_sections = Section.objects.filter(
+        is_system=False,
+        is_active=True,
+        show_on_public=True,
+    ).order_by("display_order", "name")
+    for section in custom_sections:
+        docs = CustomDocument.objects.filter(
+            section=section,
+            published=True,
+        ).order_by("-display_order", "-id")
+        add_section(
+            f"custom_{section.id}",
+            section.name,
+            "fa-folder",
+            "custom",
+            [_public_document(request, obj) for obj in docs],
+        )
+
+    return JsonResponse({"sections": sections})
+
+
 # ============================================================
 # DASHBOARD STATISTICS API
 # ============================================================

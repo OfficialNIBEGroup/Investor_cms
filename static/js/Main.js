@@ -66,7 +66,10 @@ function showTab(tabId, element){
 
 window.onload = function(){
 
-    document.getElementById('annualReports').style.display='block';
+    const annualReports = document.getElementById('annualReports');
+    if (!annualReports) return;
+
+    annualReports.style.display='block';
     document.getElementById('financialResults').style.display='none';
     document.getElementById('AnnualReturns').style.display='none';
     document.getElementById('CorporateAnnouncements').style.display='none';
