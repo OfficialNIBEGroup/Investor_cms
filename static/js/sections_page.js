@@ -66,11 +66,12 @@ function renderSectionsTable(list) {
                 : `<span style="padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:#fee2e2;color:#991b1b;">Hidden</span>`;
 
             const publicBadge = s.show_on_public ? "Yes" : "No";
-            const safeName = (s.name || "").replace(/'/g, "\\'");
+            const encodedName = encodeURIComponent(s.name || "");
+            const encodedSection = encodeURIComponent(JSON.stringify(s));
             const deleteBtn = s.is_system
                 ? ""
                 : `<button type="button" style="padding:4px 10px;font-size:12px;border-radius:6px;border:1.5px solid #fecaca;background:#fef2f2;color:#b91c1c;cursor:pointer;"
-                        onclick="deleteSection(${s.id}, '${safeName}')">Delete</button>`;
+                        onclick="deleteSection(${s.id}, decodeURIComponent('${encodedName}'))">Delete</button>`;
 
             const subList =
                 (s.subsections || [])
@@ -79,9 +80,9 @@ function renderSectionsTable(list) {
                             `<div style="font-size:12px;margin:2px 0;">
                 • ${escapeHtml(sub.name)}
                 <button type="button" style="margin-left:6px;font-size:11px;border:none;background:transparent;color:#2563eb;cursor:pointer;"
-                        onclick='openEditSubsectionModal(${JSON.stringify(sub)}, ${JSON.stringify({ id: s.id, name: s.name })})'>Edit</button>
+                        onclick="openEditSubsectionFromEncoded('${encodeURIComponent(JSON.stringify(sub))}', '${encodeURIComponent(JSON.stringify({ id: s.id, name: s.name }))}')">Edit</button>
                 <button type="button" style="font-size:11px;border:none;background:transparent;color:#dc2626;cursor:pointer;"
-                        onclick="deleteSubsection(${sub.id}, '${(sub.name || "").replace(/'/g, "\\'")}')">Del</button>
+                        onclick="deleteSubsection(${sub.id}, decodeURIComponent('${encodeURIComponent(sub.name || "")}'))">Del</button>
             </div>`
                     )
                     .join("") || "<span style='color:#94a3b8;font-size:12px;'>—</span>";
@@ -97,13 +98,13 @@ function renderSectionsTable(list) {
                 ${
                     s.allow_subsections
                         ? `<button type="button" class="primary-button" style="padding:3px 8px;font-size:11px;margin-top:4px;"
-                    onclick='openAddSubsectionModal(${JSON.stringify({ id: s.id, name: s.name })})'>+ Sub-section</button>`
+                    onclick="openAddSubsectionFromEncoded('${encodeURIComponent(JSON.stringify({ id: s.id, name: s.name }))}')">+ Sub-section</button>`
                         : ""
                 }
             </td>
             <td style="white-space:nowrap;">
                 <button type="button" class="primary-button" style="padding:4px 10px;font-size:12px;margin-right:4px;"
-                        onclick='openEditSectionModal(${JSON.stringify(s)})'>Edit</button>
+                        onclick="openEditSectionFromEncoded('${encodedSection}')">Edit</button>
                 <button type="button" style="padding:4px 10px;font-size:12px;border-radius:6px;border:1.5px solid #cbd5e1;background:white;cursor:pointer;margin-right:4px;"
                         onclick="toggleSectionStatus(${s.id})">${s.is_active ? "Hide" : "Show"}</button>
                 ${deleteBtn}
@@ -114,6 +115,21 @@ function renderSectionsTable(list) {
 }
 
 /* ---------- Section modal ---------- */
+function openEditSectionFromEncoded(encoded) {
+    openEditSectionModal(JSON.parse(decodeURIComponent(encoded)));
+}
+
+function openAddSubsectionFromEncoded(encoded) {
+    openAddSubsectionModal(JSON.parse(decodeURIComponent(encoded)));
+}
+
+function openEditSubsectionFromEncoded(encodedSub, encodedSection) {
+    openEditSubsectionModal(
+        JSON.parse(decodeURIComponent(encodedSub)),
+        JSON.parse(decodeURIComponent(encodedSection))
+    );
+}
+
 function openAddSectionModal() {
     document.getElementById("sectionModalTitle").textContent = "Add Section";
     document.getElementById("section_id").value = "";

@@ -1495,12 +1495,12 @@
                     <!-- Right side: Prev / Next -->
                     <div style="display: flex; gap: 8px; align-items: center;">
                         <button type="button" id="documentsPrevBtn"
-                                onclick="goDocumentsPage(currentDocPage - 1)"
+                                onclick="goDocumentsPrev()"
                                 style="padding: 6px 14px; font-size: 13px; border-radius: 8px; border: 1.5px solid #cbd5e1; background: white; color: #334155; cursor: pointer;">
                             ← Previous
                         </button>
                         <button type="button" id="documentsNextBtn"
-                                onclick="goDocumentsPage(currentDocPage + 1)"
+                                onclick="goDocumentsNext()"
                                 style="padding: 6px 14px; font-size: 13px; border-radius: 8px; border: 1.5px solid #cbd5e1; background: white; color: #334155; cursor: pointer;">
                             Next →
                         </button>
@@ -1560,12 +1560,12 @@
                     <!-- Right side: Prev / Next -->
                     <div style="display: flex; gap: 8px; align-items: center;">
                         <button type="button" id="auditLogPrevBtn" 
-                                onclick="loadAuditLogs(currentAuditPage - 1)"
+                                onclick="goAuditPrev()"
                                 style="padding: 6px 14px; font-size: 13px; border-radius: 8px; border: 1.5px solid #cbd5e1; background: white; color: #334155; cursor: pointer;">
                             ← Previous
                         </button>
                         <button type="button" id="auditLogNextBtn" 
-                                onclick="loadAuditLogs(currentAuditPage + 1)"
+                                onclick="goAuditNext()"
                                 style="padding: 6px 14px; font-size: 13px; border-radius: 8px; border: 1.5px solid #cbd5e1; background: white; color: #334155; cursor: pointer;">
                             Next →
                         </button>
@@ -3542,6 +3542,14 @@ function changeAuditPageSize(newSize) {
     currentAuditPageSize = parseInt(newSize, 10) || 20;
     loadAuditLogs(1);   // go back to first page
 }
+
+function goAuditPrev() {
+    loadAuditLogs(currentAuditPage - 1);
+}
+
+function goAuditNext() {
+    loadAuditLogs(currentAuditPage + 1);
+}
 /* =========================================================
    UPLOAD
 ========================================================= */
@@ -5084,6 +5092,14 @@ function goDocumentsPage(page) {
     renderDocumentsTable();
 }
 
+function goDocumentsPrev() {
+    goDocumentsPage(currentDocPage - 1);
+}
+
+function goDocumentsNext() {
+    goDocumentsPage(currentDocPage + 1);
+}
+
 
 function changeDocumentsPageSize(newSize) {
     currentDocPageSize = parseInt(newSize, 10) || 20;
@@ -5750,6 +5766,19 @@ document.addEventListener("click", function (e) {
     if (e.target?.id === "sectionModalOverlay") closeSectionModal();
     if (e.target?.id === "subsectionModalOverlay") closeSubsectionModal();
 });
+
+window.openEditModal = openEditModal;
+window.deleteDocument = deleteDocument;
+window.loadAuditLogs = loadAuditLogs;
+window.loadDocuments = loadDocuments;
+window.deleteEmployee = deleteEmployee;
+window.toggleEmployeeStatus = toggleEmployeeStatus;
+window.saveEmployee = saveEmployee;
+window.deleteSection = deleteSection;
+window.toggleSectionStatus = toggleSectionStatus;
+window.deleteSubsection = deleteSubsection;
+window.saveSection = saveSection;
+window.saveSubsection = saveSubsection;
 
 </script>
 

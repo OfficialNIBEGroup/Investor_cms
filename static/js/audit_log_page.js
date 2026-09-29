@@ -143,10 +143,20 @@ function changeAuditPageSize(newSize) {
     loadAuditLogs(1);
 }
 
+function goAuditPrev() {
+    loadAuditLogs(currentAuditPage - 1);
+}
+
+function goAuditNext() {
+    loadAuditLogs(currentAuditPage + 1);
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     loadAuditLogs(1);
 });
 
 window.loadAuditLogs = loadAuditLogs;
 window.changeAuditPageSize = changeAuditPageSize;
+window.goAuditPrev = goAuditPrev;
+window.goAuditNext = goAuditNext;
 window.currentAuditPage = currentAuditPage;

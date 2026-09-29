@@ -228,6 +228,7 @@ async function refreshAppSectionsFromAPI() {
                 })),
             });
         });
+        window.investorSections = investorSections;
 
         // Rebuild Upload <select id="section">
         const uploadSelect = document.getElementById("section");

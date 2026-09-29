@@ -129,6 +129,41 @@ function showSectionFields(section) {
             )
         );
         dynamicFields.appendChild(createField("Description", "description"));
+        const categorySelect = document.getElementById("category");
+        if (categorySelect) {
+            categorySelect.addEventListener("change", function () {
+                renderInvestorFormExtras(this.value);
+            });
+        }
+    }
+
+    /* Shareholder notice, including when chosen directly from the section list */
+    else if (section === "shareholder_notice") {
+        dynamicFields.appendChild(createField("Document Title", "title", "text", true));
+        dynamicFields.appendChild(createSelect("Financial Year", "financial_year", financialYearOptions, true));
+        dynamicFields.appendChild(createField("Notice Type", "notice_type"));
+        dynamicFields.appendChild(createField("Disclosure Date", "disclosure_date", "date"));
+        dynamicFields.appendChild(createField("Meeting Date", "meeting_date", "date"));
+    }
+
+    else if (section === "newspaper_publication" || section === "stock_exchange_disclosure") {
+        dynamicFields.appendChild(createField("Document Title", "title", "text", true));
+        dynamicFields.appendChild(createSelect("Financial Year", "financial_year", financialYearOptions, true));
+        dynamicFields.appendChild(createField("Disclosure Date", "disclosure_date", "date"));
+    }
+
+    else if (section === "tax_declaration") {
+        dynamicFields.appendChild(createField("Document Title", "title", "text", true));
+        dynamicFields.appendChild(createField("Applicable To", "applicable_to"));
+        dynamicFields.appendChild(createField("Description", "description"));
+    }
+
+    else if (section === "unclaimed_dividend") {
+        dynamicFields.appendChild(createField("Document Title", "title", "text", true));
+        dynamicFields.appendChild(createSelect("Financial Year", "financial_year", financialYearOptions, true));
+        dynamicFields.appendChild(createField("Dividend Type", "dividend_type"));
+        dynamicFields.appendChild(createField("Dividend Declaration Date", "dividend_declaration_date", "date"));
+        dynamicFields.appendChild(createField("IEPF Transfer Due Date", "iepf_transfer_due_date", "date"));
     }
 
     /* 9. Subsidiary Financial */
@@ -144,6 +179,28 @@ function showSectionFields(section) {
         dynamicFields.appendChild(createField("Document Title", "title", "text", true));
         dynamicFields.appendChild(createSelect("Financial Year", "financial_year", financialYearOptions, false));
     }
+}
+
+function renderInvestorFormExtras(category) {
+    const existing = document.getElementById("investorFormExtras");
+    if (existing) existing.remove();
+
+    const dynamicFields = document.getElementById("dynamicFields");
+    if (!dynamicFields) return;
+
+    const wrap = document.createElement("div");
+    wrap.id = "investorFormExtras";
+
+    if (category === "tax_declaration") {
+        wrap.appendChild(createField("Applicable To", "applicable_to"));
+    } else if (category === "unclaimed_dividend") {
+        wrap.appendChild(createSelect("Financial Year", "financial_year", financialYearOptions, true));
+        wrap.appendChild(createField("Dividend Type", "dividend_type"));
+        wrap.appendChild(createField("Dividend Declaration Date", "dividend_declaration_date", "date"));
+        wrap.appendChild(createField("IEPF Transfer Due Date", "iepf_transfer_due_date", "date"));
+    }
+
+    if (wrap.childElementCount) dynamicFields.appendChild(wrap);
 }
 
 function showSubsectionFields(section, subsection) {
@@ -251,6 +308,10 @@ function initUploadForm() {
         const isCustomSection = section && String(section).startsWith("custom_");
         if (isCustomSection) {
             formData.set("section_id", String(section).replace("custom_", ""));
+            const year = (formData.get("financial_year") || "").toString().trim();
+            if (year && !formData.get("extra_info")) {
+                formData.set("extra_info", year);
+            }
             formData.delete("section");
         }
 

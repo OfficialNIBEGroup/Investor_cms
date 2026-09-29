@@ -78,7 +78,8 @@ function renderEmployeesTable(list) {
         .map((u) => {
             const fullName = [u.first_name, u.last_name].filter(Boolean).join(" ") || "—";
             const email = u.email || "—";
-            const safeUser = JSON.stringify(u).replace(/'/g, "&#39;");
+            const encodedUser = encodeURIComponent(JSON.stringify(u));
+            const encodedName = encodeURIComponent(u.username || "");
 
             return `<tr>
                 <td><strong>${escapeHtml(u.username || "")}</strong></td>
@@ -90,13 +91,13 @@ function renderEmployeesTable(list) {
                 <td>${escapeHtml(u.last_login || "Never")}</td>
                 <td style="white-space:nowrap;">
                     <button type="button" class="primary-button" style="padding:4px 10px;font-size:12px;margin-right:4px;"
-                            onclick='openEditEmployeeModal(${safeUser})'>Edit</button>
+                            onclick="openEditEmployeeFromEncoded('${encodedUser}')">Edit</button>
                     <button type="button" style="padding:4px 10px;font-size:12px;border-radius:6px;border:1.5px solid #cbd5e1;background:white;cursor:pointer;margin-right:4px;"
-                            onclick="toggleEmployeeStatus(${u.id}, '${escapeHtml(u.username || "")}')">
+                            onclick="toggleEmployeeStatus(${u.id}, decodeURIComponent('${encodedName}'))">
                         ${u.is_active ? "Deactivate" : "Activate"}
                     </button>
                     <button type="button" style="padding:4px 10px;font-size:12px;border-radius:6px;border:1.5px solid #fecaca;background:#fef2f2;color:#b91c1c;cursor:pointer;"
-                            onclick="deleteEmployee(${u.id}, '${escapeHtml(u.username || "")}')">Delete</button>
+                            onclick="deleteEmployee(${u.id}, decodeURIComponent('${encodedName}'))">Delete</button>
                 </td>
             </tr>`;
         })
@@ -119,6 +120,10 @@ function openAddEmployeeModal() {
     document.getElementById("saveEmployeeButton").textContent = "Create User";
     document.getElementById("usernameHelp").textContent = "Used for login. Cannot be changed after creation.";
     document.getElementById("employeeModalOverlay").classList.add("active");
+}
+
+function openEditEmployeeFromEncoded(encoded) {
+    openEditEmployeeModal(JSON.parse(decodeURIComponent(encoded)));
 }
 
 function openEditEmployeeModal(user) {
@@ -280,6 +285,7 @@ window.loadEmployees = loadEmployees;
 window.filterEmployeesTable = filterEmployeesTable;
 window.openAddEmployeeModal = openAddEmployeeModal;
 window.openEditEmployeeModal = openEditEmployeeModal;
+window.openEditEmployeeFromEncoded = openEditEmployeeFromEncoded;
 window.closeEmployeeModal = closeEmployeeModal;
 window.saveEmployee = saveEmployee;
 window.toggleEmployeeStatus = toggleEmployeeStatus;

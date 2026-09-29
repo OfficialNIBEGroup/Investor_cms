@@ -225,6 +225,23 @@ function renderDocumentsTable() {
     updateDocumentsPagination(totalFiltered);
 }
 
+function setSelectValue(id, value) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const wanted = value == null ? "" : String(value);
+    if (
+        el.tagName === "SELECT" &&
+        wanted &&
+        !Array.from(el.options).some((option) => option.value === wanted)
+    ) {
+        const option = document.createElement("option");
+        option.value = wanted;
+        option.textContent = wanted;
+        el.appendChild(option);
+    }
+    el.value = wanted;
+}
+
 function applyDocumentFilters() {
     currentDocPage = 1;
     renderDocumentsTable();
@@ -234,6 +251,14 @@ function goDocumentsPage(page) {
     if (page < 1) return;
     currentDocPage = page;
     renderDocumentsTable();
+}
+
+function goDocumentsPrev() {
+    goDocumentsPage(currentDocPage - 1);
+}
+
+function goDocumentsNext() {
+    goDocumentsPage(currentDocPage + 1);
 }
 
 function changeDocumentsPageSize(newSize) {
@@ -372,7 +397,7 @@ function buildEditFields(section, doc) {
     if (section === "annual_report" || section === "annual_return") {
         container.appendChild(createSelect("Financial Year", "financial_year", financialYearOptions, true));
         const fy = document.getElementById("financial_year");
-        if (fy) fy.value = doc.financial_year || "";
+        setSelectValue("financial_year", doc.financial_year);
     } else if (section === "financial_result") {
         container.appendChild(createSelect("Financial Year", "financial_year", financialYearOptions, true));
         container.appendChild(
@@ -389,17 +414,17 @@ function buildEditFields(section, doc) {
                 true
             )
         );
-        container.appendChild(createField("Release Date", "release_date", "date"));
+        container.appendChild(createField("Release Date", "release_date", "date", true));
         const fy = document.getElementById("financial_year");
         const q = document.getElementById("quarter");
         const rd = document.getElementById("release_date");
-        if (fy) fy.value = doc.financial_year || "";
-        if (q) q.value = doc.quarter || "";
+        setSelectValue("financial_year", doc.financial_year);
+        setSelectValue("quarter", doc.quarter);
         if (rd && doc.release_date) rd.value = doc.release_date;
     } else if (section === "corporate_governance" || section === "shareholding_pattern") {
         container.appendChild(createSelect("Financial Year", "financial_year", financialYearOptions, true));
         const fy = document.getElementById("financial_year");
-        if (fy) fy.value = doc.financial_year || "";
+        setSelectValue("financial_year", doc.financial_year);
         container.appendChild(
             createSelect(
                 "Quarter",
@@ -415,7 +440,7 @@ function buildEditFields(section, doc) {
             )
         );
         const q = document.getElementById("quarter");
-        if (q) q.value = doc.quarter || "";
+        setSelectValue("quarter", doc.quarter);
     } else if (section === "shareholder_notice") {
         container.appendChild(createSelect("Financial Year", "financial_year", financialYearOptions, true));
         container.appendChild(createField("Notice Type", "notice_type"));
@@ -425,7 +450,7 @@ function buildEditFields(section, doc) {
         const notice = document.getElementById("notice_type");
         const disclosure = document.getElementById("disclosure_date");
         const meeting = document.getElementById("meeting_date");
-        if (fy) fy.value = doc.financial_year || "";
+        setSelectValue("financial_year", doc.financial_year);
         if (notice) notice.value = doc.notice_type || "";
         if (disclosure && doc.disclosure_date) disclosure.value = doc.disclosure_date;
         if (meeting && doc.meeting_date) meeting.value = doc.meeting_date;
@@ -434,7 +459,7 @@ function buildEditFields(section, doc) {
         container.appendChild(createField("Disclosure Date", "disclosure_date", "date"));
         const fy = document.getElementById("financial_year");
         const disclosure = document.getElementById("disclosure_date");
-        if (fy) fy.value = doc.financial_year || "";
+        setSelectValue("financial_year", doc.financial_year);
         if (disclosure && doc.disclosure_date) disclosure.value = doc.disclosure_date;
     } else if (section === "sebi_document") {
         container.appendChild(
@@ -452,7 +477,7 @@ function buildEditFields(section, doc) {
             )
         );
         const cat = document.getElementById("category");
-        if (cat) cat.value = doc.category || "";
+        setSelectValue("category", doc.category);
     } else if (section === "investor_form") {
         container.appendChild(
             createSelect(
@@ -469,7 +494,7 @@ function buildEditFields(section, doc) {
         container.appendChild(createField("Description", "description"));
         const cat = document.getElementById("category");
         const desc = document.getElementById("description");
-        if (cat) cat.value = doc.category || "";
+        setSelectValue("category", doc.category);
         if (desc) desc.value = doc.description || "";
     } else if (section === "subsidiary_financial") {
         container.appendChild(createSelect("Financial Year", "financial_year", financialYearOptions, true));
@@ -478,7 +503,7 @@ function buildEditFields(section, doc) {
         const fy = document.getElementById("financial_year");
         const cn = document.getElementById("company_name");
         const ft = document.getElementById("financial_type");
-        if (fy) fy.value = doc.financial_year || "";
+        setSelectValue("financial_year", doc.financial_year);
         if (cn) cn.value = doc.company_name || "";
         if (ft) ft.value = doc.financial_type || "";
     } else if (section === "tax_declaration") {
@@ -497,7 +522,7 @@ function buildEditFields(section, doc) {
         const dtype = document.getElementById("dividend_type");
         const declared = document.getElementById("dividend_declaration_date");
         const iepf = document.getElementById("iepf_transfer_due_date");
-        if (fy) fy.value = doc.financial_year || "";
+        setSelectValue("financial_year", doc.financial_year);
         if (dtype) dtype.value = doc.dividend_type || "";
         if (declared && doc.dividend_declaration_date) declared.value = doc.dividend_declaration_date;
         if (iepf && doc.iepf_transfer_due_date) iepf.value = doc.iepf_transfer_due_date;
@@ -628,5 +653,7 @@ window.openEditModal = openEditModal;
 window.closeEditModal = closeEditModal;
 window.deleteDocument = deleteDocument;
 window.goDocumentsPage = goDocumentsPage;
+window.goDocumentsPrev = goDocumentsPrev;
+window.goDocumentsNext = goDocumentsNext;
 window.changeDocumentsPageSize = changeDocumentsPageSize;
 window.applyDocumentFilters = applyDocumentFilters;

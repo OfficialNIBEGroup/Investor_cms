@@ -1532,6 +1532,16 @@ def update_investor_document(request):
             set_text(obj, "financial_year")
             set_text(obj, "quarter")
             set_date(obj, "release_date")
+            if not obj.release_date:
+                return JsonResponse(
+                    {"success": False, "message": "Release date is required."},
+                    status=400,
+                )
+            if not obj.quarter:
+                return JsonResponse(
+                    {"success": False, "message": "Quarter is required."},
+                    status=400,
+                )
             update_common(obj)
 
         # -------------------------------------------------------
@@ -1965,6 +1975,7 @@ def dashboard_documents_api(request):
             "subsection_name": obj.subsection.name if obj.subsection else "",
             "title": obj.title,
             "extra_info": obj.extra_info,
+            "financial_year": obj.extra_info,
             "date": obj.created_at.strftime("%d-%m-%Y"),
             "created_at": obj.created_at.isoformat(),
             "updated_at": obj.updated_at.isoformat(),
