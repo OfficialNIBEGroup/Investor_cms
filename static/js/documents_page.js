@@ -400,24 +400,42 @@ function buildEditFields(section, doc) {
         container.appendChild(createSelect("Financial Year", "financial_year", financialYearOptions, true));
         const fy = document.getElementById("financial_year");
         if (fy) fy.value = doc.financial_year || "";
-        if (section === "shareholding_pattern") {
-            container.appendChild(
-                createSelect(
-                    "Quarter",
-                    "quarter",
-                    [
-                        { value: "Q1", label: "Q1" },
-                        { value: "Q2", label: "Q2" },
-                        { value: "Q3", label: "Q3" },
-                        { value: "Q4", label: "Q4" },
-                        { value: "Annual", label: "Annual" },
-                    ],
-                    true
-                )
-            );
-            const q = document.getElementById("quarter");
-            if (q) q.value = doc.quarter || "";
-        }
+        container.appendChild(
+            createSelect(
+                "Quarter",
+                "quarter",
+                [
+                    { value: "Q1", label: "Q1" },
+                    { value: "Q2", label: "Q2" },
+                    { value: "Q3", label: "Q3" },
+                    { value: "Q4", label: "Q4" },
+                    { value: "Annual", label: "Annual" },
+                ],
+                section === "shareholding_pattern"
+            )
+        );
+        const q = document.getElementById("quarter");
+        if (q) q.value = doc.quarter || "";
+    } else if (section === "shareholder_notice") {
+        container.appendChild(createSelect("Financial Year", "financial_year", financialYearOptions, true));
+        container.appendChild(createField("Notice Type", "notice_type"));
+        container.appendChild(createField("Disclosure Date", "disclosure_date", "date"));
+        container.appendChild(createField("Meeting Date", "meeting_date", "date"));
+        const fy = document.getElementById("financial_year");
+        const notice = document.getElementById("notice_type");
+        const disclosure = document.getElementById("disclosure_date");
+        const meeting = document.getElementById("meeting_date");
+        if (fy) fy.value = doc.financial_year || "";
+        if (notice) notice.value = doc.notice_type || "";
+        if (disclosure && doc.disclosure_date) disclosure.value = doc.disclosure_date;
+        if (meeting && doc.meeting_date) meeting.value = doc.meeting_date;
+    } else if (section === "newspaper_publication" || section === "stock_exchange_disclosure") {
+        container.appendChild(createSelect("Financial Year", "financial_year", financialYearOptions, true));
+        container.appendChild(createField("Disclosure Date", "disclosure_date", "date"));
+        const fy = document.getElementById("financial_year");
+        const disclosure = document.getElementById("disclosure_date");
+        if (fy) fy.value = doc.financial_year || "";
+        if (disclosure && doc.disclosure_date) disclosure.value = doc.disclosure_date;
     } else if (section === "sebi_document") {
         container.appendChild(
             createSelect(
@@ -463,8 +481,31 @@ function buildEditFields(section, doc) {
         if (fy) fy.value = doc.financial_year || "";
         if (cn) cn.value = doc.company_name || "";
         if (ft) ft.value = doc.financial_type || "";
+    } else if (section === "tax_declaration") {
+        container.appendChild(createField("Applicable To", "applicable_to"));
+        container.appendChild(createField("Description", "description"));
+        const applicable = document.getElementById("applicable_to");
+        const desc = document.getElementById("description");
+        if (applicable) applicable.value = doc.applicable_to || "";
+        if (desc) desc.value = doc.description || "";
+    } else if (section === "unclaimed_dividend") {
+        container.appendChild(createSelect("Financial Year", "financial_year", financialYearOptions, true));
+        container.appendChild(createField("Dividend Type", "dividend_type"));
+        container.appendChild(createField("Dividend Declaration Date", "dividend_declaration_date", "date"));
+        container.appendChild(createField("IEPF Transfer Due Date", "iepf_transfer_due_date", "date"));
+        const fy = document.getElementById("financial_year");
+        const dtype = document.getElementById("dividend_type");
+        const declared = document.getElementById("dividend_declaration_date");
+        const iepf = document.getElementById("iepf_transfer_due_date");
+        if (fy) fy.value = doc.financial_year || "";
+        if (dtype) dtype.value = doc.dividend_type || "";
+        if (declared && doc.dividend_declaration_date) declared.value = doc.dividend_declaration_date;
+        if (iepf && doc.iepf_transfer_due_date) iepf.value = doc.iepf_transfer_due_date;
+    } else if (section && String(section).startsWith("custom_")) {
+        container.appendChild(createField("Extra Info", "extra_info"));
+        const extra = document.getElementById("extra_info");
+        if (extra) extra.value = doc.extra_info || "";
     }
-    // Corporate announcements / custom sections – add more as needed
 }
 
 /* Edit form submit */
@@ -487,8 +528,9 @@ document.addEventListener("DOMContentLoaded", function () {
             const documentId = document.getElementById("edit_document_id").value;
             const section = document.getElementById("edit_section").value;
 
-            const base = window.DASHBOARD_URLS.editDocument || "/api/edit-investor-document/";
-            const response = await fetch(`${base}${documentId}/${section}/`, {
+            const updateUrl =
+                window.DASHBOARD_URLS.updateDocument || "/api/update-investor-document/";
+            const response = await fetch(updateUrl, {
                 method: "POST",
                 headers: {
                     "X-CSRFToken": csrfToken,
@@ -527,15 +569,17 @@ async function deleteDocument(documentId, section) {
 
     try {
         const csrfToken = getCookie("csrftoken");
-        const base = window.DASHBOARD_URLS.deleteDocument || "/api/delete-investor-document/";
-        const response = await fetch(`${base}${documentId}/${section}/`, {
+        const deleteUrl =
+            window.DASHBOARD_URLS.deleteDocument || "/api/delete-investor-document/";
+        const response = await fetch(deleteUrl, {
             method: "POST",
             headers: {
                 "X-CSRFToken": csrfToken,
                 "X-Requested-With": "XMLHttpRequest",
                 "Content-Type": "application/json",
+                Accept: "application/json",
             },
-            body: JSON.stringify({ id: documentId, section }),
+            body: JSON.stringify({ document_id: documentId, section }),
         });
 
         const result = await response.json();

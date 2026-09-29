@@ -551,7 +551,7 @@
                         </h4>
 
                         <p>
-                            Upload or select documents to see them here.
+                            Uploads, edits, and deletions will show up here.
                         </p>
 
                         <button
@@ -2768,7 +2768,7 @@ async function loadRecentDocuments() {
     try {
 
         const response = await fetch(
-            "{% url 'dashboard_documents_api' %}",
+            "{% url 'recent_document_activity_api' %}?limit=8",
             {
                 method: "GET",
                 headers: {
@@ -2784,6 +2784,9 @@ async function loadRecentDocuments() {
         }
 
         let documents = await response.json();
+        if (!Array.isArray(documents)) {
+            documents = documents.results || [];
+        }
 
         if (!Array.isArray(documents) || documents.length === 0) {
             listEl.innerHTML = "";
@@ -2792,44 +2795,31 @@ async function loadRecentDocuments() {
             return;
         }
 
-        // Each doc's most recent activity: whichever is later, its
-        // upload time (created_at) or its last edit time (updated_at).
-        documents.forEach(doc => {
-            const createdTime = doc.created_at ? new Date(doc.created_at).getTime() : 0;
-            const updatedTime = doc.updated_at ? new Date(doc.updated_at).getTime() : 0;
-            doc._activityTime = Math.max(createdTime, updatedTime);
-            // Treat as "edited" only if updated_at is meaningfully later
-            // than created_at (a few seconds' gap covers save-time jitter).
-            doc._wasEdited = updatedTime - createdTime > 5000;
-        });
-
-        // Sort by most recent activity (upload OR edit) first
-        documents.sort((a, b) => b._activityTime - a._activityTime);
-
-        // Take the 10 most recently uploaded or edited documents
-        const recent = documents.slice(0, 7);
-
         listEl.innerHTML = "";
 
-        recent.forEach(doc => {
+        documents.slice(0, 8).forEach(doc => {
 
-            const title = doc.title || "Untitled Document";
+            const title = doc.title || doc.document_title || "Untitled Document";
             const sectionName = getSectionDisplayName(doc.section);
+            const activityDate = doc.date || doc.created_at || "-";
+            const action = String(doc.action || doc.activity || "").toLowerCase();
 
-            // Show the date of whichever happened most recently
-            const activityDate = doc._activityTime
-                ? new Date(doc._activityTime).toLocaleDateString("en-GB", {
-                      day: "2-digit", month: "2-digit", year: "numeric"
-                  }).replace(/\//g, "-")
-                : (doc.date || doc.release_date || doc.disclosure_date || "-");
+            let badgeClass = "uploaded";
+            let badgeLabel = "Created";
+            if (action.includes("delete")) {
+                badgeClass = "deleted";
+                badgeLabel = "Deleted";
+            } else if (action.includes("edit") || action.includes("update")) {
+                badgeClass = "edited";
+                badgeLabel = "Edited";
+            }
 
-            const activityBadge = doc._wasEdited
-                ? `<span class="recent-doc-activity edited">Edited</span>`
-                : `<span class="recent-doc-activity uploaded">Uploaded</span>`;
+            const details = (doc.details || "").trim();
+            const actor = doc.performed_by ? `by ${doc.performed_by}` : "";
 
-            let linkHtml = escapeHtml(title);
+            let linkHtml = `<span class="recent-doc-title">${escapeHtml(title)}</span>`;
 
-            if (doc.pdf_file) {
+            if (badgeClass !== "deleted" && doc.pdf_file) {
                 linkHtml = `
                     <a href="${escapeHtml(doc.pdf_file)}"
                        target="_blank"
@@ -2838,7 +2828,7 @@ async function loadRecentDocuments() {
                         ${escapeHtml(title)}
                     </a>
                 `;
-            } else if (doc.external_url) {
+            } else if (badgeClass !== "deleted" && doc.external_url) {
                 linkHtml = `
                     <a href="${escapeHtml(doc.external_url)}"
                        target="_blank"
@@ -2847,8 +2837,6 @@ async function loadRecentDocuments() {
                         ${escapeHtml(title)}
                     </a>
                 `;
-            } else {
-                linkHtml = `<span class="recent-doc-title">${escapeHtml(title)}</span>`;
             }
 
             const item = document.createElement("div");
@@ -2860,10 +2848,12 @@ async function loadRecentDocuments() {
                     <div class="recent-doc-meta">
                         <span class="recent-doc-section">${escapeHtml(sectionName)}</span>
                         <span class="recent-doc-date">${escapeHtml(activityDate)}</span>
+                        ${actor ? `<span class="recent-doc-section">${escapeHtml(actor)}</span>` : ""}
                     </div>
+                    ${details ? `<div class="recent-doc-details">${escapeHtml(details)}</div>` : ""}
                 </div>
                 <div class="recent-doc-status">
-                    ${activityBadge}
+                    <span class="recent-doc-activity ${badgeClass}">${badgeLabel}</span>
                 </div>
             `;
 

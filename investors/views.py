@@ -107,7 +107,7 @@ def normalize_audit_action(action):
 
 def snapshot_document(obj):
     """Capture a comparable dict of document field values."""
-    skip = {"id", "created_at", "updated_at", "display_order", "published"}
+    skip = {"id", "created_at", "updated_at", "display_order"}
     data = {}
     for field in obj._meta.fields:
         name = field.name
@@ -154,6 +154,55 @@ def describe_document_changes(old, new, pdf_replaced=False):
         changes.append("PDF file replaced")
 
     return "; ".join(changes) if changes else "Document details updated"
+
+
+INVESTOR_DOCUMENT_MODELS = {
+    "annual_report": AnnualReport,
+    "financial_result": FinancialResult,
+    "annual_return": AnnualReturn,
+    "corporate_governance": CorporateGovernance,
+    "shareholding_pattern": ShareholdingPattern,
+    "shareholder_notice": ShareholderNotice,
+    "newspaper_publication": NewspaperPublication,
+    "stock_exchange_disclosure": StockExchangeDisclosure,
+    "sebi_document": SEBIDocument,
+    "investor_form": InvestorForm,
+    "tax_declaration": TaxDeclaration,
+    "unclaimed_dividend": UnclaimedDividend,
+    "subsidiary_financial": SubsidiaryFinancial,
+}
+
+
+def document_file_links(section, document_id):
+    """Return (pdf_url, external_url) for a document that still exists."""
+    if not document_id:
+        return None, None
+
+    obj = None
+    model = INVESTOR_DOCUMENT_MODELS.get(section or "")
+    if model:
+        obj = model.objects.filter(id=document_id).first()
+    elif section and str(section).startswith("custom_"):
+        try:
+            section_pk = int(str(section).split("_", 1)[1])
+        except (TypeError, ValueError):
+            section_pk = None
+        if section_pk:
+            obj = CustomDocument.objects.filter(
+                id=document_id,
+                section_id=section_pk,
+            ).first()
+    elif section:
+        obj = CustomDocument.objects.filter(
+            id=document_id,
+            section__slug=section,
+        ).first()
+
+    if obj is None:
+        return None, None
+
+    pdf = obj.pdf_file.url if getattr(obj, "pdf_file", None) else None
+    return pdf, getattr(obj, "external_url", None) or None
 
 
 def log_audit(request, title, section, action, document_id=None, details=""):
@@ -893,6 +942,25 @@ def dashboard_statistics_api(request):
 @login_required(login_url="dashboard_login")
 @role_required(['ADMIN', 'EMPLOYEE'])
 def edit_investor_document(request, document_id, section):
+    """
+    GET  – return the document so the edit form can be filled.
+    POST – save the submitted changes. The documents page posts here.
+    """
+
+    if request.method == "POST":
+        mutable = request.POST.copy()
+        if not (mutable.get("document_id") or "").strip():
+            mutable["document_id"] = str(document_id)
+        if not (mutable.get("section") or "").strip():
+            mutable["section"] = section
+        request.POST = mutable
+        return update_investor_document(request)
+
+    if request.method != "GET":
+        return JsonResponse(
+            {"success": False, "message": "Invalid request method."},
+            status=405,
+        )
 
     try:
 
@@ -1278,6 +1346,39 @@ def edit_investor_document(request, document_id, section):
             }
 
 
+        # ====================================================
+        # CUSTOM SECTION DOCUMENT
+        # ====================================================
+
+        elif str(section).startswith("custom_"):
+
+            try:
+                section_pk = int(str(section).split("_", 1)[1])
+            except (TypeError, ValueError):
+                return JsonResponse(
+                    {"success": False, "message": "Invalid document section."},
+                    status=400,
+                )
+
+            obj = CustomDocument.objects.select_related("section").get(
+                id=document_id,
+                section_id=section_pk,
+            )
+
+            data = {
+                "id": obj.id,
+                "section": section,
+                "title": obj.title,
+                "extra_info": obj.extra_info,
+                "external_url": obj.external_url,
+                "pdf_file": (
+                    request.build_absolute_uri(obj.pdf_file.url)
+                    if obj.pdf_file
+                    else None
+                ),
+            }
+
+
         else:
 
             return JsonResponse(
@@ -1288,6 +1389,8 @@ def edit_investor_document(request, document_id, section):
                 status=400
             )
 
+
+        data["published"] = bool(obj.published)
 
         return JsonResponse({
             "success": True,
@@ -1309,6 +1412,7 @@ def edit_investor_document(request, document_id, section):
         TaxDeclaration.DoesNotExist,
         UnclaimedDividend.DoesNotExist,
         SubsidiaryFinancial.DoesNotExist,
+        CustomDocument.DoesNotExist,
     ):
 
         return JsonResponse(
@@ -1340,6 +1444,25 @@ def update_investor_document(request):
     title       = request.POST.get("title", "").strip()
     pdf_file    = request.FILES.get("pdf_file")
     external_url = request.POST.get("external_url", "").strip() or None
+
+    if pdf_file:
+        file_name = pdf_file.name.lower()
+        if not file_name.endswith(".pdf"):
+            return JsonResponse(
+                {"success": False, "message": "Only PDF files are allowed."},
+                status=400,
+            )
+        content_type = getattr(pdf_file, "content_type", "") or ""
+        if content_type and content_type not in ("application/pdf", "application/x-pdf"):
+            return JsonResponse(
+                {"success": False, "message": "Invalid file type. Please upload a valid PDF."},
+                status=400,
+            )
+        if pdf_file.size > 50 * 1024 * 1024:
+            return JsonResponse(
+                {"success": False, "message": "File size must be less than 50 MB."},
+                status=400,
+            )
 
     if not document_id or not section:
         return JsonResponse(
@@ -1384,12 +1507,21 @@ def update_investor_document(request):
             with pdf_upload_user(upload_username):
                 document.save()
 
+        def set_text(obj, field):
+            if field in request.POST:
+                setattr(obj, field, (request.POST.get(field) or "").strip())
+
+        def set_date(obj, field):
+            if field in request.POST:
+                raw = (request.POST.get(field) or "").strip()
+                setattr(obj, field, raw or None)
+
         # -------------------------------------------------------
         # ANNUAL REPORT
         # -------------------------------------------------------
         if section == "annual_report":
             obj = begin_update(AnnualReport)
-            obj.financial_year = request.POST.get("financial_year", "").strip()
+            set_text(obj, "financial_year")
             update_common(obj)
 
         # -------------------------------------------------------
@@ -1397,10 +1529,9 @@ def update_investor_document(request):
         # -------------------------------------------------------
         elif section == "financial_result":
             obj = begin_update(FinancialResult)
-            obj.financial_year = request.POST.get("financial_year", "").strip()
-            obj.quarter = request.POST.get("quarter", "").strip()
-            release = request.POST.get("release_date") or None
-            obj.release_date = release
+            set_text(obj, "financial_year")
+            set_text(obj, "quarter")
+            set_date(obj, "release_date")
             update_common(obj)
 
         # -------------------------------------------------------
@@ -1408,7 +1539,7 @@ def update_investor_document(request):
         # -------------------------------------------------------
         elif section == "annual_return":
             obj = begin_update(AnnualReturn)
-            obj.financial_year = request.POST.get("financial_year", "").strip()
+            set_text(obj, "financial_year")
             update_common(obj)
 
         # -------------------------------------------------------
@@ -1416,8 +1547,8 @@ def update_investor_document(request):
         # -------------------------------------------------------
         elif section == "corporate_governance":
             obj = begin_update(CorporateGovernance)
-            obj.financial_year = request.POST.get("financial_year", "").strip()
-            obj.quarter = request.POST.get("quarter", "").strip()
+            set_text(obj, "financial_year")
+            set_text(obj, "quarter")
             update_common(obj)
 
         # -------------------------------------------------------
@@ -1425,8 +1556,8 @@ def update_investor_document(request):
         # -------------------------------------------------------
         elif section == "shareholding_pattern":
             obj = begin_update(ShareholdingPattern)
-            obj.financial_year = request.POST.get("financial_year", "").strip()
-            obj.quarter = request.POST.get("quarter", "").strip()
+            set_text(obj, "financial_year")
+            set_text(obj, "quarter")
             update_common(obj)
 
         # -------------------------------------------------------
@@ -1434,10 +1565,10 @@ def update_investor_document(request):
         # -------------------------------------------------------
         elif section == "shareholder_notice":
             obj = begin_update(ShareholderNotice)
-            obj.financial_year = request.POST.get("financial_year", "").strip()
-            obj.notice_type = request.POST.get("notice_type", "").strip()
-            obj.disclosure_date = request.POST.get("disclosure_date") or None
-            obj.meeting_date = request.POST.get("meeting_date") or None
+            set_text(obj, "financial_year")
+            set_text(obj, "notice_type")
+            set_date(obj, "disclosure_date")
+            set_date(obj, "meeting_date")
             update_common(obj)
 
         # -------------------------------------------------------
@@ -1445,8 +1576,8 @@ def update_investor_document(request):
         # -------------------------------------------------------
         elif section == "newspaper_publication":
             obj = begin_update(NewspaperPublication)
-            obj.financial_year = request.POST.get("financial_year", "").strip()
-            obj.disclosure_date = request.POST.get("disclosure_date") or None
+            set_text(obj, "financial_year")
+            set_date(obj, "disclosure_date")
             update_common(obj)
 
         # -------------------------------------------------------
@@ -1454,8 +1585,8 @@ def update_investor_document(request):
         # -------------------------------------------------------
         elif section == "stock_exchange_disclosure":
             obj = begin_update(StockExchangeDisclosure)
-            obj.financial_year = request.POST.get("financial_year", "").strip()
-            obj.disclosure_date = request.POST.get("disclosure_date") or None
+            set_text(obj, "financial_year")
+            set_date(obj, "disclosure_date")
             update_common(obj)
 
         # -------------------------------------------------------
@@ -1463,7 +1594,7 @@ def update_investor_document(request):
         # -------------------------------------------------------
         elif section == "sebi_document":
             obj = begin_update(SEBIDocument)
-            obj.category = request.POST.get("category", "").strip()
+            set_text(obj, "category")
             update_common(obj)
 
         # -------------------------------------------------------
@@ -1471,8 +1602,8 @@ def update_investor_document(request):
         # -------------------------------------------------------
         elif section == "investor_form":
             obj = begin_update(InvestorForm)
-            obj.category = request.POST.get("category", "").strip()
-            obj.description = request.POST.get("description", "").strip()
+            set_text(obj, "category")
+            set_text(obj, "description")
             update_common(obj)
 
         # -------------------------------------------------------
@@ -1480,8 +1611,8 @@ def update_investor_document(request):
         # -------------------------------------------------------
         elif section == "tax_declaration":
             obj = begin_update(TaxDeclaration)
-            obj.applicable_to = request.POST.get("applicable_to", "").strip()
-            obj.description = request.POST.get("description", "").strip()
+            set_text(obj, "applicable_to")
+            set_text(obj, "description")
             update_common(obj)
 
         # -------------------------------------------------------
@@ -1489,10 +1620,10 @@ def update_investor_document(request):
         # -------------------------------------------------------
         elif section == "unclaimed_dividend":
             obj = begin_update(UnclaimedDividend)
-            obj.financial_year = request.POST.get("financial_year", "").strip()
-            obj.dividend_declaration_date = request.POST.get("dividend_declaration_date") or None
-            obj.dividend_type = request.POST.get("dividend_type", "").strip()
-            obj.iepf_transfer_due_date = request.POST.get("iepf_transfer_due_date") or None
+            set_text(obj, "financial_year")
+            set_date(obj, "dividend_declaration_date")
+            set_text(obj, "dividend_type")
+            set_date(obj, "iepf_transfer_due_date")
             update_common(obj)
 
         # -------------------------------------------------------
@@ -1500,9 +1631,31 @@ def update_investor_document(request):
         # -------------------------------------------------------
         elif section == "subsidiary_financial":
             obj = begin_update(SubsidiaryFinancial)
-            obj.financial_year = request.POST.get("financial_year", "").strip()
-            obj.company_name = request.POST.get("company_name", "").strip()
-            obj.financial_type = request.POST.get("financial_type", "").strip()
+            set_text(obj, "financial_year")
+            set_text(obj, "company_name")
+            set_text(obj, "financial_type")
+            update_common(obj)
+
+        # -------------------------------------------------------
+        # CUSTOM SECTION (custom_<section id>)
+        # -------------------------------------------------------
+        elif str(section).startswith("custom_"):
+            try:
+                section_pk = int(str(section).split("_", 1)[1])
+            except (TypeError, ValueError):
+                return JsonResponse(
+                    {"success": False, "message": f"Invalid section: {section}"},
+                    status=400,
+                )
+            try:
+                obj = CustomDocument.objects.get(id=document_id, section_id=section_pk)
+            except CustomDocument.DoesNotExist:
+                return JsonResponse(
+                    {"success": False, "message": "Document not found."},
+                    status=404,
+                )
+            old_snapshot = snapshot_document(obj)
+            set_text(obj, "extra_info")
             update_common(obj)
 
         else:
@@ -2346,10 +2499,19 @@ def delete_investor_document(request):
         )
 
     try:
-        import json
-        body = json.loads(request.body)
+        content_type = request.content_type or ""
+        if "application/json" in content_type:
+            try:
+                body = json.loads(request.body.decode("utf-8") or "{}")
+            except json.JSONDecodeError:
+                return JsonResponse(
+                    {"success": False, "message": "Invalid JSON body."},
+                    status=400,
+                )
+        else:
+            body = request.POST
 
-        document_id = body.get("document_id")
+        document_id = body.get("document_id") or body.get("id")
         section = (body.get("section") or "").strip()
 
         if not document_id or not section:
@@ -2366,33 +2528,33 @@ def delete_investor_document(request):
                 status=400
             )
 
-        model_map = {
-            "annual_report": AnnualReport,
-            "financial_result": FinancialResult,
-            "annual_return": AnnualReturn,
-            "corporate_governance": CorporateGovernance,
-            "shareholding_pattern": ShareholdingPattern,
-            "shareholder_notice": ShareholderNotice,
-            "newspaper_publication": NewspaperPublication,
-            "stock_exchange_disclosure": StockExchangeDisclosure,
-            "sebi_document": SEBIDocument,
-            "investor_form": InvestorForm,
-            "tax_declaration": TaxDeclaration,
-            "unclaimed_dividend": UnclaimedDividend,
-            "subsidiary_financial": SubsidiaryFinancial,
-        }
+        obj = None
 
-        model = model_map.get(section)
+        if str(section).startswith("custom_"):
+            try:
+                section_pk = int(str(section).split("_", 1)[1])
+            except (TypeError, ValueError):
+                return JsonResponse(
+                    {"success": False, "message": f"Invalid section: {section}"},
+                    status=400,
+                )
+            try:
+                obj = CustomDocument.objects.get(id=document_id, section_id=section_pk)
+            except CustomDocument.DoesNotExist:
+                obj = None
+        else:
+            model = INVESTOR_DOCUMENT_MODELS.get(section)
+            if not model:
+                return JsonResponse(
+                    {"success": False, "message": f"Invalid section: {section}"},
+                    status=400
+                )
+            try:
+                obj = model.objects.get(id=document_id)
+            except model.DoesNotExist:
+                obj = None
 
-        if not model:
-            return JsonResponse(
-                {"success": False, "message": f"Invalid section: {section}"},
-                status=400
-            )
-
-        try:
-            obj = model.objects.get(id=document_id)
-        except model.DoesNotExist:
+        if obj is None:
             return JsonResponse(
                 {
                     "success": False,
@@ -2794,6 +2956,46 @@ def delete_employee(request):
         return JsonResponse({"success": False, "message": "User not found."}, status=404)
     except Exception as e:
         return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+@login_required(login_url="dashboard_login")
+@role_required(['ADMIN', 'EMPLOYEE'])
+def recent_document_activity_api(request):
+    """
+    Latest document actions for the dashboard Recent Documents card.
+    Includes creation (uploaded), editing, and deletion.
+    """
+    try:
+        limit = int(request.GET.get("limit", 8))
+    except (TypeError, ValueError):
+        limit = 8
+    if limit < 1:
+        limit = 8
+    if limit > 30:
+        limit = 30
+
+    logs = AuditLog.objects.all().order_by("-created_at")[:limit]
+    data = []
+    for log in logs:
+        action = normalize_audit_action(log.action)
+        pdf_file, external_url = document_file_links(log.section, log.document_id)
+        data.append({
+            "id": log.id,
+            "document_id": log.document_id,
+            "title": log.document_title,
+            "document_title": log.document_title,
+            "section": log.section,
+            "action": action,
+            "activity": action,
+            "details": log.details or "",
+            "performed_by": log.performed_by,
+            "created_at": log.created_at.strftime("%d-%m-%Y %H:%M"),
+            "date": log.created_at.strftime("%d-%m-%Y %H:%M"),
+            "pdf_file": pdf_file,
+            "external_url": external_url,
+        })
+
+    return JsonResponse(data, safe=False)
+
 
 @login_required(login_url="dashboard_login")
 @role_required(['ADMIN'])

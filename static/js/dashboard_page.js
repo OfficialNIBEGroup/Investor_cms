@@ -128,6 +128,17 @@ function updateDonutAndSummary(sectionCounts, total) {
     console.log("Donut updated → total:", total, "sections:", sections.length, "offset:", offset);
 }
 
+function recentActivityBadge(entry) {
+    const action = String(entry.action || entry.activity || "").toLowerCase();
+    if (action.includes("delete")) {
+        return { label: "Deleted", className: "deleted" };
+    }
+    if (action.includes("edit") || action.includes("update")) {
+        return { label: "Edited", className: "edited" };
+    }
+    return { label: "Created", className: "uploaded" };
+}
+
 async function loadRecentDocuments() {
     const listEl = document.getElementById("recentDocumentsList");
     const emptyEl = document.getElementById("recentDocumentsEmpty");
@@ -139,7 +150,7 @@ async function loadRecentDocuments() {
 
     try {
         const response = await fetch(
-            window.DASHBOARD_URLS.recentDocuments || "/api/dashboard/recent-documents/",
+            window.DASHBOARD_URLS.recentDocuments || "/api/recent-document-activity/",
             {
                 method: "GET",
                 headers: {
@@ -163,50 +174,19 @@ async function loadRecentDocuments() {
         }
 
         listEl.innerHTML = "";
-        items.slice(0, 8).forEach((doc) => {
-            const title = doc.title || "Untitled Document";
-            const sectionName = getSectionDisplayName(doc.section);
-            const activityDate =
-                doc.date ||
-                doc.release_date ||
-                doc.disclosure_date ||
-                doc.created_at ||
-                "-";
+        items.slice(0, 8).forEach((entry) => {
+            const title = entry.title || entry.document_title || "Untitled Document";
+            const sectionName = getSectionDisplayName(entry.section);
+            const activityDate = entry.date || entry.created_at || "-";
+            const badge = recentActivityBadge(entry);
+            const actor = entry.performed_by ? `by ${entry.performed_by}` : "";
+            const details = (entry.details || "").trim();
 
-            // ----- Dynamic activity badge (Uploaded / Edited / Deleted) -----
-            let activityLabel = "Uploaded";
-            let activityClass = "uploaded";
-
-            // 1. Explicit deleted flag from backend (future-proof)
-            if (
-                doc.is_deleted === true ||
-                doc.deleted === true ||
-                (doc.activity && doc.activity.toLowerCase().includes("delete")) ||
-                (doc.action && doc.action.toLowerCase().includes("delete")) ||
-                (doc.status && doc.status.toLowerCase().includes("delete"))
-            ) {
-                activityLabel = "Deleted";
-                activityClass = "deleted";
-            }
-            // 2. Edited (updated later than created)
-            else if (doc.created_at && doc.updated_at) {
-                const created = new Date(doc.created_at).getTime();
-                const updated = new Date(doc.updated_at).getTime();
-
-                if (updated > created + 2000) {
-                    activityLabel = "Edited";
-                    activityClass = "edited";
-                }
-            }
-
-            // Title link
             let linkHtml = escapeHtml(title);
-            if (doc.pdf_file) {
-                linkHtml = `<a href="${escapeHtml(doc.pdf_file)}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}</a>`;
-            } else if (doc.external_url) {
-                linkHtml = `<a href="${escapeHtml(doc.external_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}</a>`;
-            } else {
-                linkHtml = `<span class="recent-doc-title">${escapeHtml(title)}</span>`;
+            if (badge.className !== "deleted" && entry.pdf_file) {
+                linkHtml = `<a href="${escapeHtml(entry.pdf_file)}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}</a>`;
+            } else if (badge.className !== "deleted" && entry.external_url) {
+                linkHtml = `<a href="${escapeHtml(entry.external_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}</a>`;
             }
 
             const item = document.createElement("div");
@@ -217,10 +197,12 @@ async function loadRecentDocuments() {
                     <div class="recent-doc-meta">
                         <span class="recent-doc-section">${escapeHtml(sectionName)}</span>
                         <span class="recent-doc-date">${escapeHtml(activityDate)}</span>
+                        ${actor ? `<span class="recent-doc-section">${escapeHtml(actor)}</span>` : ""}
                     </div>
+                    ${details ? `<div class="recent-doc-details">${escapeHtml(details)}</div>` : ""}
                 </div>
                 <div class="recent-doc-status">
-                    <span class="recent-doc-activity ${activityClass}">${activityLabel}</span>
+                    <span class="recent-doc-activity ${badge.className}">${badge.label}</span>
                 </div>
             `;
             listEl.appendChild(item);

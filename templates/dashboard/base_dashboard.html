@@ -10,6 +10,7 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
+{% csrf_token %}
 <div class="dashboard-wrapper">
 
     <!-- SIDEBAR -->
@@ -111,9 +112,10 @@
     uploadDocument: "{% url 'upload_investor_document' %}",
     uploadCustomDocument: "{% url 'upload_custom_document' %}",
     editDocument: "{% url 'edit_investor_document' document_id=0 section='section' %}".replace("/0/section/", "/"),
+    updateDocument: "{% url 'update_investor_document' %}",
     deleteDocument: "{% url 'delete_investor_document' %}",
     dashboardStats: "{% url 'dashboard_statistics_api' %}",
-    recentDocuments: "{% url 'dashboard_documents_api' %}",
+    recentDocuments: "{% url 'recent_document_activity_api' %}",
     downloadSummaryReport: "{% url 'download_summary_report' %}",
     auditLogApi: "{% url 'audit_log_api' %}",
     employeesList: "{% url 'employees_list_api' %}",

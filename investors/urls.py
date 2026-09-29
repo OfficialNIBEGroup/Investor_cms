@@ -32,6 +32,7 @@ from .views import (
     toggle_employee_status,
     delete_employee,
     audit_log_api,
+    recent_document_activity_api,
     sections_list_api,
     create_section,
     update_section,
@@ -116,6 +117,7 @@ urlpatterns = [
 
     # Audit
     path("api/audit-logs/", audit_log_api, name="audit_log_api"),
+    path("api/recent-document-activity/", recent_document_activity_api, name="recent_document_activity_api"),
 
     # Password Reset
     path(

@@ -24,11 +24,12 @@ window.DASHBOARD_URLS = window.DASHBOARD_URLS || {
     uploadDocument: "/api/upload-investor-document/",
     uploadCustomDocument: "/api/upload-custom-document/",
     editDocument: "/api/edit-investor-document/",          // append id/section
+    updateDocument: "/api/update-investor-document/",
     deleteDocument: "/api/delete-investor-document/",
 
     // Dashboard stats
     dashboardStats: "/api/dashboard/statistics/",
-    recentDocuments: "/api/dashboard/recent-documents/",
+    recentDocuments: "/api/recent-document-activity/",
     downloadSummaryReport: "/api/download-summary-report/",
 
     // Audit
