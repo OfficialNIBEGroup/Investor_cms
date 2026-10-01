@@ -579,10 +579,10 @@ button {
 .section-summary-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    max-height: 250px;
+    gap: 15px;
+    max-height: 370px;
     overflow-y: auto;
-    padding-right: 5px;
+    padding-right: 15px;
 }
 
 .section-summary-grid::-webkit-scrollbar {
@@ -660,7 +660,7 @@ button {
 /* DOWNLOAD */
 
 .summary-download {
-    margin-top: 20px;
+    margin-top: 50px;
 }
 
 .summary-download-button {

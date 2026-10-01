@@ -3229,23 +3229,22 @@ def delete_employee(request):
 @role_required(['ADMIN', 'EMPLOYEE'])
 def recent_document_activity_api(request):
     """
-    Latest document actions for the dashboard Recent Documents card.
+    Latest 5 document actions for the dashboard Recent Documents card.
     Includes creation (uploaded), editing, and deletion.
     """
-    try:
-        limit = int(request.GET.get("limit", 8))
-    except (TypeError, ValueError):
-        limit = 8
-    if limit < 1:
-        limit = 8
-    if limit > 30:
-        limit = 30
 
-    logs = AuditLog.objects.all().order_by("-created_at")[:limit]
+    logs = AuditLog.objects.all().order_by("-created_at")[:5]
+
     data = []
+
     for log in logs:
         action = normalize_audit_action(log.action)
-        pdf_file, external_url = document_file_links(log.section, log.document_id)
+
+        pdf_file, external_url = document_file_links(
+            log.section,
+            log.document_id
+        )
+
         data.append({
             "id": log.id,
             "document_id": log.document_id,
@@ -3263,7 +3262,6 @@ def recent_document_activity_api(request):
         })
 
     return JsonResponse(data, safe=False)
-
 
 @never_cache
 @login_required(login_url="dashboard_login")

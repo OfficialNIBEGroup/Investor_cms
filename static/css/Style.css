@@ -2046,8 +2046,8 @@ HERO
     inset: 0;
     background: linear-gradient(
         to left,                          /* gradient direction flipped */
-        rgba(0, 0, 0, 0.25),              /* very light dark overlay on the right */
-        rgba(0, 0, 0, 0.05)               /* almost transparent on the left */
+        rgba(0, 0, 0, 0.35),              /* very light dark overlay on the right */
+        rgba(0, 0, 0, 0.15)               /* almost transparent on the left */
     );
     display: flex;
     align-items: flex-end;
@@ -7132,7 +7132,7 @@ font-size:15px;
     ABOUT US SECTION
 ----------------------------------------------------------*/
 .bbg-about-section{
-    padding:120px 8%;
+    padding:30px 8%;
     background:#fff;
 }
 .bbg-about-container{
@@ -7259,7 +7259,7 @@ font-size:15px;
     WHAT WE DO SECTION
 ----------------------------------------------------------*/
 .bbg-wwd-section{
-    padding:100px 8%;
+    padding:30px 8%;
     background:#fff;
 }
 .bbg-wwd-header{
@@ -7327,7 +7327,7 @@ font-size:15px;
     TECHNOLOGY / PROCESS FLOW SECTION
 ----------------------------------------------------------*/
 .bbg-flow-section{
-    padding:100px 8%;
+    padding:55px 8%;
     background:var(--bbg-navy);
 }
 .bbg-flow-header{
@@ -7396,7 +7396,7 @@ font-size:15px;
     OUR 15 TPD PLANT SECTION
 ----------------------------------------------------------*/
 .bbg-plant-section{
-    padding:120px 8%;
+    padding:70px 8%;
     background:#fff;
 }
 .bbg-plant-container{
@@ -7518,7 +7518,7 @@ font-size:15px;
     SUSTAINABILITY SECTION
 ----------------------------------------------------------*/
 .bbg-sustain-section{
-    padding:100px 8%;
+    padding:70px 8%;
     background:var(--bbg-green-light);
 }
 .bbg-sustain-header{
@@ -7566,7 +7566,7 @@ font-size:15px;
     OUR PRODUCTS SECTION
 ----------------------------------------------------------*/
 .bbg-products-section{
-    padding:120px 8%;
+    padding:70px 8%;
     background:#fff;
 }
 .bbg-products-header{
