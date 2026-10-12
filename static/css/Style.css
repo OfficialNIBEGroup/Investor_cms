@@ -1671,7 +1671,7 @@ HERO
 ========================== */
 .team-grid{
     display:grid;
-    grid-template-columns:repeat(3, 1fr);
+    grid-template-columns:repeat(4, 1fr);
     gap:35px;
     max-width:1100px;
     margin:0 auto;
@@ -1692,7 +1692,7 @@ HERO
     overflow:hidden;
     border-radius:25px;
     position:relative;
-    height:400px;
+    height:300px;
 }
 .image-box img{
     width:100%;
@@ -1725,9 +1725,9 @@ HERO
     opacity:1;
 }
 .overlay p{
-    color:#fff;
-    font-size:0.95rem;
-    line-height:1.6;
+     color:#fff;
+    font-size:0.65rem;
+    line-height:1.7;
     margin:0;
     text-align: justify;
 }
@@ -2322,7 +2322,7 @@ table th, table td{
     padding:0 5%;
 }
 .contact-hero h1{
-    font-size:70px;
+    font-size:60px;
     font-weight:700;
     color:#243449;
     margin-bottom:25px;
@@ -9105,7 +9105,7 @@ td a:hover{
     height: 35px;
     display: flex;
     align-items: stretch;
-    background: #009fe3;
+    background: #003366;
     backdrop-filter: blur(8px);
     border-bottom: 1px solid rgba(212, 175, 55, 0.4);
     text-align: left;
