@@ -745,192 +745,312 @@ HERO
         font-size:0.95rem;
     }
 }
-/* ==========================
-   ABOUT SECTION
-========================== */
-.about{
-    background:#f5f5f5;
-    padding:20px 5%;
+
+/* =========================================
+   COMPACT ABOUT US SECTION
+========================================= */
+
+.about {
+    background: #f5f5f5;
+    padding: 25px 6%;
+    width: 100%;
+    box-sizing: border-box;
 }
-.about-us{
-    text-align:center;
-    margin-bottom:40px;
+
+.about-us {
+    text-align: center;
+    margin-bottom: 20px;
 }
-.about-us h2{
-    font-size:48px;
-    font-weight:800;
-    color:#003366;
+
+.about-us h2 {
+    font-size: 36px;
+    font-weight: 800;
+    color: #003366;
+    margin: 0;
 }
-/* ==========================
-   MAIN LAYOUT
-========================== */
-.about-company-section{
-    display:grid;
-    grid-template-columns:30% 68%;
-    gap:20px;
-    min-height: 800px;
+
+/* MAIN LAYOUT */
+
+.about-company-section {
+    display: grid;
+    grid-template-columns: 30% 1fr;
+    gap: 15px;
+    align-items: stretch;
 }
-/* ==========================
-   LEFT CONTENT BOX
-========================== */
-.content-box{
-    background:linear-gradient(135deg,#2fa8e0,#4fc3f7);
-    border-radius:15px;
-    padding:20px;
-    color:#000;
-    box-shadow:0 10px 25px rgba(0,0,0,0.08);
+
+/* LEFT BOX */
+
+.content-box {
+    background: linear-gradient(135deg, #2fa8e0, #4fc3f7);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
 }
-.content-box p{
-    font-size:1.1rem;
-    line-height:1.7;
-    margin-bottom:35px;
+
+.content-box p {
+    font-size: 0.95rem;
+    line-height: 1.55;
+    margin-bottom: 15px;
     text-align: justify;
 }
-.image-box img:hover{
-    transform:scale(1.05);
+
+.content-box .image-box {
+    width: 100%;
+    height: 220px;
+    overflow: hidden;
+    border-radius: 10px;
+    margin-top: auto;
 }
-/* ==========================
-   RIGHT SIDE
-========================== */
-.right-side{
-    display:flex;
-    flex-direction:column;
-    gap:20px;
+
+.content-box .image-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
+
+/* RIGHT SIDE */
+
+.right-side {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-width: 0;
+}
+
 /* VIDEO */
-.video-box iframe{
-    width:100%;
-    height:300px;
-    display:block;
-    border-radius:15px;
+
+.video-box {
+    width: 100%;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #000;
 }
-#aboutCompanyVideo{
-    width:100%;
-    height:420px;
-    display:block;
-    border-radius:15px;
-    object-fit:cover;
+
+.video-box video {
+    width: 100%;
+    max-height: 320px;
+    display: block;
+    object-fit: cover;
+    border-radius: 12px;
 }
-/* ==========================
-   BOTTOM BOXES
-========================== */
-.bottom-boxes{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:20px;
+
+/* BOTTOM BOXES */
+
+.bottom-boxes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
 }
-/* PARTNER BOX */
-.sub-box1{
-    background:#fff;
-    border-radius:15px;
-    padding:20px;
-    height:320px;
-    overflow:hidden;
+
+/* PARTNERS */
+
+.sub-box1 {
+    background: #fff;
+    border-radius: 12px;
+    padding: 15px;
+    height: 250px;
+    overflow: hidden;
 }
-.sub-box1 h3{
-    font-size:2rem;
-    margin-bottom:20px;
-    text-align:center;
-    color:#003366;
+
+.sub-box1 h3 {
+    font-size: 1.4rem;
+    margin-bottom: 12px;
+    text-align: center;
+    color: #003366;
 }
-/* ==========================
-   LOGO SLIDER
-========================== */
-.logo-slider{
-    height:250px;
-    overflow:hidden;
-    position:relative;
+
+/* LOGO SLIDER */
+
+.logo-slider {
+    height: 165px;
+    overflow: hidden;
 }
-.logo-track{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:30px;
-    animation:verticalScroll 3s linear infinite;
-    animation-play-state:running;
+
+.logo-track {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    animation: verticalScroll 3s linear infinite;
 }
-.logo-item img{
-    width:180px;
-    height:auto;
-    object-fit:contain;
+
+.logo-item img {
+    width: 125px;
+    height: auto;
+    object-fit: contain;
 }
-@keyframes verticalScroll{
-    0%{
-        transform:translateY(0);
-    }
-    100%{
-        transform:translateY(-50%);
-    }
+
+/* MD BOX */
+
+.sub-box2 {
+    background: linear-gradient(135deg, #274863, #1d3952);
+    color: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
-/* ==========================
-   MD BOX
-========================== */
-.sub-box2{
-    background:linear-gradient(135deg,#274863,#1d3952);
-    color:#fff;
-    border-radius:15px;
-    padding:25px;
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
-    box-shadow:0 10px 25px rgba(0,0,0,0.08);
-}
-.sub-box2 p{
-    font-size:1.1rem;
-    line-height:1.8;
-    margin-bottom:30px;
+
+.sub-box2 p {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 15px;
     color: #d5dde7;
     text-align: justify;
 }
-.md-info{
-    display:flex;
-    align-items:center;
-    gap:15px;
+
+.md-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
-.md-info img{
-    width:60px;
-    height:60px;
-    border-radius:50%;
-    object-fit:cover;
-    border:3px solid #fff;
+
+.md-info img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
 }
-.md-info strong{
-    font-size:1.1rem;
+
+.md-info strong {
+    font-size: 0.95rem;
 }
-.md-info span{
-    color:#d9d9d9;
+
+.md-info span {
+    font-size: 0.8rem;
+    color: #d9d9d9;
 }
-/* ==========================
-   GALLERY SLIDER
-========================== */
-.gallery-slider{
-    margin-top:40px;
-    overflow:hidden;
+
+/* GALLERY */
+
+.gallery-slider {
+     margin-top: 40px;
+    width: 100%;
+    overflow: hidden;
 }
-.slider-track{
-    display:flex;
-    gap:15px;
-    width:max-content;
-    animation:galleryScroll 35s linear infinite;
+
+.slider-track {
+    display: flex;
+    gap: 12px;
+    width: max-content;
+    animation: galleryScroll 35s linear infinite;
 }
-.slider-track img{
-    width:250px;
-    height:400px;
-    object-fit:cover;
-    border-radius:12px;
-    transition:0.4s;
+
+.slider-track img {
+    
+    border-radius: 10px;
+    transition: 0.4s;
+     width: 250px;
+    height: 400px;
+    object-fit: cover;
 }
-.slider-track img:hover{
-    transform:scale(1.05);
+
+.slider-track img:hover {
+    transform: scale(1.04);
 }
-@keyframes galleryScroll{
-    from{
-        transform:translateX(0);
+
+/* ANIMATIONS */
+
+@keyframes verticalScroll {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-50%); }
+}
+
+@keyframes galleryScroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+
+/* TABLET */
+
+@media(max-width: 1024px) {
+    .about-company-section {
+        grid-template-columns: 35% 1fr;
     }
-    to{
-        transform:translateX(-50%);
+
+    .video-box video {
+        max-height: 280px;
+    }
+
+    .bottom-boxes {
+        grid-template-columns: 1fr;
     }
 }
+
+/* MOBILE */
+
+@media(max-width: 768px) {
+    .about {
+        padding: 25px 18px;
+    }
+
+    .about-us h2 {
+        font-size: 28px;
+    }
+
+    .about-company-section {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .content-box .image-box {
+        height: 200px;
+    }
+
+    .video-box video {
+        max-height: 240px;
+    }
+
+    .bottom-boxes {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sub-box1 {
+        height: 250px;
+    }
+
+    .sub-box2 {
+        min-height: 180px;
+    }
+
+    .slider-track img {
+        width: 150px;
+        height: 180px;
+    }
+}
+
+/* SMALL MOBILE */
+
+@media(max-width: 480px) {
+    .about {
+        padding: 20px 12px;
+    }
+
+    .about-us h2 {
+        font-size: 25px;
+    }
+
+    .video-box video {
+        max-height: 200px;
+    }
+
+    .content-box p,
+    .sub-box2 p {
+        font-size: 0.85rem;
+    }
+
+    .slider-track img {
+        width: 130px;
+        height: 160px;
+    }
+}
+
 /* ==========================
    RAJNATH SINGH SPEECH VIDEO SECTION
 ========================== */
@@ -1356,34 +1476,294 @@ HERO
 /* ==================================================================================
                                    ABOUT.CSS STYLE
 ===================================================================================== */
-/* ==========================
-   HERO SECTION
-========================== */
-.about-hero{
-    position:relative;
-    width:100%;
-    height:100vh;
-    background:linear-gradient(
-        rgba(10,30,80,0.55),
-        rgba(10,30,80,0.55)
-    ),
-    url("../images/about/Nibe Sir About us Photo.avif");
-    background-size:cover;
-    background-position:center;
-    background-repeat:no-repeat;
-    display:flex;
-    justify-content:center;
-    align-items:center;
+
+/* =====================================
+   ABOUT HERO SECTION
+   (matched to Investor Relations hero design)
+===================================== */
+
+.about-hero {
+    position: relative;
+    width: 100%;
+    height: 550px;
+    margin-top: 50px;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    background-image: url("../images/about/Nibe\ Sir\ About\ us\ Photo.png");
+    background-size: cover;
+    background-position: center 35%;
+    background-repeat: no-repeat;
+
+    overflow: hidden;
 }
-/* Hero Heading */
-.about-hero h1{
-    font-family:'Poppins', sans-serif;
-    font-size:140px;
-    font-weight:600;
-    line-height:1;
-    margin-bottom:25px;
-    color:#ffffff;
+
+/* Dark gradient overlay — same strength language as Investor */
+.about-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    background: linear-gradient(
+        90deg,
+        rgba(5, 15, 38, 0.05) 0%,
+        rgba(5, 15, 38, 0.25) 35%,
+        rgba(5, 15, 38, 0.55) 65%,
+        rgba(5, 15, 38, 0.78) 100%
+    );
+
+    z-index: 1;
 }
+
+/* Hero Content */
+.about-hero-content {
+    position: relative;
+    z-index: 2;
+
+    width: 48%;
+    max-width: 650px;
+
+    margin-left: auto;
+    margin-right: 9%;
+
+    padding: 40px 0;
+
+    text-align: right;
+    color: #ffffff;
+}
+
+/* Small About Tag — matched to .investor-tag */
+.about-tag {
+    display: block;
+
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+
+    letter-spacing: 5px;
+    text-transform: uppercase;
+
+    color: #ffffff;
+    margin-bottom: 22px;
+
+    opacity: 0;
+    animation: aboutHeroFadeUp 0.8s ease forwards;
+}
+
+/* Main Heading — matched to Investor h2 scale & weight */
+.about-hero-content h1 {
+    font-family: 'Montserrat', sans-serif;
+
+    font-size: clamp(55px, 6vw, 82px);
+    font-weight: 700;
+
+    line-height: 1.08;
+    letter-spacing: -2px;
+
+    margin: 0 0 22px;
+    color: #ffffff;
+
+    opacity: 0;
+    animation: aboutHeroFadeUp 1s ease forwards;
+    animation-delay: 0.2s;
+}
+
+/* NIBE Highlight — same accent blue as Investor */
+.about-hero-content h1 span:not(.heading-dot) {
+    color: #1687D9;
+}
+
+/* Description — matched to Investor paragraph */
+.about-hero-content p {
+    font-family: 'Poppins', sans-serif;
+
+    font-size: 16px;
+    font-weight: 300;
+
+    line-height: 1.8;
+    letter-spacing: 0.3px;
+
+    color: rgba(255, 255, 255, 0.9);
+    max-width: 550px;
+    margin: 0 0 0 auto;
+
+    opacity: 0;
+    animation: aboutHeroFadeUp 1s ease forwards;
+    animation-delay: 0.4s;
+}
+
+/* Decorative Line — white like Investor, right-aligned */
+.hero-line {
+    width: 75px;
+    height: 3px;
+
+    background: #ffffff;
+
+    margin: 28px 0 0 auto;
+    border-radius: 2px;
+
+    transform: scaleX(0);
+    transform-origin: right;
+    animation: aboutHeroLineReveal 0.8s ease forwards;
+    animation-delay: 0.7s;
+}
+
+/* Bottom Tagline */
+.hero-bottom-text {
+    font-family: 'Poppins', sans-serif;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    letter-spacing: 2.5px;
+    line-height: 1.8;
+
+    color: rgba(255, 255, 255, 0.85);
+
+    text-align: right;
+    margin-top: 22px;
+
+    opacity: 0;
+    animation: aboutHeroFadeUp 1s ease forwards;
+    animation-delay: 0.9s;
+}
+
+/* About hero entrance keyframes (identical motion to Investor) */
+@keyframes aboutHeroFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes aboutHeroLineReveal {
+    to {
+        transform: scaleX(1);
+    }
+}
+
+
+/* =====================================
+   RESPONSIVE DESIGN
+===================================== */
+
+@media (max-width: 1024px) {
+
+    .about-hero {
+        height: 500px;
+    }
+
+    .about-hero-content {
+        width: 52%;
+        margin-right: 6%;
+    }
+
+    .about-hero-content h1 {
+        font-size: 64px;
+    }
+
+    .about-tag {
+        letter-spacing: 3px;
+    }
+}
+
+
+@media (max-width: 768px) {
+
+    .about-hero {
+        height: 420px;
+        background-position: 38% center;
+    }
+
+    .about-hero::before {
+        background: linear-gradient(
+            90deg,
+            rgba(5, 15, 38, 0.20),
+            rgba(5, 15, 38, 0.72)
+        );
+    }
+
+    .about-hero-content {
+        width: 70%;
+        margin-right: 5%;
+        padding: 24px 0;
+    }
+
+    .about-tag {
+        font-size: 11px;
+        letter-spacing: 2.5px;
+        margin-bottom: 16px;
+    }
+
+    .about-hero-content h1 {
+        font-size: 42px;
+        letter-spacing: -1px;
+        margin-bottom: 16px;
+    }
+
+    .about-hero-content p {
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .hero-line {
+        margin-top: 20px;
+    }
+
+    .hero-bottom-text {
+        font-size: 10px;
+        letter-spacing: 1.5px;
+        margin-top: 16px;
+    }
+}
+
+
+@media (max-width: 480px) {
+
+    .about-hero {
+        height: 380px;
+        background-position: 35% center;
+    }
+
+    .about-hero-content {
+        width: 80%;
+        margin-right: 5%;
+    }
+
+    .about-hero-content h1 {
+        font-size: 34px;
+        letter-spacing: -0.5px;
+    }
+
+    .about-tag {
+        font-size: 10px;
+        letter-spacing: 2px;
+    }
+
+    .about-hero-content p {
+        font-size: 15px;
+        line-height: 1.6;
+    }
+
+    .hero-line {
+        width: 55px;
+        height: 3px;
+        margin-top: 22px;
+        margin-bottom: 22px;
+    }
+
+    .hero-bottom-text {
+        font-size: 8px;
+        letter-spacing: 1px;
+    }
+}
+
 /* ==========================
    ABOUT SECTION
 ========================== */
@@ -1433,9 +1813,6 @@ HERO
    LAPTOP
 ========================== */
 @media(max-width: 1200px){
-    .about-hero h1{
-        font-size:5rem;
-    }
     .about-right p{
         font-size:1.5rem;
     }
@@ -1444,12 +1821,6 @@ HERO
    TABLET
 ========================== */
 @media(max-width: 991px){
-    .about-hero{
-        height:70vh;
-    }
-    .about-hero h1{
-        font-size:4rem;
-    }
     .about-container{
         grid-template-columns:1fr;
         gap:30px;
@@ -1465,13 +1836,6 @@ HERO
    MOBILE
 ========================== */
 @media(max-width: 768px){
-    .about-hero{
-        height:60vh;
-    }
-    .about-hero h1{
-        font-size:2.5rem;
-        padding:0 20px;
-    }
     .about-section{
         padding:30px 20px;
     }
@@ -2029,94 +2393,203 @@ HERO
 /* ==================================================================================
                                    INVESTOR.CSS STYLE
 ===================================================================================== */
-/* Investor Relations Section */
-.investor-relations{
-    position:relative;
-    width:100%;
-    height:500px;
-    margin-top:50px;
-     background-image:url("../images/investors/Investors\ Relations.jpg");
-    background-size:cover;
-    background-position:center;
-    overflow:hidden;
+
+/* ================= INVESTOR RELATIONS HERO ================= */
+
+.investor-relations {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    margin-top: 50px;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(5, 15, 38, 0.65) 0%,
+            rgba(5, 15, 38, 0.35) 40%,
+            rgba(5, 15, 38, 0.05) 100%
+        ),
+        url("../images/investors/Investors Relations.jpg");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    overflow: hidden;
 }
-/* Dark Overlay */
+
+/* Overlay */
+
 .investor-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-        to left,                          /* gradient direction flipped */
-        rgba(0, 0, 0, 0.35),              /* very light dark overlay on the right */
-        rgba(0, 0, 0, 0.15)               /* almost transparent on the left */
-    );
+
     display: flex;
-    align-items: flex-end;
-    justify-content: flex-end;            /* ← pushes content to the right */
+    align-items: center;
+    justify-content: flex-start;
+
+    padding-left: 9%;
 }
+
+/* Content */
 
 .investor-overlay .investor-content {
-    max-width: 700px;
-    padding: 0 10px 40px 0;               /* right padding instead of left */
-    color: #fff;
+    position: relative;
+    z-index: 2;
+    max-width: 650px;
+    color: #ffffff;
 }
+
+/* Small Tag */
+
+.investor-tag {
+    display: block;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 5px;
+    color: white;
+    margin-bottom: 22px;
+
+    opacity: 0;
+    animation: investorFadeUp 0.8s ease forwards;
+}
+
+/* Main Heading */
 
 .investor-overlay .investor-content h2 {
-    font-family: 'Poppins', sans-serif;
-    font-size: 67px;
-    font-weight: 600;
-    line-height: 1;
-    margin-bottom: 25px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(55px, 6vw, 82px);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -2px;
+
     color: #ffffff;
-    text-align: right;
+    margin: 0 0 22px;
+
+    opacity: 0;
+    animation: investorFadeUp 1s ease forwards;
+    animation-delay: 0.2s;
 }
+
+.investor-overlay .investor-content h2 span {
+    color: #1687D9;
+}
+
+/* Description */
 
 .investor-overlay .investor-content p {
-    font-size: 1.6rem;
-    line-height: 1.3;
-    font-weight: 400;
-    color: rgba(255, 255, 255, 0.95);
-    max-width: 950px;
-    text-align: center;                    /* changed from justify to right */
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 1.8;
+    letter-spacing: 0.3px;
+
+    color: rgba(255, 255, 255, 0.9);
+    max-width: 550px;
+    text-align: left;
+    margin: 0;
+    
+    opacity: 0;
+    animation: investorFadeUp 1s ease forwards;
+    animation-delay: 0.4s;
 }
 
-/* Tablet */
+/* Gold Line */
+
+.investor-line {
+    width: 75px;
+    height: 3px;
+    background: white;
+    margin-top: 28px;
+
+    transform: scaleX(0);
+    transform-origin: left;
+
+    animation: investorLineReveal 0.8s ease forwards;
+    animation-delay: 0.7s;
+}
+
+/* Animations */
+
+@keyframes investorFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes investorLineReveal {
+    to {
+        transform: scaleX(1);
+    }
+}
+
+/* ================= TABLET ================= */
+
 @media (max-width: 992px) {
+
     .investor-relations {
         height: 450px;
     }
-    .investor-overlay .investor-content {
-        padding: 0 30px 30px 0;
+
+    .investor-overlay {
+        padding-left: 6%;
     }
+
     .investor-overlay .investor-content h2 {
-        font-size: 3.8rem;
+        font-size: 65px;
     }
+
     .investor-overlay .investor-content p {
-        font-size: 1.2rem;
+        font-size: 15px;
+        max-width: 480px;
     }
+
     .investor-updates .container {
         flex-direction: column;
     }
+
     .investor-sidebar {
         width: 100%;
     }
 }
 
-/* Mobile */
+/* ================= MOBILE ================= */
+
 @media (max-width: 768px) {
+
     .investor-relations {
-        height: 350px;
+        height: 380px;
+        background-position: 60% center;
     }
-    .investor-overlay .investor-content {
-        padding: 0 20px 25px 0;
+
+    .investor-overlay {
+        padding: 0 7%;
     }
+
     .investor-overlay .investor-content h2 {
-        font-size: 2.5rem;
+        font-size: 48px;
+        letter-spacing: -1px;
     }
+
     .investor-overlay .investor-content p {
-        font-size: 1rem;
+        font-size: 13px;
+        line-height: 1.7;
         max-width: 100%;
     }
+
+    .investor-tag {
+        font-size: 10px;
+        letter-spacing: 3px;
+    }
 }
+
 /* Investors Table  */
 .investor-updates{
     padding:80px 5%;
@@ -8218,7 +8691,7 @@ font-size:15px;
     bottom:0;
     width:80px;
     height:4px;
-    background:var(--accent-blue);
+    background:white;
     border-radius:2px;
 }
 .investor-breadcrumb{
@@ -9613,4 +10086,74 @@ td a:hover{
         grid-template-columns: 1fr;
         gap: 24px;
     }
+}
+/* =====================================================================
+   ABOUT SECTION — same animation language as Investor tab section
+   ===================================================================== */
+
+/* Content fade-up (identical motion & timing to .tab-content.active-content) */
+.about-section,
+.about-company-section,
+.about-container,
+.visions,
+.management-team,
+.testimonial-section,
+.mission-section,
+.defence-future,
+.sovereign-section,
+.about {
+    animation: aboutFadeIn 0.45s ease;
+}
+
+@keyframes aboutFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Scroll-reveal support for About blocks (matches investor .reveal-up / .js-reveal) */
+.about-section .js-reveal,
+.about-company-section .js-reveal,
+.visions .js-reveal,
+.management-team .js-reveal,
+.team-card.js-reveal,
+.vision-card.js-reveal,
+.testimonial-slide.js-reveal,
+.about .js-reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.about-section .js-reveal.revealed,
+.about-company-section .js-reveal.revealed,
+.visions .js-reveal.revealed,
+.management-team .js-reveal.revealed,
+.team-card.js-reveal.revealed,
+.vision-card.js-reveal.revealed,
+.testimonial-slide.js-reveal.revealed,
+.about .js-reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Optional: make About cards feel consistent with investor list items on hover */
+.about .team-card,
+.about .vision-card,
+.management-team .team-card,
+.visions .vision-card {
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.about .team-card:hover,
+.about .vision-card:hover,
+.management-team .team-card:hover,
+.visions .vision-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 30px rgba(10, 42, 82, 0.15);
 }
