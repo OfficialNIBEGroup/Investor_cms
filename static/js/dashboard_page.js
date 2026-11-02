@@ -6,7 +6,7 @@
 
 async function loadDashboardStatistics() {
     try {
-        const response = await fetch(window.DASHBOARD_URLS.dashboardStats || "/api/dashboard/statistics/", {
+        const response = await fetch(window.DASHBOARD_URLS.dashboardStats || window.appUrl("/api/dashboard/statistics/"), {
             method: "GET",
             headers: {
                 "X-Requested-With": "XMLHttpRequest",
@@ -149,7 +149,7 @@ async function loadRecentDocuments() {
     if (emptyEl) emptyEl.style.display = "none";
 
     try {
-        const recentUrl = window.DASHBOARD_URLS.recentDocuments || "/api/recent-document-activity/";
+        const recentUrl = window.DASHBOARD_URLS.recentDocuments || window.appUrl("/api/recent-document-activity/");
         const response = await fetch(
             `${recentUrl}${recentUrl.includes("?") ? "&" : "?"}limit=8&t=${Date.now()}`,
             {
@@ -226,7 +226,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         try {
             const response = await fetch(
-                window.DASHBOARD_URLS.downloadSummaryReport || "/api/download-summary-report/",
+                window.DASHBOARD_URLS.downloadSummaryReport || window.appUrl("/api/download-summary-report/"),
                 {
                     method: "GET",
                     headers: { "X-Requested-With": "XMLHttpRequest" },

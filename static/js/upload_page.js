@@ -317,8 +317,8 @@ function initUploadForm() {
 
         try {
             const uploadUrl = isCustomSection
-                ? window.DASHBOARD_URLS.uploadCustomDocument || "/api/upload-custom-document/"
-                : window.DASHBOARD_URLS.uploadDocument || "/api/upload-investor-document/";
+                ? window.DASHBOARD_URLS.uploadCustomDocument || window.appUrl("/api/upload-custom-document/")
+                : window.DASHBOARD_URLS.uploadDocument || window.appUrl("/api/upload-investor-document/");
 
             const response = await fetch(uploadUrl, {
                 method: "POST",

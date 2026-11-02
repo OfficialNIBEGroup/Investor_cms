@@ -283,7 +283,7 @@ async function loadDocuments() {
     if (paginationEl) paginationEl.style.display = "none";
 
     try {
-        const documentsUrl = window.DASHBOARD_URLS.documentsApi || "/api/dashboard-documents/";
+        const documentsUrl = window.DASHBOARD_URLS.documentsApi || window.appUrl("/api/dashboard-documents/");
         const response = await fetch(`${documentsUrl}${documentsUrl.includes("?") ? "&" : "?"}t=${Date.now()}`, {
             method: "GET",
             headers: {
@@ -343,7 +343,7 @@ async function openEditModal(documentId, section) {
 
     try {
         // Adjust URL pattern to match your backend
-        const base = window.DASHBOARD_URLS.editDocument || "/api/edit-investor-document/";
+        const base = window.DASHBOARD_URLS.editDocument || window.appUrl("/api/edit-investor-document/");
         const response = await fetch(`${base}${documentId}/${section}/`, {
             method: "GET",
             headers: {
@@ -555,7 +555,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const section = document.getElementById("edit_section").value;
 
             const updateUrl =
-                window.DASHBOARD_URLS.updateDocument || "/api/update-investor-document/";
+                window.DASHBOARD_URLS.updateDocument || window.appUrl("/api/update-investor-document/");
             const response = await fetch(updateUrl, {
                 method: "POST",
                 headers: {
@@ -596,7 +596,7 @@ async function deleteDocument(documentId, section) {
     try {
         const csrfToken = getCookie("csrftoken");
         const deleteUrl =
-            window.DASHBOARD_URLS.deleteDocument || "/api/delete-investor-document/";
+            window.DASHBOARD_URLS.deleteDocument || window.appUrl("/api/delete-investor-document/");
         const response = await fetch(deleteUrl, {
             method: "POST",
             headers: {

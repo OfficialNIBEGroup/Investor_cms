@@ -13,7 +13,7 @@ async function loadSections() {
     tbody.innerHTML = `<tr><td colspan="7" class="table-empty">Loading sections...</td></tr>`;
 
     try {
-        const response = await fetch(window.DASHBOARD_URLS.sectionsListApi || "/api/sections/", {
+        const response = await fetch(window.DASHBOARD_URLS.sectionsListApi || window.appUrl("/api/sections/"), {
             credentials: "same-origin",
             headers: { "X-Requested-With": "XMLHttpRequest" },
         });
@@ -184,8 +184,8 @@ async function saveSection(event) {
 
     try {
         const url = id
-            ? window.DASHBOARD_URLS.updateSection || "/api/sections/update/"
-            : window.DASHBOARD_URLS.createSection || "/api/sections/create/";
+            ? window.DASHBOARD_URLS.updateSection || window.appUrl("/api/sections/update/")
+            : window.DASHBOARD_URLS.createSection || window.appUrl("/api/sections/create/");
 
         const response = await fetch(url, {
             method: "POST",
@@ -215,7 +215,7 @@ async function saveSection(event) {
 async function toggleSectionStatus(id) {
     try {
         const response = await fetch(
-            window.DASHBOARD_URLS.toggleSectionStatus || "/api/sections/toggle-status/",
+            window.DASHBOARD_URLS.toggleSectionStatus || window.appUrl("/api/sections/toggle-status/"),
             {
                 method: "POST",
                 headers: {
@@ -244,7 +244,7 @@ async function deleteSection(id, name) {
         return;
 
     try {
-        const response = await fetch(window.DASHBOARD_URLS.deleteSection || "/api/sections/delete/", {
+        const response = await fetch(window.DASHBOARD_URLS.deleteSection || window.appUrl("/api/sections/delete/"), {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -311,8 +311,8 @@ async function saveSubsection(event) {
 
     try {
         const url = id
-            ? window.DASHBOARD_URLS.updateSubsection || "/api/subsections/update/"
-            : window.DASHBOARD_URLS.createSubsection || "/api/subsections/create/";
+            ? window.DASHBOARD_URLS.updateSubsection || window.appUrl("/api/subsections/update/")
+            : window.DASHBOARD_URLS.createSubsection || window.appUrl("/api/subsections/create/");
 
         const response = await fetch(url, {
             method: "POST",
@@ -343,7 +343,7 @@ async function deleteSubsection(id, name) {
 
     try {
         const response = await fetch(
-            window.DASHBOARD_URLS.deleteSubsection || "/api/subsections/delete/",
+            window.DASHBOARD_URLS.deleteSubsection || window.appUrl("/api/subsections/delete/"),
             {
                 method: "POST",
                 headers: {

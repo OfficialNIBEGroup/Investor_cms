@@ -460,7 +460,7 @@
         if (!menu || !panels) return;
 
         try {
-            const response = await fetch(window.INVESTOR_DOCUMENTS_URL || "/api/public-investor-documents/", {
+            const response = await fetch(window.INVESTOR_DOCUMENTS_URL || window.appUrl("/api/public-investor-documents/"), {
                 headers: { Accept: "application/json" },
                 cache: "no-store",
             });

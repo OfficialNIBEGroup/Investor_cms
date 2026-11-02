@@ -30,7 +30,7 @@ async function loadEmployees() {
     tbody.innerHTML = `<tr><td colspan="8" class="table-empty">Loading employees...</td></tr>`;
 
     try {
-        const response = await fetch(window.DASHBOARD_URLS.employeesList || "/api/employees/", {
+        const response = await fetch(window.DASHBOARD_URLS.employeesList || window.appUrl("/api/employees/"), {
             credentials: "same-origin",
             headers: { "X-Requested-With": "XMLHttpRequest" },
         });
@@ -178,8 +178,8 @@ async function saveEmployee(event) {
     try {
         // Use create or update URL based on whether id exists
         const url = id
-            ? (window.DASHBOARD_URLS.updateEmployee || "/api/employees/update/")
-            : (window.DASHBOARD_URLS.createEmployee || "/api/employees/create/");
+            ? (window.DASHBOARD_URLS.updateEmployee || window.appUrl("/api/employees/update/"))
+            : (window.DASHBOARD_URLS.createEmployee || window.appUrl("/api/employees/create/"));
 
         const response = await fetch(url, {
             method: "POST",
@@ -214,7 +214,7 @@ async function toggleEmployeeStatus(userId, username) {
 
     try {
         const response = await fetch(
-            window.DASHBOARD_URLS.toggleEmployeeStatus || "/api/employees/toggle-status/",
+            window.DASHBOARD_URLS.toggleEmployeeStatus || window.appUrl("/api/employees/toggle-status/"),
             {
                 method: "POST",
                 headers: {
@@ -244,7 +244,7 @@ async function deleteEmployee(userId, username) {
     if (!confirm(`Delete user "${username}" permanently?\nThis cannot be undone.`)) return;
 
     try {
-        const response = await fetch(window.DASHBOARD_URLS.deleteEmployee || "/api/employees/delete/", {
+        const response = await fetch(window.DASHBOARD_URLS.deleteEmployee || window.appUrl("/api/employees/delete/"), {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

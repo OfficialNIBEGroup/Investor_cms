@@ -125,14 +125,18 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
-STATIC_URL = '/static/'
+# This app is mounted at /CMS on the production VPS. Keep local development at /.
+FORCE_SCRIPT_NAME = os.environ.get(
+    'DJANGO_FORCE_SCRIPT_NAME', '/CMS' if not DEBUG else ''
+).rstrip('/') or None
+STATIC_URL = f'{FORCE_SCRIPT_NAME}/static/' if FORCE_SCRIPT_NAME else '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
-MEDIA_URL = '/media/'
+MEDIA_URL = f'{FORCE_SCRIPT_NAME}/media/' if FORCE_SCRIPT_NAME else '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Comma-separated HTTPS origins, for example https://investors.example.com.
@@ -142,8 +146,8 @@ CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.environ.get(
 
 # Enable these after HTTPS has been configured in Nginx.
 SECURE_SSL_REDIRECT = os.environ.get('DJANGO_SECURE_SSL_REDIRECT', 'False').lower() == 'true'
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG and SECURE_SSL_REDIRECT
+CSRF_COOKIE_SECURE = not DEBUG and SECURE_SSL_REDIRECT
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
