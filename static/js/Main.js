@@ -178,7 +178,7 @@ async function loadShareholderNotices() {
 
     try {
 
-        const response = await fetch("/api/shareholder-notices/");
+        const response = await fetch(window.appUrl("/api/shareholder-notices/"));
 
         if (!response.ok) {
             throw new Error("Failed to load shareholder notices");
@@ -330,7 +330,7 @@ async function loadNewspaperPublications() {
     try {
 
         const response =
-            await fetch("/api/newspaper-publications/");
+            await fetch(window.appUrl("/api/newspaper-publications/"));
 
         if (!response.ok) {
             throw new Error("Failed to load newspaper publications");
@@ -440,7 +440,7 @@ async function loadStockExchangeDisclosures() {
     try {
 
         const response =
-            await fetch("/api/stock-exchange-disclosures/");
+            await fetch(window.appUrl("/api/stock-exchange-disclosures/"));
 
         if (!response.ok) {
             throw new Error("Failed to load stock exchange disclosures");
@@ -638,7 +638,7 @@ function showCG2022(){
 
 async function loadCorporateGovernance() {
     try {
-        const response = await fetch("/api/corporate-governance/");
+        const response = await fetch(window.appUrl("/api/corporate-governance/"));
 
         if (!response.ok) {
             throw new Error("Failed to load corporate governance");
@@ -767,7 +767,7 @@ async function loadShareholdingPattern() {
 
     try {
 
-        const response = await fetch("/api/shareholding-pattern/");
+        const response = await fetch(window.appUrl("/api/shareholding-pattern/"));
 
         if (!response.ok) {
             throw new Error("Failed to load shareholding pattern");
@@ -936,7 +936,7 @@ async function loadSEBIDocuments() {
 
     try {
 
-        const response = await fetch("/api/sebi-documents/");
+        const response = await fetch(window.appUrl("/api/sebi-documents/"));
 
         if (!response.ok) {
             throw new Error("Failed to load SEBI documents");
@@ -1048,7 +1048,7 @@ async function loadTaxDeclarations() {
 
     try {
 
-        const response = await fetch("/api/tax-declarations/");
+        const response = await fetch(window.appUrl("/api/tax-declarations/"));
 
         if (!response.ok) {
             throw new Error("Failed to load tax declarations");
@@ -1130,7 +1130,7 @@ async function loadUnclaimedDividends() {
 
     try {
 
-        const response = await fetch("/api/unclaimed-dividends/");
+        const response = await fetch(window.appUrl("/api/unclaimed-dividends/"));
 
         if (!response.ok) {
             throw new Error("Failed to load unclaimed dividends");
@@ -1811,7 +1811,7 @@ async function loadFinancialResults(){
 
     try {
 
-        const response = await fetch("/api/financial-results/");
+        const response = await fetch(window.appUrl("/api/financial-results/"));
 
         if (!response.ok) {
             throw new Error("Failed to load financial results");
@@ -2037,7 +2037,7 @@ async function loadInvestorForms() {
 
     try {
 
-        const response = await fetch("/api/investor-forms/");
+        const response = await fetch(window.appUrl("/api/investor-forms/"));
 
         if (!response.ok) {
             throw new Error("Failed to load investor forms");
@@ -2116,7 +2116,7 @@ async function loadSubsidiaryFinancials() {
 
     try {
 
-        const response = await fetch("/api/subsidiary-financials/");
+        const response = await fetch(window.appUrl("/api/subsidiary-financials/"));
 
         if (!response.ok) {
             throw new Error("Failed to load subsidiary financials");

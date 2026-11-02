@@ -85,7 +85,7 @@ def role_required(allowed_roles=None):
             # Role not allowed → block access
             if user_role not in allowed_roles:
                 # For API calls return JSON error
-                if request.path.startswith('/api/'):
+                if request.path_info.startswith('/api/'):
                     return JsonResponse({
                         "success": False,
                         "message": "You do not have permission to perform this action."

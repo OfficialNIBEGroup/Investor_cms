@@ -20,36 +20,36 @@ window.IS_ADMIN = window.IS_ADMIN === true || window.CURRENT_USER_ROLE === "ADMI
 /* ------------------------------------------------------------------ */
 window.DASHBOARD_URLS = window.DASHBOARD_URLS || {
     // Documents
-    documentsApi: "/api/dashboard-documents/",
-    uploadDocument: "/api/upload-investor-document/",
-    uploadCustomDocument: "/api/upload-custom-document/",
-    editDocument: "/api/edit-investor-document/",          // append id/section
-    updateDocument: "/api/update-investor-document/",
-    deleteDocument: "/api/delete-investor-document/",
+    documentsApi: window.appUrl("/api/dashboard-documents/"),
+    uploadDocument: window.appUrl("/api/upload-investor-document/"),
+    uploadCustomDocument: window.appUrl("/api/upload-custom-document/"),
+    editDocument: window.appUrl("/api/edit-investor-document/"),          // append id/section
+    updateDocument: window.appUrl("/api/update-investor-document/"),
+    deleteDocument: window.appUrl("/api/delete-investor-document/"),
 
     // Dashboard stats
-    dashboardStats: "/api/dashboard-statistics/",
-    recentDocuments: "/api/recent-document-activity/",
-    downloadSummaryReport: "/api/download-summary-report/",
+    dashboardStats: window.appUrl("/api/dashboard-statistics/"),
+    recentDocuments: window.appUrl("/api/recent-document-activity/"),
+    downloadSummaryReport: window.appUrl("/api/download-summary-report/"),
 
     // Audit
-    auditLogApi: "/api/audit-logs/",
+    auditLogApi: window.appUrl("/api/audit-logs/"),
 
     // Employees
-    employeesList: "/api/employees/",
-    saveEmployee: "/api/employees/save/",
-    toggleEmployeeStatus: "/api/employees/toggle-status/",
-    deleteEmployee: "/api/employees/delete/",
+    employeesList: window.appUrl("/api/employees/"),
+    saveEmployee: window.appUrl("/api/employees/save/"),
+    toggleEmployeeStatus: window.appUrl("/api/employees/toggle-status/"),
+    deleteEmployee: window.appUrl("/api/employees/delete/"),
 
     // Sections
-    sectionsListApi: "/api/sections/",
-    createSection: "/api/sections/create/",
-    updateSection: "/api/sections/update/",
-    toggleSectionStatus: "/api/sections/toggle-status/",
-    deleteSection: "/api/sections/delete/",
-    createSubsection: "/api/subsections/create/",
-    updateSubsection: "/api/subsections/update/",
-    deleteSubsection: "/api/subsections/delete/",
+    sectionsListApi: window.appUrl("/api/sections/"),
+    createSection: window.appUrl("/api/sections/create/"),
+    updateSection: window.appUrl("/api/sections/update/"),
+    toggleSectionStatus: window.appUrl("/api/sections/toggle-status/"),
+    deleteSection: window.appUrl("/api/sections/delete/"),
+    createSubsection: window.appUrl("/api/subsections/create/"),
+    updateSubsection: window.appUrl("/api/subsections/update/"),
+    deleteSubsection: window.appUrl("/api/subsections/delete/"),
 };
 
 /* ------------------------------------------------------------------ */
@@ -196,7 +196,7 @@ function clearDynamicFields(containerId = "dynamicFields") {
 async function refreshAppSectionsFromAPI() {
     try {
         const response = await fetch(
-            (window.DASHBOARD_URLS.sectionsListApi || "/api/sections/") + "?active_only=1",
+            (window.DASHBOARD_URLS.sectionsListApi || window.appUrl("/api/sections/")) + "?active_only=1",
             {
                 credentials: "same-origin",
                 headers: { "X-Requested-With": "XMLHttpRequest" },

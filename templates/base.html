@@ -133,8 +133,16 @@
 </footer>
 {% endblock %}
 
+    <script>
+        window.APP_BASE_PATH = "{% url 'home' %}".replace(/\/+$/, '');
+        window.appUrl = function (path) {
+            const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+            return `${window.APP_BASE_PATH}${normalizedPath}`;
+        };
+    </script>
+
     <!-- Main JS -->
-    <script src="{% static 'js/Main.js' %}"></script>
+    <script src="{% static 'js/Main.js' %}?v=cms-prefix-20261102"></script>
     
     <!-- image-perf.js (if you have it) -->
     <script src="{% static 'js/image-perf.js' %}" defer></script>

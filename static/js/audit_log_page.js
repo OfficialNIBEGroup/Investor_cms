@@ -53,7 +53,7 @@ async function loadAuditLogs(page = 1) {
     if (paginationEl) paginationEl.style.display = "none";
 
     try {
-        const base = window.DASHBOARD_URLS.auditLogApi || "/api/audit-logs/";
+        const base = window.DASHBOARD_URLS.auditLogApi || window.appUrl("/api/audit-logs/");
         const response = await fetch(
             `${base}?page=${currentAuditPage}&page_size=${currentAuditPageSize}&t=${Date.now()}`,
             {
