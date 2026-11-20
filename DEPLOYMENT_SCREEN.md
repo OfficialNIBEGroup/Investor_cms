@@ -5,7 +5,7 @@ The public site is bound to:
 - `https://www.nibelimited.com/`
 - `http://nibelimited.com/`
 
-Gunicorn listens only on `127.0.0.1:8001`. Nginx on port 80/443 routes those hostnames to this app. The commands below assume Ubuntu, DNS for `nibelimited.com` and `www.nibelimited.com` pointing to `200.97.168.12`, and the project copied to `/var/www/investor-cms`.
+Gunicorn listens only on `127.0.0.1:8002`. Nginx on port 80/443 routes those hostnames to this app. The commands below assume Ubuntu, DNS for `nibelimited.com` and `www.nibelimited.com` pointing to `200.97.168.12`, and the project copied to `/var/www/investor-cms/Investor_cms`.
 
 The old URL `https://200.97.168.12/CMS/` is redirected to `/` on the same host.
 
@@ -68,7 +68,7 @@ screen -S investor-cms
 Inside the screen session, start the app:
 
 ```bash
-gunicorn nibe_cms.wsgi:application --bind 127.0.0.1:8001 --workers 3 --access-logfile - --error-logfile -
+gunicorn nibe_cms.wsgi:application --bind 127.0.0.1:8002 --workers 3 --access-logfile - --error-logfile -
 ```
 
 Detach and leave it running with **Ctrl+A**, then **D**. Reconnect with `screen -r investor-cms`; list sessions with `screen -ls`. To stop it, reconnect and press **Ctrl+C**, then `exit`. Use a different session name and port if those are already occupied.

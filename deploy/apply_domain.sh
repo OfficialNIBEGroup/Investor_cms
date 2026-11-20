@@ -3,6 +3,7 @@
 #   sudo bash /var/www/investor-cms/Investor_cms/deploy/apply_domain.sh
 set -euo pipefail
 
+APP_PORT=8002
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 APP_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 ENV_FILE="$APP_DIR/.env"
@@ -15,7 +16,9 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 cd "$APP_DIR"
+echo "apply_domain.sh v3"
 echo "Using app directory: $APP_DIR"
+echo "Gunicorn port: $APP_PORT"
 
 if [ ! -f "$APP_DIR/manage.py" ]; then
   echo "manage.py not found in $APP_DIR"
@@ -91,7 +94,7 @@ else
   echo "WARNING: venv not found under $APP_DIR or $(dirname "$APP_DIR"); skip pip/collectstatic"
 fi
 
-sed "s|/var/www/investor-cms|$APP_DIR|g" "$APP_DIR/deploy/nginx-nibelimited.conf" > "$NGINX_AVAIL"
+sed -e "s|/var/www/investor-cms|$APP_DIR|g" -e "s|127.0.0.1:8001|127.0.0.1:${APP_PORT}|g" -e "s|127.0.0.1:8002|127.0.0.1:${APP_PORT}|g" "$APP_DIR/deploy/nginx-nibelimited.conf" > "$NGINX_AVAIL"
 
 CERT_DIR=""
 for name in www.nibelimited.com nibelimited.com; do
@@ -188,7 +191,7 @@ if pgrep -f 'gunicorn nibe_cms.wsgi' >/dev/null 2>&1; then
   echo "Sent HUP to Gunicorn so it reloads Django settings"
 else
   echo "Gunicorn is not running. Start it from $APP_DIR:"
-  echo "  cd $APP_DIR && source venv/bin/activate && gunicorn nibe_cms.wsgi:application --bind 127.0.0.1:8001 --workers 3"
+  echo "  cd $APP_DIR && source venv/bin/activate && gunicorn nibe_cms.wsgi:application --bind 127.0.0.1:${APP_PORT} --workers 3"
 fi
 
 echo
