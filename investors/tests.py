@@ -369,3 +369,22 @@ class DomainBindingTests(TestCase):
     def test_home_is_at_domain_root(self):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
+
+    def test_domain_hosts_are_always_allowed(self):
+        from django.conf import settings
+        self.assertIn("www.nibelimited.com", settings.ALLOWED_HOSTS)
+        self.assertIn("nibelimited.com", settings.ALLOWED_HOSTS)
+        self.assertIn("200.97.168.12", settings.ALLOWED_HOSTS)
+        self.assertEqual(settings.STATIC_URL, "/static/")
+        self.assertIsNone(settings.FORCE_SCRIPT_NAME)
+
+    def test_home_accepts_public_hosts(self):
+        for host in ("www.nibelimited.com", "nibelimited.com", "200.97.168.12"):
+            response = self.client.get("/", HTTP_HOST=host)
+            self.assertEqual(response.status_code, 200, host)
+            self.assertContains(response, "/static/css/Style.css")
+            self.assertNotContains(response, "/CMS/static/")
+
+    def test_stylesheet_is_served(self):
+        response = self.client.get("/static/css/Style.css")
+        self.assertEqual(response.status_code, 200)

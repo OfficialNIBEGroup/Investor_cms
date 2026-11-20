@@ -31,13 +31,17 @@ def _csv_env(name, default=''):
     return [item.strip() for item in os.environ.get(name, default).split(',') if item.strip()]
 
 
-# Public site is bound to the company domain (and the previous VPS IP during cutover).
-_DEFAULT_ALLOWED_HOSTS = (
-    'localhost,127.0.0.1'
-    if DEBUG
-    else 'www.nibelimited.com,nibelimited.com,200.97.168.12'
-)
-ALLOWED_HOSTS = _csv_env('DJANGO_ALLOWED_HOSTS', _DEFAULT_ALLOWED_HOSTS)
+# Always accept the live hosts, even if production .env is stale.
+# A missing host here is Django's HTML 400 "Bad Request" page.
+REQUIRED_ALLOWED_HOSTS = [
+    'www.nibelimited.com',
+    'nibelimited.com',
+    '.nibelimited.com',
+    '200.97.168.12',
+    'localhost',
+    '127.0.0.1',
+]
+ALLOWED_HOSTS = list(dict.fromkeys(_csv_env('DJANGO_ALLOWED_HOSTS') + REQUIRED_ALLOWED_HOSTS))
 
 
 # Application definition
@@ -54,6 +58,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -129,30 +134,37 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
-# App serves at domain root: https://www.nibelimited.com/ and http://nibelimited.com/
-# Leave DJANGO_FORCE_SCRIPT_NAME empty. Set it only if you must remount under a subpath.
-FORCE_SCRIPT_NAME = os.environ.get('DJANGO_FORCE_SCRIPT_NAME', '').rstrip('/') or None
-STATIC_URL = f'{FORCE_SCRIPT_NAME}/static/' if FORCE_SCRIPT_NAME else '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+# App serves at domain root. Ignore a leftover /CMS value from the old VPS .env
+# so CSS/JS URLs stay /static/... instead of /CMS/static/...
+_raw_script = os.environ.get('DJANGO_FORCE_SCRIPT_NAME', '').strip().rstrip('/')
+if _raw_script.upper() in ('', '/', 'CMS', '/CMS'):
+    FORCE_SCRIPT_NAME = None
+else:
+    FORCE_SCRIPT_NAME = _raw_script
 
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
+# Serve files from static/ even if collectstatic has not been run on the VPS.
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = DEBUG
 
-MEDIA_URL = f'{FORCE_SCRIPT_NAME}/media/' if FORCE_SCRIPT_NAME else '/media/'
+MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-_DEFAULT_CSRF_ORIGINS = (
-    ''
-    if DEBUG
-    else (
-        'https://www.nibelimited.com,'
-        'https://nibelimited.com,'
-        'http://www.nibelimited.com,'
-        'http://nibelimited.com'
-    )
-)
-CSRF_TRUSTED_ORIGINS = _csv_env('DJANGO_CSRF_TRUSTED_ORIGINS', _DEFAULT_CSRF_ORIGINS)
+REQUIRED_CSRF_ORIGINS = [
+    'https://www.nibelimited.com',
+    'https://nibelimited.com',
+    'http://www.nibelimited.com',
+    'http://nibelimited.com',
+    'https://200.97.168.12',
+    'http://200.97.168.12',
+]
+CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(
+    _csv_env('DJANGO_CSRF_TRUSTED_ORIGINS') + REQUIRED_CSRF_ORIGINS
+))
 
 # Keep HTTP on nibelimited.com working. Do not force HTTPS until both hosts have certs
 # and you explicitly set DJANGO_SECURE_SSL_REDIRECT=True.

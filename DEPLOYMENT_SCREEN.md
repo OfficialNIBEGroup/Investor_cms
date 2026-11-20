@@ -75,7 +75,17 @@ Detach and leave it running with **Ctrl+A**, then **D**. Reconnect with `screen 
 
 ## 4. Bind Nginx to nibelimited.com and www.nibelimited.com
 
-Disable any older site that currently owns these hostnames (including a previous `/CMS` location or `investors.nibelimited.com` vhost), then install the site from this repo:
+A domain request that shows Django's `Bad Request (400)` means the running app still does not allow that hostname. CSS missing on `https://200.97.168.12/` means Nginx is looking in `staticfiles/` (often empty) while the files live in `static/`, or the HTML still points at `/CMS/static/`.
+
+After copying this code onto the VPS, run:
+
+```bash
+sudo bash /var/www/investor-cms/deploy/apply_domain.sh
+```
+
+That updates `.env` hosts, removes the `/CMS` prefix, installs the Nginx site, points `/static/` at `/var/www/investor-cms/static/`, and reloads Gunicorn.
+
+If you prefer to do it by hand, disable any older site that currently owns these hostnames, then:
 
 ```bash
 cp /var/www/investor-cms/deploy/nginx-nibelimited.conf /etc/nginx/sites-available/nibelimited

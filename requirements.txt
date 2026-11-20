@@ -7,3 +7,4 @@ reportlab==5.0.1
 sqlparse==0.6.0
 tzdata==2026.3
 gunicorn==23.0.0
+whitenoise==6.11.0
