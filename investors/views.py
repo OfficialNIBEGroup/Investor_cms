@@ -2269,7 +2269,7 @@ def upload_dashboard(request):
 
     # Client must not access dashboard
     if role == 'CLIENT':
-        return redirect('https://www.nibelimited.com')
+        return redirect('home')
 
     # Display name for header
     full_name = request.user.get_full_name().strip()
@@ -2702,7 +2702,7 @@ def dashboard_login(request):
             # CLIENT should not enter the dashboard
             if user.profile.role == 'CLIENT':
                 login(request, user)
-                return redirect('https://www.nibelimited.com')
+                return redirect('home')
 
             # Admin or Employee
             login(request, user)
@@ -2745,7 +2745,7 @@ def redirect_based_on_role(user):
         return redirect('documents')   # New dashboard (Documents page)
 
     # CLIENT (or any other role)
-    return redirect('https://www.nibelimited.com')
+    return redirect('home')
 
 # ============================================================
 # DELETE INVESTOR DOCUMENT

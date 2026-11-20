@@ -26,14 +26,18 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-temporary-key-
 if not DEBUG and SECRET_KEY == 'django-insecure-temporary-key-change-this':
     raise RuntimeError('Set DJANGO_SECRET_KEY to a unique production secret.')
 
-# Security settings for production
-SECURE_SSL_REDIRECT = False
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
 
-ALLOWED_HOSTS = [host.strip() for host in os.environ.get(
-    'DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1'
-).split(',') if host.strip()]
+def _csv_env(name, default=''):
+    return [item.strip() for item in os.environ.get(name, default).split(',') if item.strip()]
+
+
+# Public site is bound to the company domain (and the previous VPS IP during cutover).
+_DEFAULT_ALLOWED_HOSTS = (
+    'localhost,127.0.0.1'
+    if DEBUG
+    else 'www.nibelimited.com,nibelimited.com,200.97.168.12'
+)
+ALLOWED_HOSTS = _csv_env('DJANGO_ALLOWED_HOSTS', _DEFAULT_ALLOWED_HOSTS)
 
 
 # Application definition
@@ -125,10 +129,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
-# This app is mounted at /CMS on the production VPS. Keep local development at /.
-FORCE_SCRIPT_NAME = os.environ.get(
-    'DJANGO_FORCE_SCRIPT_NAME', '/CMS' if not DEBUG else ''
-).rstrip('/') or None
+# App serves at domain root: https://www.nibelimited.com/ and http://nibelimited.com/
+# Leave DJANGO_FORCE_SCRIPT_NAME empty. Set it only if you must remount under a subpath.
+FORCE_SCRIPT_NAME = os.environ.get('DJANGO_FORCE_SCRIPT_NAME', '').rstrip('/') or None
 STATIC_URL = f'{FORCE_SCRIPT_NAME}/static/' if FORCE_SCRIPT_NAME else '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
@@ -139,16 +142,25 @@ STATICFILES_DIRS = [
 MEDIA_URL = f'{FORCE_SCRIPT_NAME}/media/' if FORCE_SCRIPT_NAME else '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Comma-separated HTTPS origins, for example https://investors.example.com.
-CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.environ.get(
-    'DJANGO_CSRF_TRUSTED_ORIGINS', ''
-).split(',') if origin.strip()]
+_DEFAULT_CSRF_ORIGINS = (
+    ''
+    if DEBUG
+    else (
+        'https://www.nibelimited.com,'
+        'https://nibelimited.com,'
+        'http://www.nibelimited.com,'
+        'http://nibelimited.com'
+    )
+)
+CSRF_TRUSTED_ORIGINS = _csv_env('DJANGO_CSRF_TRUSTED_ORIGINS', _DEFAULT_CSRF_ORIGINS)
 
-# Enable these after HTTPS has been configured in Nginx.
+# Keep HTTP on nibelimited.com working. Do not force HTTPS until both hosts have certs
+# and you explicitly set DJANGO_SECURE_SSL_REDIRECT=True.
 SECURE_SSL_REDIRECT = os.environ.get('DJANGO_SECURE_SSL_REDIRECT', 'False').lower() == 'true'
 SESSION_COOKIE_SECURE = not DEBUG and SECURE_SSL_REDIRECT
 CSRF_COOKIE_SECURE = not DEBUG and SECURE_SSL_REDIRECT
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
 
 
 # Email

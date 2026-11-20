@@ -354,3 +354,18 @@ class PublicInvestorPageTests(TestCase):
         board = next(item for item in sections if item["key"] == f"custom_{custom.id}")
         self.assertEqual(board["name"], "Board Notes")
         self.assertEqual([doc["title"] for doc in board["documents"]], ["Published Note"])
+
+
+class DomainBindingTests(TestCase):
+    def test_old_cms_prefix_redirects_to_root(self):
+        response = self.client.get("/CMS/", follow=False)
+        self.assertEqual(response.status_code, 301)
+        self.assertEqual(response.url, "/")
+
+        response = self.client.get("/CMS/investors/?year=2025", follow=False)
+        self.assertEqual(response.status_code, 301)
+        self.assertEqual(response.url, "/investors/?year=2025")
+
+    def test_home_is_at_domain_root(self):
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
