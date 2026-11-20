@@ -77,11 +77,13 @@ Detach and leave it running with **Ctrl+A**, then **D**. Reconnect with `screen 
 
 A domain request that shows Django's `Bad Request (400)` means the running app still does not allow that hostname. CSS missing on `https://200.97.168.12/` means Nginx is looking in `staticfiles/` (often empty) while the files live in `static/`, or the HTML still points at `/CMS/static/`.
 
-After copying this code onto the VPS, run:
+After copying this code onto the VPS, run it from the Django project folder (the folder that contains `manage.py`):
 
 ```bash
-sudo bash /var/www/investor-cms/deploy/apply_domain.sh
+sudo bash /var/www/investor-cms/Investor_cms/deploy/apply_domain.sh
 ```
+
+The script finds that folder itself, creates `.env` if it is missing, and points Nginx at the same path.
 
 That updates `.env` hosts, removes the `/CMS` prefix, installs the Nginx site, points `/static/` at `/var/www/investor-cms/static/`, and reloads Gunicorn.
 

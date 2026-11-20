@@ -1,9 +1,10 @@
 #!/bin/bash
-# Run on the Hostinger VPS after pulling this code:
-#   sudo bash /var/www/investor-cms/deploy/apply_domain.sh
+# Run on the Hostinger VPS from the Django project folder:
+#   sudo bash /var/www/investor-cms/Investor_cms/deploy/apply_domain.sh
 set -euo pipefail
 
-APP_DIR="${APP_DIR:-/var/www/investor-cms}"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+APP_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 ENV_FILE="$APP_DIR/.env"
 NGINX_AVAIL="/etc/nginx/sites-available/nibelimited"
 NGINX_ENABLED="/etc/nginx/sites-enabled/nibelimited"
@@ -14,18 +15,42 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 cd "$APP_DIR"
+echo "Using app directory: $APP_DIR"
 
-if [ ! -f "$ENV_FILE" ]; then
-  echo "Missing $ENV_FILE"
+if [ ! -f "$APP_DIR/manage.py" ]; then
+  echo "manage.py not found in $APP_DIR"
   exit 1
 fi
 
-python3 - <<'PY'
+if [ ! -f "$ENV_FILE" ]; then
+  if [ -f "$(dirname "$APP_DIR")/.env" ]; then
+    cp "$(dirname "$APP_DIR")/.env" "$ENV_FILE"
+    echo "Copied .env from $(dirname "$APP_DIR")/.env"
+  else
+    SECRET="$(python3 -c 'import secrets; print(secrets.token_urlsafe(50))')"
+    cat > "$ENV_FILE" <<EOF
+DJANGO_SECRET_KEY=${SECRET}
+DJANGO_DEBUG=False
+DJANGO_ALLOWED_HOSTS=www.nibelimited.com,nibelimited.com,200.97.168.12,localhost,127.0.0.1
+DJANGO_CSRF_TRUSTED_ORIGINS=https://www.nibelimited.com,https://nibelimited.com,http://www.nibelimited.com,http://nibelimited.com,https://200.97.168.12,http://200.97.168.12
+DJANGO_FORCE_SCRIPT_NAME=
+DJANGO_SECURE_SSL_REDIRECT=False
+EMAIL_HOST_USER=
+EMAIL_HOST_PASSWORD=
+EOF
+    chmod 600 "$ENV_FILE"
+    echo "Created $ENV_FILE"
+  fi
+fi
+
+python3 - "$ENV_FILE" <<'PY'
 from pathlib import Path
-p = Path("/var/www/investor-cms/.env")
+import sys
+p = Path(sys.argv[1])
 text = p.read_text(encoding="utf-8")
 lines = text.splitlines()
 wanted = {
+    "DJANGO_DEBUG": "False",
     "DJANGO_ALLOWED_HOSTS": "www.nibelimited.com,nibelimited.com,200.97.168.12,localhost,127.0.0.1",
     "DJANGO_CSRF_TRUSTED_ORIGINS": "https://www.nibelimited.com,https://nibelimited.com,http://www.nibelimited.com,http://nibelimited.com,https://200.97.168.12,http://200.97.168.12",
     "DJANGO_FORCE_SCRIPT_NAME": "",
@@ -47,17 +72,26 @@ for key, value in wanted.items():
     if key not in found:
         out.append(f"{key}={value}")
 p.write_text("\n".join(out) + "\n", encoding="utf-8")
-print("Updated .env hosts and removed /CMS prefix")
+print(f"Updated {p} hosts and removed /CMS prefix")
 PY
 
-if [ -x "$APP_DIR/venv/bin/pip" ]; then
-  "$APP_DIR/venv/bin/pip" install -r "$APP_DIR/requirements.txt"
-  "$APP_DIR/venv/bin/python" "$APP_DIR/manage.py" collectstatic --noinput
+VENV_PIP=""
+for candidate in "$APP_DIR/venv/bin/pip" "$(dirname "$APP_DIR")/venv/bin/pip"; do
+  if [ -x "$candidate" ]; then
+    VENV_PIP="$candidate"
+    break
+  fi
+done
+
+if [ -n "$VENV_PIP" ]; then
+  VENV_BIN="$(dirname "$VENV_PIP")"
+  "$VENV_PIP" install -r "$APP_DIR/requirements.txt"
+  "$VENV_BIN/python" "$APP_DIR/manage.py" collectstatic --noinput
 else
-  echo "WARNING: $APP_DIR/venv not found; skip pip/collectstatic"
+  echo "WARNING: venv not found under $APP_DIR or $(dirname "$APP_DIR"); skip pip/collectstatic"
 fi
 
-cp "$APP_DIR/deploy/nginx-nibelimited.conf" "$NGINX_AVAIL"
+sed "s|/var/www/investor-cms|$APP_DIR|g" "$APP_DIR/deploy/nginx-nibelimited.conf" > "$NGINX_AVAIL"
 
 CERT_DIR=""
 for name in www.nibelimited.com nibelimited.com; do
@@ -96,14 +130,14 @@ server {
     }
 
     location /static/ {
-        root /var/www/investor-cms;
+        root ${APP_DIR};
         try_files \$uri @app;
         expires 30d;
         add_header Cache-Control "public";
     }
 
     location /media/ {
-        root /var/www/investor-cms;
+        root ${APP_DIR};
         try_files \$uri @app;
     }
 
@@ -138,8 +172,8 @@ fi
 ln -sfn "$NGINX_AVAIL" "$NGINX_ENABLED"
 rm -f /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/investor-cms
 
-# Stop other enabled sites from stealing these hostnames / 443 default.
 for site in /etc/nginx/sites-enabled/*; do
+  [ -e "$site" ] || continue
   base="$(basename "$site")"
   if [ "$base" != "nibelimited" ]; then
     echo "NOTE: $base is still enabled. If the domain 400 persists, disable it: rm $site"
@@ -153,7 +187,7 @@ if pgrep -f 'gunicorn nibe_cms.wsgi' >/dev/null 2>&1; then
   pkill -HUP -f 'gunicorn nibe_cms.wsgi' || true
   echo "Sent HUP to Gunicorn so it reloads Django settings"
 else
-  echo "Gunicorn is not running. Start it:"
+  echo "Gunicorn is not running. Start it from $APP_DIR:"
   echo "  cd $APP_DIR && source venv/bin/activate && gunicorn nibe_cms.wsgi:application --bind 127.0.0.1:8001 --workers 3"
 fi
 
