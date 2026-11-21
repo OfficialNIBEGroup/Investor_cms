@@ -2393,15 +2393,7 @@ def upload_investor_document(request):
     if section == "corporate_announcements" and subsection:
         check_section = subsection
 
-    model = model_map.get(check_section)
-    if model and model.objects.filter(title__iexact=title).exists():
-        return JsonResponse(
-            {
-                "success": False,
-                "message": f'A document with the title "{title}" already exists in this section. Please use a different title.'
-            },
-            status=400
-        )
+   
 
     # -------------------------------------------------------
     # Map the new hierarchy (section + subsection) back to

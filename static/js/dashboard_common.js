@@ -62,6 +62,9 @@ const financialYearOptions = [
     { value: "2024-25", label: "Financial Year 2024-25" },
     { value: "2023-24", label: "Financial Year 2023-24" },
     { value: "2022-23", label: "Financial Year 2022-23" },
+    { value: "2021-22", label: "Financial Year 2021-22" },
+    { value: "2020-21", label: "Financial Year 2020-21" },
+    { value: "2019-20", label: "Financial Year 2019-20" },
 ];
 
 /* ------------------------------------------------------------------ */
