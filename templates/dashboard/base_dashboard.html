@@ -45,13 +45,13 @@
                 <span>Upload Document</span>
             </a>
 
-            {% if is_admin %}
             <a href="{% url 'audit_log' %}"
                class="menu-item {% if active_tab == 'audit_log' %}active{% endif %}">
                 <span class="menu-icon">📋</span>
                 <span>Audit Log</span>
             </a>
 
+            {% if is_admin %}
             <a href="{% url 'employees' %}"
                class="menu-item {% if active_tab == 'employees' %}active{% endif %}">
                 <span class="menu-icon">👥</span>

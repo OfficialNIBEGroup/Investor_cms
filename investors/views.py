@@ -4,9 +4,11 @@ import json
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.cache import never_cache
 from django.shortcuts import render, redirect
-from django.db.models import Max
+from django.db.models import Max, Q
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 from functools import wraps
 from django.contrib import messages
 from .models import Profile   # make sure Profile is imported
@@ -44,6 +46,12 @@ AUDIT_ACTION_MAP = {
     "edited": "edited",
     "deleted": "deleted",
     "delete": "deleted",
+    "registered": "registered",
+    "register": "registered",
+    "approved": "approved",
+    "approve": "approved",
+    "rejected": "rejected",
+    "reject": "rejected",
 }
 
 
@@ -55,49 +63,45 @@ AUDIT_ACTION_MAP = {
 # CLIENT   → Only public website (www.nibelimited.com)
 
 def role_required(allowed_roles=None):
-    """
-    Restrict a view to specific roles only.
-
-    Example:
-        @role_required(['ADMIN'])
-        def employees_list_api(...):
-
-        @role_required(['ADMIN', 'EMPLOYEE'])
-        def upload_investor_document(...):
-    """
     if allowed_roles is None:
         allowed_roles = []
 
     def decorator(view_func):
         @wraps(view_func)
         def wrapper(request, *args, **kwargs):
-
-            # User must be logged in
             if not request.user.is_authenticated:
                 return redirect('dashboard_login')
 
-            # Safety: create profile if it does not exist
             if not hasattr(request.user, 'profile'):
-                Profile.objects.create(user=request.user, role='EMPLOYEE')
+                Profile.objects.create(user=request.user, role='EMPLOYEE', approval_status='APPROVED')
 
-            user_role = request.user.profile.role
+            profile = request.user.profile
+            if not request.user.is_active or profile.approval_status != 'APPROVED':
+                logout(request)
+                if request.path.startswith('/api/'):
+                    return JsonResponse({
+                        "success": False,
+                        "message": "Your account is not approved or is inactive."
+                    }, status=403)
 
-            # Role not allowed → block access
+                messages.error(request, "Your account is awaiting Admin approval or is inactive.")
+                return redirect('dashboard_login')
+
+            user_role = profile.role
             if user_role not in allowed_roles:
-                # For API calls return JSON error
-                if request.path_info.startswith('/api/'):
+                if request.path.startswith('/api/'):
                     return JsonResponse({
                         "success": False,
                         "message": "You do not have permission to perform this action."
                     }, status=403)
 
-                # For normal pages → redirect with message
                 messages.error(request, "You do not have permission to access this page.")
                 return redirect('upload_dashboard')
 
             return view_func(request, *args, **kwargs)
         return wrapper
     return decorator
+
 
 def normalize_audit_action(action):
     """Map free-form action labels to AuditLog choices."""
@@ -256,7 +260,7 @@ def annual_reports_api(request):
     reports = AnnualReport.objects.filter(
         published=True
     ).order_by(
-        "-display_order"
+        "-updated_at", "-created_at", "-id"
     )
 
     data = []
@@ -279,6 +283,7 @@ def annual_reports_api(request):
 
     return JsonResponse(data, safe=False)
 
+
 # ============================================================
 # FINANCIAL RESULTS API
 # ============================================================
@@ -288,7 +293,7 @@ def financial_results_api(request):
     results = FinancialResult.objects.filter(
         published=True
     ).order_by(
-        "-display_order"
+        "-updated_at", "-created_at", "-id"
     )
 
     data = []
@@ -323,7 +328,7 @@ def annual_returns_api(request):
     returns = AnnualReturn.objects.filter(
         published=True
     ).order_by(
-        "-display_order"
+        "-updated_at", "-created_at", "-id"
     )
 
     data = []
@@ -358,7 +363,7 @@ def shareholder_notices_api(request):
     notices = ShareholderNotice.objects.filter(
         published=True
     ).order_by(
-        "-display_order"
+        "-updated_at", "-created_at", "-id"
     )
 
     data = []
@@ -403,7 +408,7 @@ def newspaper_publications_api(request):
     publications = NewspaperPublication.objects.filter(
         published=True
     ).order_by(
-        "-display_order"
+        "-updated_at", "-created_at", "-id"
     )
 
     data = []
@@ -442,7 +447,7 @@ def stock_exchange_disclosures_api(request):
     disclosures = StockExchangeDisclosure.objects.filter(
         published=True
     ).order_by(
-        "-display_order"
+        "-updated_at", "-created_at", "-id"
     )
 
     data = []
@@ -481,7 +486,7 @@ def corporate_governance_api(request):
     documents = CorporateGovernance.objects.filter(
         published=True
     ).order_by(
-        "-display_order"
+        "-updated_at", "-created_at", "-id"
     )
 
     data = []
@@ -516,7 +521,7 @@ def shareholding_pattern_api(request):
     documents = ShareholdingPattern.objects.filter(
         published=True
     ).order_by(
-        "-display_order"
+        "-updated_at", "-created_at", "-id"
     )
 
     data = []
@@ -551,7 +556,7 @@ def sebi_documents_api(request):
     documents = SEBIDocument.objects.filter(
         published=True
     ).order_by(
-        "-display_order"
+        "-updated_at", "-created_at", "-id"
     )
 
     data = []
@@ -585,7 +590,7 @@ def investor_forms_api(request):
     forms = InvestorForm.objects.filter(
         published=True
     ).order_by(
-        "-display_order"
+        "-updated_at", "-created_at", "-id"
     )
 
     data = []
@@ -620,7 +625,7 @@ def tax_declarations_api(request):
     declarations = TaxDeclaration.objects.filter(
         published=True
     ).order_by(
-        "-display_order"
+        "-updated_at", "-created_at", "-id"
     )
 
     data = []
@@ -655,7 +660,7 @@ def unclaimed_dividends_api(request):
     dividends = UnclaimedDividend.objects.filter(
         published=True
     ).order_by(
-        "-display_order"
+        "-updated_at", "-created_at", "-id"
     )
 
     data = []
@@ -704,7 +709,7 @@ def subsidiary_financials_api(request):
     financials = SubsidiaryFinancial.objects.filter(
         published=True
     ).order_by(
-        "-display_order"
+        "-updated_at", "-created_at", "-id"
     )
 
     data = []
@@ -764,6 +769,8 @@ def _public_document(request, obj, bucket=""):
         "description": getattr(obj, "description", "") or "",
         "applicable_to": getattr(obj, "applicable_to", "") or "",
         "dividend_type": getattr(obj, "dividend_type", "") or "",
+        "dividend_declaration_date": _public_date(getattr(obj, "dividend_declaration_date", None)),
+        "iepf_transfer_due_date": _public_date(getattr(obj, "iepf_transfer_due_date", None)),
         "release_date": _public_date(getattr(obj, "release_date", None)),
         "disclosure_date": _public_date(getattr(obj, "disclosure_date", None)),
         "meeting_date": _public_date(getattr(obj, "meeting_date", None)),
@@ -775,7 +782,7 @@ def _public_document(request, obj, bucket=""):
 
 
 def _published(model):
-    return model.objects.filter(published=True).order_by("-display_order", "-id")
+    return model.objects.filter(published=True).order_by("-updated_at", "-created_at", "-id")
 
 
 @never_cache
@@ -939,7 +946,7 @@ def public_investor_documents(request):
         docs = CustomDocument.objects.filter(
             section=section,
             published=True,
-        ).order_by("-display_order", "-id")
+        ).order_by("-updated_at", "-created_at", "-id")
         add_section(
             f"custom_{section.id}",
             section.name,
@@ -1048,21 +1055,13 @@ def dashboard_statistics_api(request):
     # --------------------------------------------------------
     section_counts = {
         "annual_report": annual_report,
-
         "financial_result": financial_result,
-
         "annual_return": annual_return,
-
         "corporate_announcements": corporate_announcements,
-
         "corporate_governance": corporate_governance,
-
         "shareholding_pattern": shareholding_pattern,
-
         "sebi_document": sebi_document,
-
         "investor_form": investor_forms_declaration,
-
         "subsidiary_financial": subsidiary_financial,
     }
 
@@ -1083,77 +1082,22 @@ def dashboard_statistics_api(request):
             "is_system": False,
         })
 
-    # --------------------------------------------------------
-    # TOTAL DOCUMENTS
-    # --------------------------------------------------------
     total_documents = sum(section_counts.values())
 
-    # --------------------------------------------------------
-    # RETURN RESPONSE
-    #
-    # section_counts = system + custom section counts
-    # custom_sections = list for frontend dynamic cards
-    # child_counts   = individual child/subsection counts
-    # --------------------------------------------------------
     return JsonResponse({
         "total_documents": total_documents,
-
         "section_counts": section_counts,
-
         "custom_sections": custom_sections_payload,
-
         "child_counts": {
             "shareholder_notice": shareholder_notice,
             "newspaper_publication": newspaper_publication,
             "stock_exchange_disclosure": stock_exchange_disclosure,
-
             "kyc_nomination": kyc_nomination,
             "tax_declaration": tax_declaration,
             "unclaimed_dividend": unclaimed_dividend,
         }
     })
 
-    # Raw counts from each model
-    annual_report          = AnnualReport.objects.count()
-    financial_result       = FinancialResult.objects.count()
-    annual_return          = AnnualReturn.objects.count()
-    corporate_governance   = CorporateGovernance.objects.count()
-    shareholding_pattern   = ShareholdingPattern.objects.count()
-    sebi_document          = SEBIDocument.objects.count()
-    subsidiary_financial   = SubsidiaryFinancial.objects.count()
-
-    # Corporate Announcements = 3 child models
-    corporate_announcements = (
-        ShareholderNotice.objects.count() +
-        NewspaperPublication.objects.count() +
-        StockExchangeDisclosure.objects.count()
-    )
-
-    # Investor Forms & Declaration = InvestorForm + TaxDeclaration + UnclaimedDividend
-    investor_form = (
-        InvestorForm.objects.count() +
-        TaxDeclaration.objects.count() +
-        UnclaimedDividend.objects.count()
-    )
-
-    section_counts = {
-        "annual_report":            annual_report,
-        "financial_result":         financial_result,
-        "annual_return":            annual_return,
-        "corporate_announcements":  corporate_announcements,
-        "corporate_governance":     corporate_governance,
-        "shareholding_pattern":     shareholding_pattern,
-        "sebi_document":            sebi_document,
-        "investor_form":            investor_form,
-        "subsidiary_financial":     subsidiary_financial,
-    }
-
-    total_documents = sum(section_counts.values())
-
-    return JsonResponse({
-        "total_documents": total_documents,
-        "section_counts": section_counts,
-    })
 
 # ============================================================
 # EDIT DOCUMENT - GET DOCUMENT DATA
@@ -1183,101 +1127,43 @@ def edit_investor_document(request, document_id, section):
         )
 
     try:
-
-        # ====================================================
-        # ANNUAL REPORT
-        # ====================================================
-
         if section == "annual_report":
-
-            obj = AnnualReport.objects.get(
-                id=document_id
-            )
-
+            obj = AnnualReport.objects.get(id=document_id)
             data = {
                 "id": obj.id,
                 "section": "annual_report",
                 "title": obj.title,
                 "financial_year": obj.financial_year,
                 "external_url": obj.external_url,
-                "pdf_file": (
-                    request.build_absolute_uri(
-                        obj.pdf_file.url
-                    )
-                    if obj.pdf_file
-                    else None
-                ),
+                "pdf_file": request.build_absolute_uri(obj.pdf_file.url) if obj.pdf_file else None,
             }
 
-
-        # ====================================================
-        # FINANCIAL RESULTS
-        # ====================================================
-
         elif section == "financial_result":
-
-            obj = FinancialResult.objects.get(
-                id=document_id
-            )
-
+            obj = FinancialResult.objects.get(id=document_id)
             data = {
                 "id": obj.id,
                 "section": "financial_result",
                 "title": obj.title,
                 "financial_year": obj.financial_year,
                 "quarter": obj.quarter,
-                "release_date": (
-                    obj.release_date.strftime("%Y-%m-%d")
-                    if obj.release_date
-                    else None
-                ),
+                "release_date": obj.release_date.strftime("%Y-%m-%d") if obj.release_date else None,
                 "external_url": obj.external_url,
-                "pdf_file": (
-                    request.build_absolute_uri(
-                        obj.pdf_file.url
-                    )
-                    if obj.pdf_file
-                    else None
-                ),
+                "pdf_file": request.build_absolute_uri(obj.pdf_file.url) if obj.pdf_file else None,
             }
 
-
-        # ====================================================
-        # ANNUAL RETURNS
-        # ====================================================
-
         elif section == "annual_return":
-
-            obj = AnnualReturn.objects.get(
-                id=document_id
-            )
-
+            obj = AnnualReturn.objects.get(id=document_id)
             data = {
                 "id": obj.id,
                 "section": "annual_return",
                 "title": obj.title,
                 "financial_year": obj.financial_year,
                 "external_url": obj.external_url,
-                "pdf_file": (
-                    request.build_absolute_uri(
-                        obj.pdf_file.url
-                    )
-                    if obj.pdf_file
-                    else None
-                ),
+                "pdf_file": request.build_absolute_uri(obj.pdf_file.url) if obj.pdf_file else None,
             }
 
-
-        # ====================================================
-        # CORPORATE GOVERNANCE
-        # ====================================================
-
         elif section == "corporate_governance":
-
-            obj = CorporateGovernance.objects.get(
-                id=document_id
-            )
-
+            obj = CorporateGovernance.objects.get(id=document_id)
             data = {
                 "id": obj.id,
                 "section": "corporate_governance",
@@ -1285,26 +1171,11 @@ def edit_investor_document(request, document_id, section):
                 "financial_year": obj.financial_year,
                 "quarter": obj.quarter,
                 "external_url": obj.external_url,
-                "pdf_file": (
-                    request.build_absolute_uri(
-                        obj.pdf_file.url
-                    )
-                    if obj.pdf_file
-                    else None
-                ),
+                "pdf_file": request.build_absolute_uri(obj.pdf_file.url) if obj.pdf_file else None,
             }
 
-
-        # ====================================================
-        # SHAREHOLDING PATTERN
-        # ====================================================
-
         elif section == "shareholding_pattern":
-
-            obj = ShareholdingPattern.objects.get(
-                id=document_id
-            )
-
+            obj = ShareholdingPattern.objects.get(id=document_id)
             data = {
                 "id": obj.id,
                 "section": "shareholding_pattern",
@@ -1312,151 +1183,60 @@ def edit_investor_document(request, document_id, section):
                 "financial_year": obj.financial_year,
                 "quarter": obj.quarter,
                 "external_url": obj.external_url,
-                "pdf_file": (
-                    request.build_absolute_uri(
-                        obj.pdf_file.url
-                    )
-                    if obj.pdf_file
-                    else None
-                ),
+                "pdf_file": request.build_absolute_uri(obj.pdf_file.url) if obj.pdf_file else None,
             }
 
-
-        # ====================================================
-        # SHAREHOLDER NOTICE
-        # ====================================================
-
         elif section == "shareholder_notice":
-
-            obj = ShareholderNotice.objects.get(
-                id=document_id
-            )
-
+            obj = ShareholderNotice.objects.get(id=document_id)
             data = {
                 "id": obj.id,
                 "section": "shareholder_notice",
                 "title": obj.title,
                 "financial_year": obj.financial_year,
                 "notice_type": obj.notice_type,
-                "disclosure_date": (
-                    obj.disclosure_date.strftime("%Y-%m-%d")
-                    if obj.disclosure_date
-                    else None
-                ),
-                "meeting_date": (
-                    obj.meeting_date.strftime("%Y-%m-%d")
-                    if obj.meeting_date
-                    else None
-                ),
+                "disclosure_date": obj.disclosure_date.strftime("%Y-%m-%d") if obj.disclosure_date else None,
+                "meeting_date": obj.meeting_date.strftime("%Y-%m-%d") if obj.meeting_date else None,
                 "external_url": obj.external_url,
-                "pdf_file": (
-                    request.build_absolute_uri(
-                        obj.pdf_file.url
-                    )
-                    if obj.pdf_file
-                    else None
-                ),
+                "pdf_file": request.build_absolute_uri(obj.pdf_file.url) if obj.pdf_file else None,
             }
 
-
-        # ====================================================
-        # NEWSPAPER PUBLICATION
-        # ====================================================
-
         elif section == "newspaper_publication":
-
-            obj = NewspaperPublication.objects.get(
-                id=document_id
-            )
-
+            obj = NewspaperPublication.objects.get(id=document_id)
             data = {
                 "id": obj.id,
                 "section": "newspaper_publication",
                 "title": obj.title,
                 "financial_year": obj.financial_year,
-                "disclosure_date": (
-                    obj.disclosure_date.strftime("%Y-%m-%d")
-                    if obj.disclosure_date
-                    else None
-                ),
+                "disclosure_date": obj.disclosure_date.strftime("%Y-%m-%d") if obj.disclosure_date else None,
                 "external_url": obj.external_url,
-                "pdf_file": (
-                    request.build_absolute_uri(
-                        obj.pdf_file.url
-                    )
-                    if obj.pdf_file
-                    else None
-                ),
+                "pdf_file": request.build_absolute_uri(obj.pdf_file.url) if obj.pdf_file else None,
             }
 
-
-        # ====================================================
-        # STOCK EXCHANGE DISCLOSURE
-        # ====================================================
-
         elif section == "stock_exchange_disclosure":
-
-            obj = StockExchangeDisclosure.objects.get(
-                id=document_id
-            )
-
+            obj = StockExchangeDisclosure.objects.get(id=document_id)
             data = {
                 "id": obj.id,
                 "section": "stock_exchange_disclosure",
                 "title": obj.title,
                 "financial_year": obj.financial_year,
-                "disclosure_date": (
-                    obj.disclosure_date.strftime("%Y-%m-%d")
-                    if obj.disclosure_date
-                    else None
-                ),
+                "disclosure_date": obj.disclosure_date.strftime("%Y-%m-%d") if obj.disclosure_date else None,
                 "external_url": obj.external_url,
-                "pdf_file": (
-                    request.build_absolute_uri(
-                        obj.pdf_file.url
-                    )
-                    if obj.pdf_file
-                    else None
-                ),
+                "pdf_file": request.build_absolute_uri(obj.pdf_file.url) if obj.pdf_file else None,
             }
 
-
-        # ====================================================
-        # SEBI DOCUMENT
-        # ====================================================
-
         elif section == "sebi_document":
-
-            obj = SEBIDocument.objects.get(
-                id=document_id
-            )
-
+            obj = SEBIDocument.objects.get(id=document_id)
             data = {
                 "id": obj.id,
                 "section": "sebi_document",
                 "title": obj.title,
                 "category": obj.category,
                 "external_url": obj.external_url,
-                "pdf_file": (
-                    request.build_absolute_uri(
-                        obj.pdf_file.url
-                    )
-                    if obj.pdf_file
-                    else None
-                ),
+                "pdf_file": request.build_absolute_uri(obj.pdf_file.url) if obj.pdf_file else None,
             }
 
-
-        # ====================================================
-        # INVESTOR FORM
-        # ====================================================
-
         elif section == "investor_form":
-
-            obj = InvestorForm.objects.get(
-                id=document_id
-            )
-
+            obj = InvestorForm.objects.get(id=document_id)
             data = {
                 "id": obj.id,
                 "section": "investor_form",
@@ -1464,26 +1244,11 @@ def edit_investor_document(request, document_id, section):
                 "category": obj.category,
                 "description": obj.description,
                 "external_url": obj.external_url,
-                "pdf_file": (
-                    request.build_absolute_uri(
-                        obj.pdf_file.url
-                    )
-                    if obj.pdf_file
-                    else None
-                ),
+                "pdf_file": request.build_absolute_uri(obj.pdf_file.url) if obj.pdf_file else None,
             }
 
-
-        # ====================================================
-        # TAX DECLARATION
-        # ====================================================
-
         elif section == "tax_declaration":
-
-            obj = TaxDeclaration.objects.get(
-                id=document_id
-            )
-
+            obj = TaxDeclaration.objects.get(id=document_id)
             data = {
                 "id": obj.id,
                 "section": "tax_declaration",
@@ -1491,63 +1256,25 @@ def edit_investor_document(request, document_id, section):
                 "applicable_to": obj.applicable_to,
                 "description": obj.description,
                 "external_url": obj.external_url,
-                "pdf_file": (
-                    request.build_absolute_uri(
-                        obj.pdf_file.url
-                    )
-                    if obj.pdf_file
-                    else None
-                ),
+                "pdf_file": request.build_absolute_uri(obj.pdf_file.url) if obj.pdf_file else None,
             }
 
-
-        # ====================================================
-        # UNCLAIMED DIVIDEND
-        # ====================================================
-
         elif section == "unclaimed_dividend":
-
-            obj = UnclaimedDividend.objects.get(
-                id=document_id
-            )
-
+            obj = UnclaimedDividend.objects.get(id=document_id)
             data = {
                 "id": obj.id,
                 "section": "unclaimed_dividend",
                 "title": obj.title,
                 "financial_year": obj.financial_year,
-                "dividend_declaration_date": (
-                    obj.dividend_declaration_date.strftime("%Y-%m-%d")
-                    if obj.dividend_declaration_date
-                    else None
-                ),
+                "dividend_declaration_date": obj.dividend_declaration_date.strftime("%Y-%m-%d") if obj.dividend_declaration_date else None,
                 "dividend_type": obj.dividend_type,
-                "iepf_transfer_due_date": (
-                    obj.iepf_transfer_due_date.strftime("%Y-%m-%d")
-                    if obj.iepf_transfer_due_date
-                    else None
-                ),
+                "iepf_transfer_due_date": obj.iepf_transfer_due_date.strftime("%Y-%m-%d") if obj.iepf_transfer_due_date else None,
                 "external_url": obj.external_url,
-                "pdf_file": (
-                    request.build_absolute_uri(
-                        obj.pdf_file.url
-                    )
-                    if obj.pdf_file
-                    else None
-                ),
+                "pdf_file": request.build_absolute_uri(obj.pdf_file.url) if obj.pdf_file else None,
             }
 
-
-        # ====================================================
-        # SUBSIDIARY FINANCIAL
-        # ====================================================
-
         elif section == "subsidiary_financial":
-
-            obj = SubsidiaryFinancial.objects.get(
-                id=document_id
-            )
-
+            obj = SubsidiaryFinancial.objects.get(id=document_id)
             data = {
                 "id": obj.id,
                 "section": "subsidiary_financial",
@@ -1556,22 +1283,10 @@ def edit_investor_document(request, document_id, section):
                 "company_name": obj.company_name,
                 "financial_type": obj.financial_type,
                 "external_url": obj.external_url,
-                "pdf_file": (
-                    request.build_absolute_uri(
-                        obj.pdf_file.url
-                    )
-                    if obj.pdf_file
-                    else None
-                ),
+                "pdf_file": request.build_absolute_uri(obj.pdf_file.url) if obj.pdf_file else None,
             }
 
-
-        # ====================================================
-        # CUSTOM SECTION DOCUMENT
-        # ====================================================
-
         elif str(section).startswith("custom_"):
-
             try:
                 section_pk = int(str(section).split("_", 1)[1])
             except (TypeError, ValueError):
@@ -1584,39 +1299,23 @@ def edit_investor_document(request, document_id, section):
                 id=document_id,
                 section_id=section_pk,
             )
-
             data = {
                 "id": obj.id,
                 "section": section,
                 "title": obj.title,
                 "extra_info": obj.extra_info,
                 "external_url": obj.external_url,
-                "pdf_file": (
-                    request.build_absolute_uri(obj.pdf_file.url)
-                    if obj.pdf_file
-                    else None
-                ),
+                "pdf_file": request.build_absolute_uri(obj.pdf_file.url) if obj.pdf_file else None,
             }
 
-
         else:
-
             return JsonResponse(
-                {
-                    "success": False,
-                    "message": "Invalid document section."
-                },
-                status=400
+                {"success": False, "message": "Invalid document section."},
+                status=400,
             )
 
-
         data["published"] = bool(obj.published)
-
-        return JsonResponse({
-            "success": True,
-            "document": data
-        })
-
+        return JsonResponse({"success": True, "document": data})
 
     except (
         AnnualReport.DoesNotExist,
@@ -1634,15 +1333,7 @@ def edit_investor_document(request, document_id, section):
         SubsidiaryFinancial.DoesNotExist,
         CustomDocument.DoesNotExist,
     ):
-
-        return JsonResponse(
-            {
-                "success": False,
-                "message": "Document not found."
-            },
-            status=404
-        )
-
+        return JsonResponse({"success": False, "message": "Document not found."}, status=404)
 
 
 @login_required(login_url="dashboard_login")
@@ -1665,8 +1356,6 @@ def update_investor_document(request):
     pdf_file    = request.FILES.get("pdf_file")
     external_url = request.POST.get("external_url", "").strip() or None
 
-    # An untouched file input is submitted as an empty part. Ignore it so the
-    # current PDF stays in place and the rest of the form can still save.
     if pdf_file is not None and (
         not (getattr(pdf_file, "name", "") or "").strip() or pdf_file.size == 0
     ):
@@ -1724,16 +1413,12 @@ def update_investor_document(request):
             old_snapshot = snapshot_document(document)
             return document
 
-        # -------------------------------------------------------
-        # Helper to update common fields
-        # -------------------------------------------------------
         def update_common(document):
             document.title = title
             document.external_url = external_url
             if pdf_file:
                 document.pdf_file = pdf_file
 
-            # Update publish status if sent
             published_raw = request.POST.get("published")
             if published_raw is not None:
                 document.published = str(published_raw).strip().lower() in ("true", "1", "yes", "on")
@@ -1741,26 +1426,20 @@ def update_investor_document(request):
             with pdf_upload_user(upload_username):
                 document.save()
 
-        def set_text(obj, field):
+        def set_text(target, field):
             if field in request.POST:
-                setattr(obj, field, (request.POST.get(field) or "").strip())
+                setattr(target, field, (request.POST.get(field) or "").strip())
 
-        def set_date(obj, field):
+        def set_date(target, field):
             if field in request.POST:
                 raw = (request.POST.get(field) or "").strip()
-                setattr(obj, field, raw or None)
+                setattr(target, field, raw or None)
 
-        # -------------------------------------------------------
-        # ANNUAL REPORT
-        # -------------------------------------------------------
         if section == "annual_report":
             obj = begin_update(AnnualReport)
             set_text(obj, "financial_year")
             update_common(obj)
 
-        # -------------------------------------------------------
-        # FINANCIAL RESULT
-        # -------------------------------------------------------
         elif section == "financial_result":
             obj = begin_update(FinancialResult)
             set_text(obj, "financial_year")
@@ -1778,35 +1457,23 @@ def update_investor_document(request):
                 )
             update_common(obj)
 
-        # -------------------------------------------------------
-        # ANNUAL RETURN
-        # -------------------------------------------------------
         elif section == "annual_return":
             obj = begin_update(AnnualReturn)
             set_text(obj, "financial_year")
             update_common(obj)
 
-        # -------------------------------------------------------
-        # CORPORATE GOVERNANCE
-        # -------------------------------------------------------
         elif section == "corporate_governance":
             obj = begin_update(CorporateGovernance)
             set_text(obj, "financial_year")
             set_text(obj, "quarter")
             update_common(obj)
 
-        # -------------------------------------------------------
-        # SHAREHOLDING PATTERN
-        # -------------------------------------------------------
         elif section == "shareholding_pattern":
             obj = begin_update(ShareholdingPattern)
             set_text(obj, "financial_year")
             set_text(obj, "quarter")
             update_common(obj)
 
-        # -------------------------------------------------------
-        # SHAREHOLDER NOTICE
-        # -------------------------------------------------------
         elif section == "shareholder_notice":
             obj = begin_update(ShareholderNotice)
             set_text(obj, "financial_year")
@@ -1815,53 +1482,35 @@ def update_investor_document(request):
             set_date(obj, "meeting_date")
             update_common(obj)
 
-        # -------------------------------------------------------
-        # NEWSPAPER PUBLICATION
-        # -------------------------------------------------------
         elif section == "newspaper_publication":
             obj = begin_update(NewspaperPublication)
             set_text(obj, "financial_year")
             set_date(obj, "disclosure_date")
             update_common(obj)
 
-        # -------------------------------------------------------
-        # STOCK EXCHANGE DISCLOSURE
-        # -------------------------------------------------------
         elif section == "stock_exchange_disclosure":
             obj = begin_update(StockExchangeDisclosure)
             set_text(obj, "financial_year")
             set_date(obj, "disclosure_date")
             update_common(obj)
 
-        # -------------------------------------------------------
-        # SEBI DOCUMENT
-        # -------------------------------------------------------
         elif section == "sebi_document":
             obj = begin_update(SEBIDocument)
             set_text(obj, "category")
             update_common(obj)
 
-        # -------------------------------------------------------
-        # INVESTOR FORM
-        # -------------------------------------------------------
         elif section == "investor_form":
             obj = begin_update(InvestorForm)
             set_text(obj, "category")
             set_text(obj, "description")
             update_common(obj)
 
-        # -------------------------------------------------------
-        # TAX DECLARATION
-        # -------------------------------------------------------
         elif section == "tax_declaration":
             obj = begin_update(TaxDeclaration)
             set_text(obj, "applicable_to")
             set_text(obj, "description")
             update_common(obj)
 
-        # -------------------------------------------------------
-        # UNCLAIMED DIVIDEND
-        # -------------------------------------------------------
         elif section == "unclaimed_dividend":
             obj = begin_update(UnclaimedDividend)
             set_text(obj, "financial_year")
@@ -1870,9 +1519,6 @@ def update_investor_document(request):
             set_date(obj, "iepf_transfer_due_date")
             update_common(obj)
 
-        # -------------------------------------------------------
-        # SUBSIDIARY FINANCIAL
-        # -------------------------------------------------------
         elif section == "subsidiary_financial":
             obj = begin_update(SubsidiaryFinancial)
             set_text(obj, "financial_year")
@@ -1880,9 +1526,6 @@ def update_investor_document(request):
             set_text(obj, "financial_type")
             update_common(obj)
 
-        # -------------------------------------------------------
-        # CUSTOM SECTION (custom_<section id>)
-        # -------------------------------------------------------
         elif str(section).startswith("custom_"):
             try:
                 section_pk = int(str(section).split("_", 1)[1])
@@ -1949,7 +1592,8 @@ def update_investor_document(request):
             {"success": False, "message": f"Update failed: {str(e)}"},
             status=500
         )
-    
+
+
 # ============================================================
 # DASHBOARD DOCUMENTS API
 # ============================================================
@@ -1961,10 +1605,7 @@ def dashboard_documents_api(request):
 
     documents = []
 
-    # --------------------------------------------------------
-    # 1. Annual Report
-    # --------------------------------------------------------
-    for obj in AnnualReport.objects.all().order_by("-display_order"):
+    for obj in AnnualReport.objects.all().order_by("-updated_at", "-created_at", "-id"):
         documents.append({
             "id": obj.id,
             "section": "annual_report",
@@ -1979,10 +1620,7 @@ def dashboard_documents_api(request):
             "external_url": obj.external_url,
         })
 
-    # --------------------------------------------------------
-    # 2. Financial Results
-    # --------------------------------------------------------
-    for obj in FinancialResult.objects.all().order_by("-display_order"):
+    for obj in FinancialResult.objects.all().order_by("-updated_at", "-created_at", "-id"):
         documents.append({
             "id": obj.id,
             "section": "financial_result",
@@ -1999,10 +1637,7 @@ def dashboard_documents_api(request):
             "external_url": obj.external_url,
         })
 
-    # --------------------------------------------------------
-    # 3. Annual Returns
-    # --------------------------------------------------------
-    for obj in AnnualReturn.objects.all().order_by("-display_order"):
+    for obj in AnnualReturn.objects.all().order_by("-updated_at", "-created_at", "-id"):
         documents.append({
             "id": obj.id,
             "section": "annual_return",
@@ -2017,13 +1652,10 @@ def dashboard_documents_api(request):
             "external_url": obj.external_url,
         })
 
-    # --------------------------------------------------------
-    # 4a. Corporate Announcements → Shareholder Notice
-    # --------------------------------------------------------
-    for obj in ShareholderNotice.objects.all().order_by("-display_order"):
+    for obj in ShareholderNotice.objects.all().order_by("-updated_at", "-created_at", "-id"):
         documents.append({
             "id": obj.id,
-            "section": "shareholder_notice",          # child key
+            "section": "shareholder_notice",
             "parent_section": "corporate_announcements",
             "title": obj.title,
             "financial_year": obj.financial_year,
@@ -2039,10 +1671,7 @@ def dashboard_documents_api(request):
             "external_url": obj.external_url,
         })
 
-    # --------------------------------------------------------
-    # 4b. Corporate Announcements → Newspaper Publication
-    # --------------------------------------------------------
-    for obj in NewspaperPublication.objects.all().order_by("-display_order"):
+    for obj in NewspaperPublication.objects.all().order_by("-updated_at", "-created_at", "-id"):
         documents.append({
             "id": obj.id,
             "section": "newspaper_publication",
@@ -2059,10 +1688,7 @@ def dashboard_documents_api(request):
             "external_url": obj.external_url,
         })
 
-    # --------------------------------------------------------
-    # 4c. Corporate Announcements → Stock Exchange Disclosure
-    # --------------------------------------------------------
-    for obj in StockExchangeDisclosure.objects.all().order_by("-display_order"):
+    for obj in StockExchangeDisclosure.objects.all().order_by("-updated_at", "-created_at", "-id"):
         documents.append({
             "id": obj.id,
             "section": "stock_exchange_disclosure",
@@ -2079,10 +1705,7 @@ def dashboard_documents_api(request):
             "external_url": obj.external_url,
         })
 
-    # --------------------------------------------------------
-    # 5. Corporate Governance
-    # --------------------------------------------------------
-    for obj in CorporateGovernance.objects.all().order_by("-display_order"):
+    for obj in CorporateGovernance.objects.all().order_by("-updated_at", "-created_at", "-id"):
         documents.append({
             "id": obj.id,
             "section": "corporate_governance",
@@ -2098,10 +1721,7 @@ def dashboard_documents_api(request):
             "external_url": obj.external_url,
         })
 
-    # --------------------------------------------------------
-    # 6. Shareholding Pattern
-    # --------------------------------------------------------
-    for obj in ShareholdingPattern.objects.all().order_by("-display_order"):
+    for obj in ShareholdingPattern.objects.all().order_by("-updated_at", "-created_at", "-id"):
         documents.append({
             "id": obj.id,
             "section": "shareholding_pattern",
@@ -2117,10 +1737,7 @@ def dashboard_documents_api(request):
             "external_url": obj.external_url,
         })
 
-    # --------------------------------------------------------
-    # 7. SEBI Documents
-    # --------------------------------------------------------
-    for obj in SEBIDocument.objects.all().order_by("-display_order"):
+    for obj in SEBIDocument.objects.all().order_by("-updated_at", "-created_at", "-id"):
         documents.append({
             "id": obj.id,
             "section": "sebi_document",
@@ -2135,10 +1752,7 @@ def dashboard_documents_api(request):
             "external_url": obj.external_url,
         })
 
-    # --------------------------------------------------------
-    # 8a. Investor Forms
-    # --------------------------------------------------------
-    for obj in InvestorForm.objects.all().order_by("-display_order"):
+    for obj in InvestorForm.objects.all().order_by("-updated_at", "-created_at", "-id"):
         documents.append({
             "id": obj.id,
             "section": "investor_form",
@@ -2154,10 +1768,7 @@ def dashboard_documents_api(request):
             "external_url": obj.external_url,
         })
 
-    # --------------------------------------------------------
-    # 8b. Tax Declarations (still under Investor Forms group)
-    # --------------------------------------------------------
-    for obj in TaxDeclaration.objects.all().order_by("-display_order"):
+    for obj in TaxDeclaration.objects.all().order_by("-updated_at", "-created_at", "-id"):
         documents.append({
             "id": obj.id,
             "section": "tax_declaration",
@@ -2174,10 +1785,7 @@ def dashboard_documents_api(request):
             "external_url": obj.external_url,
         })
 
-    # --------------------------------------------------------
-    # 8c. Unclaimed Dividends (still under Investor Forms group)
-    # --------------------------------------------------------
-    for obj in UnclaimedDividend.objects.all().order_by("-display_order"):
+    for obj in UnclaimedDividend.objects.all().order_by("-updated_at", "-created_at", "-id"):
         documents.append({
             "id": obj.id,
             "section": "unclaimed_dividend",
@@ -2196,10 +1804,7 @@ def dashboard_documents_api(request):
             "external_url": obj.external_url,
         })
 
-    # --------------------------------------------------------
-    # 9. Subsidiary Financial
-    # --------------------------------------------------------
-    for obj in SubsidiaryFinancial.objects.all().order_by("-display_order"):
+    for obj in SubsidiaryFinancial.objects.all().order_by("-updated_at", "-created_at", "-id"):
         documents.append({
             "id": obj.id,
             "section": "subsidiary_financial",
@@ -2216,10 +1821,7 @@ def dashboard_documents_api(request):
             "external_url": obj.external_url,
         })
 
-    # --------------------------------------------------------
-    # Custom sections (created via Sections CRUD)
-    # --------------------------------------------------------
-    for obj in CustomDocument.objects.select_related("section", "subsection").all().order_by("-display_order"):
+    for obj in CustomDocument.objects.select_related("section", "subsection").all().order_by("-updated_at", "-created_at", "-id"):
         documents.append({
             "id": obj.id,
             "section": f"custom_{obj.section_id}",
@@ -2239,6 +1841,7 @@ def dashboard_documents_api(request):
         })
 
     return JsonResponse(documents, safe=False)
+
 
 # ============================================================
 # INVESTORS PAGE (public)
@@ -2261,20 +1864,22 @@ def upload_dashboard(request):
     and the logged-in user name in the header.
     """
 
-    # Safety: ensure profile exists
     if not hasattr(request.user, 'profile'):
-        Profile.objects.create(user=request.user, role='EMPLOYEE')
+        Profile.objects.create(user=request.user, role='EMPLOYEE', approval_status='APPROVED')
 
-    role = request.user.profile.role
+    profile = request.user.profile
+    if not request.user.is_active or profile.approval_status != 'APPROVED':
+        logout(request)
+        messages.error(request, "Your account is awaiting Admin approval or is inactive.")
+        return redirect("dashboard_login")
 
-    # Client must not access dashboard
+    role = profile.role
+
     if role == 'CLIENT':
         return redirect('https://www.nibelimited.com')
 
-    # Display name for header
     full_name = request.user.get_full_name().strip()
     display_name = full_name if full_name else request.user.username
-    # Avatar initials (max 2 chars)
     if full_name:
         parts = full_name.split()
         initials = (parts[0][0] + (parts[-1][0] if len(parts) > 1 else "")).upper()
@@ -2290,15 +1895,14 @@ def upload_dashboard(request):
         "username": request.user.username,
     })
 
+
 # ============================================================
 # DASHBOARD LOGOUT
 # ============================================================
 
 @login_required(login_url="dashboard_login")
 def dashboard_logout(request):
-
     logout(request)
-
     return redirect("dashboard_login")
 
 
@@ -2322,7 +1926,6 @@ def upload_investor_document(request):
     pdf_file     = request.FILES.get("pdf_file")
     external_url = request.POST.get("external_url", "").strip() or None
 
-    # Publish status from radio button (default = Published)
     published_raw = request.POST.get("published", "true").strip().lower()
     is_published = published_raw in ("true", "1", "yes", "on")
 
@@ -2344,11 +1947,6 @@ def upload_investor_document(request):
             status=400
         )
 
-    # ========================================================
-    # FILE VALIDATION + DUPLICATE PREVENTION
-    # ========================================================
-
-    # 1. File type validation (only PDF)
     if pdf_file:
         file_name = pdf_file.name.lower()
         if not file_name.endswith(".pdf"):
@@ -2364,41 +1962,13 @@ def upload_investor_document(request):
                 status=400
             )
 
-        # 2. File size validation (max 50 MB)
-        max_size = 50 * 1024 * 1024  # 50 MB
+        max_size = 50 * 1024 * 1024
         if pdf_file.size > max_size:
             return JsonResponse(
                 {"success": False, "message": "File size must be less than 50 MB."},
                 status=400
             )
 
-    # 3. Duplicate title prevention (same title in same section)
-    model_map = {
-        "annual_report": AnnualReport,
-        "financial_result": FinancialResult,
-        "annual_return": AnnualReturn,
-        "corporate_governance": CorporateGovernance,
-        "shareholding_pattern": ShareholdingPattern,
-        "shareholder_notice": ShareholderNotice,
-        "newspaper_publication": NewspaperPublication,
-        "stock_exchange_disclosure": StockExchangeDisclosure,
-        "sebi_document": SEBIDocument,
-        "investor_form": InvestorForm,
-        "tax_declaration": TaxDeclaration,
-        "unclaimed_dividend": UnclaimedDividend,
-        "subsidiary_financial": SubsidiaryFinancial,
-    }
-
-    check_section = section
-    if section == "corporate_announcements" and subsection:
-        check_section = subsection
-
-   
-
-    # -------------------------------------------------------
-    # Map the new hierarchy (section + subsection) back to
-    # the concrete model that should be used
-    # -------------------------------------------------------
     effective_section = section
 
     if section == "corporate_announcements":
@@ -2409,12 +1979,6 @@ def upload_investor_document(request):
                 {"success": False, "message": "Please select a Corporate Announcements subsection."},
                 status=400
             )
-
-    # For investor_form the frontend sometimes sends category
-    # as the subcategory. We keep the same model.
-    if section == "investor_form" and subsection:
-        # still use InvestorForm model, just store the category
-        pass
 
     try:
         with pdf_upload_user(
@@ -2666,41 +2230,66 @@ def _create_investor_document(
 
 
 # ============================================================
-# DASHBOARD LOGIN
+# DASHBOARD LOGIN & REGISTRATION
 # ============================================================
 
 @never_cache
 def dashboard_login(request):
-    """
-    Login for Admin & Employee only.
-    Client role is redirected to the public website.
-    """
-    # Already logged in → go to correct place
     if request.user.is_authenticated:
-        return redirect_based_on_role(request.user)
+        profile = getattr(request.user, 'profile', None)
+        if not request.user.is_active or (profile and profile.approval_status != 'APPROVED'):
+            logout(request)
+        else:
+            return redirect_based_on_role(request.user)
 
     if request.method == "POST":
         username = request.POST.get("username", "").strip()
         password = request.POST.get("password", "")
         remember_me = request.POST.get("remember_me")
 
+        existing_user = User.objects.filter(
+            Q(username__iexact=username) | Q(profile__employee_id__iexact=username)
+        ).first()
+
+        if existing_user and existing_user.check_password(password):
+            profile = getattr(existing_user, 'profile', None)
+            if profile is None:
+                profile = Profile.objects.create(user=existing_user, role='EMPLOYEE', approval_status='APPROVED')
+
+            if profile.approval_status == 'PENDING':
+                return render(request, "Investor_Login.html", {
+                    "error": "Your registration request is pending Admin approval. You will be able to log in once approved.",
+                    "remembered_username": username,
+                })
+
+            if profile.approval_status == 'REJECTED':
+                return render(request, "Investor_Login.html", {
+                    "error": "Your account registration request was rejected. Please contact the administrator.",
+                    "remembered_username": username,
+                })
+
+            if not existing_user.is_active:
+                return render(request, "Investor_Login.html", {
+                    "error": "Your account is currently inactive. Please contact the administrator.",
+                    "remembered_username": username,
+                })
+
         user = authenticate(request, username=username, password=password)
+        if user is None and existing_user and existing_user.is_active and existing_user.check_password(password):
+            user = authenticate(request, username=existing_user.username, password=password)
 
         if user is not None:
-            # Create profile if missing
             if not hasattr(user, 'profile'):
-                Profile.objects.create(user=user, role='EMPLOYEE')
+                Profile.objects.create(user=user, role='EMPLOYEE', approval_status='APPROVED')
 
-            # CLIENT should not enter the dashboard
             if user.profile.role == 'CLIENT':
                 login(request, user)
                 return redirect('https://www.nibelimited.com')
 
-            # Admin or Employee
             login(request, user)
 
             if remember_me:
-                request.session.set_expiry(60 * 60 * 24 * 30)  # 30 days
+                request.session.set_expiry(60 * 60 * 24 * 30)
                 request.session["remembered_username"] = username
             else:
                 request.session.set_expiry(0)
@@ -2708,36 +2297,119 @@ def dashboard_login(request):
 
             return redirect_based_on_role(user)
 
-        # Wrong credentials
         return render(request, "Investor_Login.html", {
             "error": "Invalid Employee ID or Password.",
             "remembered_username": username,
         })
 
-    # GET request
     remembered_username = request.session.get("remembered_username", "")
     return render(request, "Investor_Login.html", {
         "remembered_username": remembered_username,
     })
 
 
+@never_cache
+def dashboard_register(request):
+    if request.user.is_authenticated:
+        return redirect_based_on_role(request.user)
+
+    form_data = {
+        "username": "",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+    }
+
+    if request.method == "POST":
+        username = (request.POST.get("username") or "").strip()
+        first_name = (request.POST.get("first_name") or "").strip()
+        last_name = (request.POST.get("last_name") or "").strip()
+        email = (request.POST.get("email") or "").strip()
+        password = request.POST.get("password") or ""
+
+        form_data = {
+            "username": username,
+            "first_name": first_name,
+            "last_name": last_name,
+            "email": email,
+        }
+
+        errors = []
+        if not username:
+            errors.append("Employee ID is required.")
+        if not password:
+            errors.append("Password is required.")
+        elif len(password) < 6:
+            errors.append("Password must be at least 6 characters.")
+
+        if username and (
+            User.objects.filter(username__iexact=username).exists()
+            or Profile.objects.filter(employee_id__iexact=username).exists()
+        ):
+            errors.append("An account with this Employee ID already exists.")
+
+        if email and User.objects.filter(email__iexact=email).exists():
+            errors.append("An account with this Email already exists.")
+
+        candidate_user = User(
+            username=username,
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+        )
+
+        if password and not errors:
+            try:
+                validate_password(password, user=candidate_user)
+            except DjangoValidationError as exc:
+                errors.extend(exc.messages)
+
+        if not errors:
+            candidate_user.set_password(password)
+            candidate_user.is_active = False
+            candidate_user.is_staff = True
+            candidate_user.save()
+
+            profile = candidate_user.profile
+            profile.employee_id = username
+            profile.role = 'EMPLOYEE'
+            profile.approval_status = 'PENDING'
+            profile.save()
+
+            full_name = f"{first_name} {last_name}".strip() or username
+            AuditLog.objects.create(
+                document_title=f"{full_name} ({username})",
+                section="user_registration",
+                action="registered",
+                details=f"New employee account registered (Employee ID: {username}, Email: {email or '—'}, Status: Pending Approval)",
+                performed_by=candidate_user.username,
+                document_id=candidate_user.id,
+            )
+
+            return render(request, "Investor_Register.html", {
+                "submitted_success": True,
+                "success_message": "Your registration request has been submitted successfully and is awaiting Admin approval.",
+                "form_data": {},
+            })
+
+        return render(request, "Investor_Register.html", {
+            "errors": errors,
+            "form_data": form_data,
+        })
+
+    return render(request, "Investor_Register.html", {"form_data": form_data})
+
 def redirect_based_on_role(user):
-    """
-    After login, send user to the correct place according to role.
-    ADMIN / EMPLOYEE → New Dashboard
-    CLIENT           → Public website
-    """
     if not hasattr(user, 'profile'):
-        from .models import Profile
-        Profile.objects.create(user=user, role='EMPLOYEE')
+        Profile.objects.create(user=user, role='EMPLOYEE', approval_status='APPROVED')
 
     role = user.profile.role
 
     if role in ['ADMIN', 'EMPLOYEE']:
-        return redirect('documents')   # New dashboard (Documents page)
+        return redirect('documents')
 
-    # CLIENT (or any other role)
     return redirect('https://www.nibelimited.com')
+
 
 # ============================================================
 # DELETE INVESTOR DOCUMENT
@@ -2822,7 +2494,6 @@ def delete_investor_document(request, document_id=None, section=None):
                 status=404
             )
 
-        # Capture title before deleting
         doc_title = getattr(obj, "title", "Untitled")
 
         log_audit(
@@ -2845,9 +2516,7 @@ def delete_investor_document(request, document_id=None, section=None):
             {"success": False, "message": str(e)},
             status=500
         )
- # ============================================================
-# SUMMARY REPORT DOWNLOAD
-# ============================================================
+
 
 # ============================================================
 # SUMMARY REPORT DOWNLOAD (PDF)
@@ -2856,10 +2525,6 @@ def delete_investor_document(request, document_id=None, section=None):
 @login_required(login_url="dashboard_login")
 @role_required(['ADMIN', 'EMPLOYEE'])
 def download_summary_report(request):
-    """
-    Generate and download a professional PDF Summary Report
-    of all investor documents.
-    """
     try:
         try:
             from reportlab.lib import colors
@@ -3014,29 +2679,34 @@ def download_summary_report(request):
 
     except Exception as e:
         import traceback
-        traceback.print_exc()  # prints the full error to your runserver terminal
+        traceback.print_exc()
         return JsonResponse(
             {"success": False, "message": f"Failed to generate PDF: {str(e)}"},
             status=500
         )
 
-# ============================================================
-# EMPLOYEE MANAGEMENT  (Only ADMIN can access)
-# ============================================================
 
+# ============================================================
+# EMPLOYEE MANAGEMENT & APPROVAL (Only ADMIN can access)
+# ============================================================
 
 @login_required(login_url="dashboard_login")
 @role_required(['ADMIN'])
 def employees_list_api(request):
-    """Only Admin can see the list of employees."""
-    users = User.objects.all().order_by("-date_joined")
+    users = User.objects.select_related('profile').all().order_by("-date_joined")
 
     data = []
     for user in users:
-        role = user.profile.role if hasattr(user, 'profile') else 'EMPLOYEE'
+        profile = user.profile if hasattr(user, 'profile') else None
+        role = profile.role if profile else 'EMPLOYEE'
+        approval_status = profile.approval_status if profile else ('APPROVED' if user.is_active else 'PENDING')
+        emp_id = (profile.employee_id if profile and profile.employee_id else user.username)
+        full_name = user.get_full_name().strip() or user.username
 
         data.append({
             "id": user.id,
+            "employee_id": emp_id,
+            "full_name": full_name,
             "username": user.username,
             "first_name": user.first_name,
             "last_name": user.last_name,
@@ -3044,11 +2714,103 @@ def employees_list_api(request):
             "is_active": user.is_active,
             "is_staff": user.is_staff,
             "role": role,
+            "approval_status": approval_status,
             "date_joined": user.date_joined.strftime("%d-%m-%Y"),
             "last_login": user.last_login.strftime("%d-%m-%Y %H:%M") if user.last_login else "Never",
         })
 
     return JsonResponse(data, safe=False)
+
+
+@login_required(login_url="dashboard_login")
+@role_required(['ADMIN'])
+def approve_employee(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Invalid method"}, status=405)
+
+    try:
+        body = json.loads(request.body)
+        user_id = body.get("id")
+        if not user_id:
+            return JsonResponse({"success": False, "message": "User ID is required."}, status=400)
+
+        target_user = User.objects.select_related('profile').get(id=user_id)
+        if target_user.id == request.user.id:
+            return JsonResponse({"success": False, "message": "You cannot modify your own approval status."}, status=400)
+
+        profile = target_user.profile
+        profile.approval_status = 'APPROVED'
+        if not profile.employee_id:
+            profile.employee_id = target_user.username
+        profile.save(update_fields=["approval_status", "employee_id"])
+
+        target_user.is_active = True
+        target_user.is_staff = True
+        target_user.save(update_fields=["is_active", "is_staff"])
+
+        emp_label = f"{target_user.get_full_name().strip() or target_user.username} ({profile.employee_id})"
+        log_audit(
+            request,
+            title=emp_label,
+            section="user_management",
+            action="approved",
+            document_id=target_user.id,
+            details=f"Approved registration for '{target_user.username}' ({profile.employee_id})",
+        )
+
+        return JsonResponse({
+            "success": True,
+            "message": f"Account '{target_user.username}' approved and activated.",
+            "approval_status": "APPROVED",
+        })
+    except User.DoesNotExist:
+        return JsonResponse({"success": False, "message": "User not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+
+@login_required(login_url="dashboard_login")
+@role_required(['ADMIN'])
+def reject_employee(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Invalid method"}, status=405)
+
+    try:
+        body = json.loads(request.body)
+        user_id = body.get("id")
+        if not user_id:
+            return JsonResponse({"success": False, "message": "User ID is required."}, status=400)
+
+        target_user = User.objects.select_related('profile').get(id=user_id)
+        if target_user.id == request.user.id:
+            return JsonResponse({"success": False, "message": "You cannot modify your own approval status."}, status=400)
+
+        profile = target_user.profile
+        profile.approval_status = 'REJECTED'
+        profile.save(update_fields=["approval_status"])
+
+        target_user.is_active = False
+        target_user.save(update_fields=["is_active"])
+
+        emp_label = f"{target_user.get_full_name().strip() or target_user.username} ({profile.employee_id or target_user.username})"
+        log_audit(
+            request,
+            title=emp_label,
+            section="user_management",
+            action="rejected",
+            document_id=target_user.id,
+            details=f"Rejected registration for '{target_user.username}'",
+        )
+
+        return JsonResponse({
+            "success": True,
+            "message": f"Account '{target_user.username}' has been rejected.",
+            "approval_status": "REJECTED",
+        })
+    except User.DoesNotExist:
+        return JsonResponse({"success": False, "message": "User not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
 
 
 @login_required(login_url="dashboard_login")
@@ -3091,8 +2853,9 @@ def create_employee(request):
             is_staff=True,
         )
 
-        # Set role
         user.profile.role = role
+        user.profile.employee_id = username
+        user.profile.approval_status = 'APPROVED'
         user.profile.save()
 
         return JsonResponse({
@@ -3216,6 +2979,7 @@ def delete_employee(request):
     except Exception as e:
         return JsonResponse({"success": False, "message": str(e)}, status=500)
 
+
 @never_cache
 @login_required(login_url="dashboard_login")
 @role_required(['ADMIN', 'EMPLOYEE'])
@@ -3255,13 +3019,12 @@ def recent_document_activity_api(request):
 
     return JsonResponse(data, safe=False)
 
+
 @never_cache
 @login_required(login_url="dashboard_login")
-@role_required(['ADMIN'])
+@role_required(['ADMIN', 'EMPLOYEE'])
 def audit_log_api(request):
-    """Only Admin can see audit logs."""
-    # ... keep your existing code inside this function ...
-    """Return paginated audit logs."""
+    """Admin sees all audit logs with employee name & ID; Employee sees only their own logs."""
     try:
         page = int(request.GET.get("page", 1))
         page_size = int(request.GET.get("page_size", 10))
@@ -3269,27 +3032,47 @@ def audit_log_api(request):
         page = 1
         page_size = 10
 
-    if page < 1:
-        page = 1
-    if page_size < 1:
-        page_size = 10
-    if page_size > 50:
-        page_size = 50
+    page = max(1, page)
+    page_size = min(50, max(1, page_size))
 
-    qs = AuditLog.objects.all().order_by("-created_at")
+    profile = getattr(request.user, "profile", None)
+    is_admin = bool(profile and profile.role == "ADMIN")
+
+    if is_admin:
+        qs = AuditLog.objects.all().order_by("-created_at")
+    else:
+        qs = AuditLog.objects.filter(performed_by=request.user.username).order_by("-created_at")
+
     total = qs.count()
     total_pages = max(1, (total + page_size - 1) // page_size)
-
-    if page > total_pages:
-        page = total_pages
+    page = min(page, total_pages)
 
     start = (page - 1) * page_size
     end = start + page_size
     logs = qs[start:end]
 
+    usernames = {log.performed_by for log in logs if log.performed_by}
+    user_map = {
+        u.username: u
+        for u in User.objects.select_related("profile").filter(username__in=usernames)
+    }
+
     data = []
     for log in logs:
-        data.append({
+        actor_user = user_map.get(log.performed_by)
+        actor_profile = getattr(actor_user, "profile", None) if actor_user else None
+
+        emp_name = (
+            actor_user.get_full_name().strip()
+            if actor_user and actor_user.get_full_name().strip()
+            else (log.performed_by or "System")
+        )
+        emp_id = (
+            getattr(actor_profile, "employee_id", None)
+            or (actor_user.username if actor_user else (log.performed_by or "—"))
+        )
+
+        entry = {
             "id": log.id,
             "document_title": log.document_title,
             "section": log.section,
@@ -3297,7 +3080,12 @@ def audit_log_api(request):
             "details": log.details or "",
             "performed_by": log.performed_by,
             "created_at": log.created_at.strftime("%d-%m-%Y %H:%M"),
-        })
+        }
+        if is_admin:
+            entry["employee_name"] = emp_name
+            entry["employee_id"] = emp_id
+
+        data.append(entry)
 
     return JsonResponse({
         "results": data,
@@ -3305,16 +3093,14 @@ def audit_log_api(request):
         "page_size": page_size,
         "total": total,
         "total_pages": total_pages,
+        "scope": "all" if is_admin else "self",
     })
-     
+
+
 # ============================================================
 # SECTION MANAGEMENT (Admin only)
-# A) Create new custom sections
-# B) Manage name / order / show-hide for all sections
-# C) Sub-sections under any section
 # ============================================================
 
-# Built-in sections that map to existing document models
 SYSTEM_SECTIONS_SEED = [
     {"name": "Annual Reports", "slug": "annual-reports", "model_key": "annual_report", "icon": "📊", "display_order": 1},
     {"name": "Financial Results", "slug": "financial-results", "model_key": "financial_result", "icon": "📈", "display_order": 2},
@@ -3333,7 +3119,6 @@ SYSTEM_SECTIONS_SEED = [
 
 
 def ensure_system_sections():
-    """Create system Section rows once if they do not exist yet."""
     for item in SYSTEM_SECTIONS_SEED:
         Section.objects.get_or_create(
             slug=item["slug"],
@@ -3381,10 +3166,6 @@ def unique_subsection_slug(section, base_slug, exclude_id=None):
 @login_required(login_url="dashboard_login")
 @role_required(["ADMIN", "EMPLOYEE"])
 def sections_list_api(request):
-    """
-    List all sections (for upload dropdowns + manage page).
-    Query: ?active_only=1  → only active sections
-    """
     ensure_system_sections()
 
     qs = Section.objects.all().prefetch_related("subsections")
@@ -3432,7 +3213,6 @@ def sections_list_api(request):
 @login_required(login_url="dashboard_login")
 @role_required(["ADMIN"])
 def create_section(request):
-    """Create a new custom section (Option A). Admin only."""
     if request.method != "POST":
         return JsonResponse({"success": False, "message": "Invalid method"}, status=405)
 
@@ -3460,7 +3240,7 @@ def create_section(request):
         section = Section.objects.create(
             name=name,
             slug=slug,
-            model_key="",  # custom → no system model
+            model_key="",
             description=description,
             icon=icon,
             is_system=False,
@@ -3483,7 +3263,6 @@ def create_section(request):
 @login_required(login_url="dashboard_login")
 @role_required(["ADMIN"])
 def update_section(request):
-    """Update section name / order / visibility (Option B). Admin only."""
     if request.method != "POST":
         return JsonResponse({"success": False, "message": "Invalid method"}, status=405)
 
@@ -3516,7 +3295,6 @@ def update_section(request):
         if "display_order" in body and body["display_order"] is not None and body["display_order"] != "":
             section.display_order = int(body["display_order"])
 
-        # Optional slug change for custom sections only
         if not section.is_system and body.get("slug"):
             section.slug = unique_section_slug(body["slug"], exclude_id=section.id)
 
@@ -3535,7 +3313,6 @@ def update_section(request):
 @login_required(login_url="dashboard_login")
 @role_required(["ADMIN"])
 def delete_section(request):
-    """Delete a custom section only (system sections cannot be deleted)."""
     if request.method != "POST":
         return JsonResponse({"success": False, "message": "Invalid method"}, status=405)
 
@@ -3551,7 +3328,6 @@ def delete_section(request):
             }, status=400)
 
         name = section.name
-        # Custom documents cascade-delete with section
         section.delete()
 
         return JsonResponse({
@@ -3567,7 +3343,6 @@ def delete_section(request):
 @login_required(login_url="dashboard_login")
 @role_required(["ADMIN"])
 def toggle_section_status(request):
-    """Show / hide a section (is_active)."""
     if request.method != "POST":
         return JsonResponse({"success": False, "message": "Invalid method"}, status=405)
 
@@ -3587,8 +3362,6 @@ def toggle_section_status(request):
     except Exception as e:
         return JsonResponse({"success": False, "message": str(e)}, status=500)
 
-
-# ---------- Sub-sections (Option C) ----------
 
 @login_required(login_url="dashboard_login")
 @role_required(["ADMIN"])
@@ -3681,7 +3454,6 @@ def delete_subsection(request):
 @login_required(login_url="dashboard_login")
 @role_required(["ADMIN", "EMPLOYEE"])
 def custom_documents_api(request):
-    """List documents for a custom section (?section_id= or ?slug=)."""
     section_id = request.GET.get("section_id")
     slug = request.GET.get("slug")
 
@@ -3722,7 +3494,6 @@ def custom_documents_api(request):
 @login_required(login_url="dashboard_login")
 @role_required(["ADMIN", "EMPLOYEE"])
 def upload_custom_document(request):
-    """Upload a document into a custom section (PDF / URL / published)."""
     if request.method != "POST":
         return JsonResponse({"success": False, "message": "Invalid method"}, status=405)
 
@@ -3815,25 +3586,21 @@ def delete_custom_document(request):
         return JsonResponse({"success": False, "message": str(e)}, status=500)
 
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
-from django.contrib.auth import logout
-
 def get_dashboard_context(request, active_tab):
     user = request.user
 
-    # Safety: make sure Profile exists
     if not hasattr(user, 'profile'):
-        from .models import Profile
-        Profile.objects.create(user=user, role='EMPLOYEE')
+        Profile.objects.create(user=user, role='EMPLOYEE', approval_status='APPROVED')
 
-    # Correct way to get the role
-    role = user.profile.role
+    profile = user.profile
+    if not user.is_active or profile.approval_status != 'APPROVED':
+        return None
+
+    role = profile.role
     is_admin = role == "ADMIN"
 
-    # Protect admin-only pages
-    if active_tab in ["dashboard", "audit_log", "employees", "sections"] and not is_admin:
-        return None  # caller will redirect
+    if active_tab in ["dashboard", "employees", "sections"] and not is_admin:
+        return None
 
     display_name = user.get_full_name() or user.username
     initials = "".join([n[0] for n in display_name.split()[:2]]).upper() or "U"
@@ -3861,12 +3628,18 @@ def dashboard_view(request):
 @login_required
 def documents_view(request):
     context = get_dashboard_context(request, "documents")
+    if context is None:
+        logout(request)
+        return redirect("dashboard_login")
     return render(request, "dashboard/documents.html", context)
 
 
 @login_required
 def upload_view(request):
     context = get_dashboard_context(request, "upload")
+    if context is None:
+        logout(request)
+        return redirect("dashboard_login")
     return render(request, "dashboard/upload.html", context)
 
 
@@ -3875,7 +3648,8 @@ def upload_view(request):
 def audit_log_view(request):
     context = get_dashboard_context(request, "audit_log")
     if context is None:
-        return redirect("documents")
+        logout(request)
+        return redirect("dashboard_login")
     return render(request, "dashboard/audit_log.html", context)
 
 

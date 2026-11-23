@@ -81,6 +81,9 @@ urlpatterns = [
     path("dashboard_login/", dashboard_login, name="dashboard_login"),
     path("dashboard_logout/", dashboard_logout, name="dashboard_logout"),
     path("upload-dashboard/", upload_dashboard, name="upload_dashboard"),
+    path("dashboard_register/", views.dashboard_register, name="dashboard_register"),
+    path("api/employees/approve/", views.approve_employee, name="approve_employee"),
+    path("api/employees/reject/", views.reject_employee, name="reject_employee"),
 
     path("dashboard/", views.dashboard_view, name="dashboard"),
     path("documents/", views.documents_view, name="documents"),

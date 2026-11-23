@@ -196,106 +196,28 @@ function clearDynamicFields(containerId = "dynamicFields") {
  * Refresh section dropdowns + investorSections from the Sections API.
  * Safe to call on any page.
  */
-async function refreshAppSectionsFromAPI() {
-    try {
-        const response = await fetch(
-            (window.DASHBOARD_URLS.sectionsListApi || window.appUrl("/api/sections/")) + "?active_only=1",
-            {
-                credentials: "same-origin",
-                headers: { "X-Requested-With": "XMLHttpRequest" },
-            }
-        );
-        if (!response.ok) return;
-        const sections = await response.json();
-        if (!Array.isArray(sections)) return;
+const ALLOWED_UPLOAD_SECTIONS = [
+    { value: "annual_report", label: "Annual Report" },
+    { value: "financial_result", label: "Financial Result" },
+    { value: "annual_return", label: "Annual Returns" },
+    { value: "corporate_announcements", label: "Corporate Announcement" },
+    { value: "corporate_governance", label: "Corporate Governance" },
+    { value: "shareholding_pattern", label: "Shareholding Pattern" },
+    { value: "sebi_document", label: "SEBI Documents" },
+    { value: "investor_form", label: "Investor Forms" },
+    { value: "subsidiary_financial", label: "Subsidiary Financials" },
+  ];
 
-        // Keep system hierarchy; append custom sections
-        const customOnly = sections.filter((s) => !s.is_system && s.is_active);
-
-        // Remove previous custom_* entries
-        investorSections = (investorSections || []).filter(
-            (s) => !(s.key && String(s.key).startsWith("custom_"))
-        );
-
-        customOnly.forEach((s) => {
-            investorSections.push({
-                key: "custom_" + s.id,
-                name: s.name,
-                is_custom: true,
-                section_id: s.id,
-                icon: s.icon || "📁",
-                children: (s.subsections || []).map((sub) => ({
-                    key: "sub_" + sub.id,
-                    name: sub.name,
-                    subsection_id: sub.id,
-                })),
-            });
-        });
-        window.investorSections = investorSections;
-
-        // Rebuild Upload <select id="section">
-        const uploadSelect = document.getElementById("section");
-        if (uploadSelect) {
-            const current = uploadSelect.value;
-            let html = '<option value="">Select Section</option>';
-            sections
-                .filter((s) => s.is_active)
-                .forEach((s) => {
-                    if (s.is_system && s.model_key) {
-                        html += `<option value="${s.model_key}">${escapeHtml(s.name)}</option>`;
-                    } else if (!s.is_system) {
-                        html += `<option value="custom_${s.id}">${escapeHtml(s.icon || "📁")} ${escapeHtml(s.name)}</option>`;
-                    }
-                });
-            // Ensure composite options exist
-            [
-                ["corporate_announcements", "Corporate Announcements"],
-                ["investor_form", "Investor Forms & Declaration"],
-            ].forEach(([val, label]) => {
-                if (!html.includes(`value="${val}"`)) {
-                    html += `<option value="${val}">${label}</option>`;
-                }
-            });
-            uploadSelect.innerHTML = html;
-            if (current) uploadSelect.value = current;
-        }
-
-        // Rebuild Documents filter <select id="documentSectionFilter">
-        const filterSelect = document.getElementById("documentSectionFilter");
-        if (filterSelect) {
-            const current = filterSelect.value;
-            let html = '<option value="all">All Sections</option>';
-            sections
-                .filter((s) => s.is_active)
-                .forEach((s) => {
-                    if (s.is_system && s.model_key) {
-                        html += `<option value="${s.model_key}">${escapeHtml(s.name)}</option>`;
-                    } else if (!s.is_system) {
-                        html += `<option value="custom_${s.id}">${escapeHtml(s.name)}</option>`;
-                    }
-                });
-            [
-                ["corporate_announcements", "Corporate Announcements"],
-                ["investor_form", "Investor Forms & Declaration"],
-            ].forEach(([val, label]) => {
-                if (!html.includes(`value="${val}"`)) {
-                    html += `<option value="${val}">${label}</option>`;
-                }
-            });
-            filterSelect.innerHTML = html;
-            if (current) filterSelect.value = current;
-        }
-
-        // Refresh dashboard stats if the function exists on this page
-        if (typeof loadDashboardStatistics === "function") {
-            try {
-                loadDashboardStatistics();
-            } catch (e) {}
-        }
-    } catch (e) {
-        console.error("refreshAppSectionsFromAPI failed:", e);
-    }
-}
+  const uploadSelect = document.getElementById("section");
+  if (uploadSelect) {
+    const current = uploadSelect.value;
+    uploadSelect.innerHTML =
+      '<option value="">Select Section</option>' +
+      ALLOWED_UPLOAD_SECTIONS.map(
+        (opt) => `<option value="${opt.value}">${escapeHtml(opt.label)}</option>`
+      ).join("");
+    if (current) uploadSelect.value = current;
+  }
 
 /* Export for modules that expect globals */
 window.financialYearOptions = financialYearOptions;

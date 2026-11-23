@@ -21,6 +21,38 @@
         </button>
     </div>
 
+    <!-- ACCOUNT APPROVAL REQUESTS -->
+    <div class="dashboard-card documents-table-card" style="margin-bottom: 24px;">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3>Account Approval Requests</h3>
+                <p style="font-size: 13px; color: #64748b;">Review newly registered employee accounts before granting dashboard access.</p>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Employee Name</th>
+                        <th>Employee ID</th>
+                        <th>Official Email Address</th>
+                        <th>Username</th>
+                        <th>Registration Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="pendingApprovalsTableBody">
+                    <tr>
+                        <td colspan="7" class="table-empty">Loading registration requests...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ALL EMPLOYEES -->
     <div class="dashboard-card documents-table-card">
 
         <div class="search-row">
@@ -38,6 +70,7 @@
                         <th>Name</th>
                         <th>Email</th>
                         <th>Role</th>
+                        <th>Account Status</th>
                         <th>Status</th>
                         <th>Joined</th>
                         <th>Last Login</th>
@@ -46,7 +79,7 @@
                 </thead>
                 <tbody id="employeesTableBody">
                     <tr>
-                        <td colspan="8" class="table-empty">Loading employees...</td>
+                        <td colspan="9" class="table-empty">Loading employees...</td>
                     </tr>
                 </tbody>
             </table>
@@ -153,5 +186,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/employees_page.js' %}?v=cms-prefix-20261102"></script>
+<script src="{% static 'js/employees_page.js' %}?v=20261123-approval1"></script>
 {% endblock %}

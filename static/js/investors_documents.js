@@ -189,14 +189,17 @@
 
     function renderSubsidiaryYear(panel, section, year) {
         const docs = section.documents.filter((doc) => (doc.financial_year || "Other") === year);
-        const rows = docs.map((doc, index) => [
-            String(index + 1),
-            escapeHtml(doc.company_name || doc.title || "-"),
-            escapeHtml(doc.financial_type || "-"),
-            documentLink(doc, "View"),
-        ]);
+        const rows = docs.map((doc, index) => {
+            const companyLabel = doc.company_name || doc.title || "-";
+            const typeLabel = doc.financial_type ? ` (${doc.financial_type})` : "";
+            return [
+                String(index + 1),
+                escapeHtml(`${companyLabel}${typeLabel}`),
+                documentLink(doc, "View"),
+            ];
+        });
         panel.innerHTML = headingBlock(section.name, "Financial Year " + year, "years")
-            + table(["Sr No.", "Company Name", "Type", "Document"], rows);
+            + table(["Sr No.", "Company Name", "Financials"], rows);
     }
 
     function renderNoticeTable(panel, section, docs) {
@@ -354,6 +357,55 @@
             return;
         }
 
+        if (bucket === "kyc_nomination") {
+            const rows = docs.map((doc, index) => [
+                String(index + 1),
+                escapeHtml(doc.title || "-"),
+                escapeHtml(doc.description || "-"),
+                documentLink(doc, "Download"),
+            ]);
+            panel.innerHTML = headingBlock(section.name, subtitle, "index")
+                + table(["Sr No.", "Form Name", "Description", "Download Link"], rows);
+            return;
+        }
+
+        if (bucket === "tax_declaration") {
+            const rows = docs.map((doc, index) => [
+                String(index + 1),
+                escapeHtml(doc.title || "-"),
+                escapeHtml(doc.description || "-"),
+                escapeHtml(doc.applicable_to || "-"),
+                documentLink(doc, "Download"),
+            ]);
+            panel.innerHTML = headingBlock(section.name, subtitle, "index")
+                + table(["Sr No.", "Form Name", "Purpose", "Applicable To", "Download Link"], rows);
+            return;
+        }
+
+        if (bucket === "unclaimed_dividend") {
+            const rows = docs.map((doc, index) => [
+                String(index + 1),
+                escapeHtml(doc.financial_year || "-"),
+                escapeHtml(doc.dividend_declaration_date || "-"),
+                escapeHtml(doc.dividend_type || "-"),
+                escapeHtml(doc.iepf_transfer_due_date || "-"),
+                documentLink(doc, "View"),
+            ]);
+            panel.innerHTML = headingBlock(section.name, subtitle, "index")
+                + table(
+                    [
+                        "Sr No.",
+                        "Financial Year",
+                        "Date of Declaration of Dividend",
+                        "Type of Dividend",
+                        "Due Date for Transfer to IEPF",
+                        "Download Details",
+                    ],
+                    rows
+                );
+            return;
+        }
+
         renderSimpleList(panel, section, section.name, subtitle, docs, "index");
     }
 
@@ -460,7 +512,12 @@
         if (!menu || !panels) return;
 
         try {
-            const response = await fetch(window.INVESTOR_DOCUMENTS_URL || window.appUrl("/api/public-investor-documents/"), {
+            const url =
+                window.INVESTOR_DOCUMENTS_URL ||
+                (typeof window.appUrl === "function"
+                    ? window.appUrl("/api/public-investor-documents/")
+                    : "/api/public-investor-documents/");
+            const response = await fetch(url, {
                 headers: { Accept: "application/json" },
                 cache: "no-store",
             });

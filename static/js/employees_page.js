@@ -1,10 +1,21 @@
 /**
  * employees_page.js
- * Employees tab (Admin only): list, add/edit, toggle status, delete.
+ * Employees tab (Admin only): pending approvals, list, add/edit, toggle status, delete.
  * Requires: dashboard_common.js
  */
 
+
 let allEmployeesCache = [];
+
+function resolveEmployeeUrl(key, fallbackPath) {
+    if (window.DASHBOARD_URLS && window.DASHBOARD_URLS[key]) {
+        return window.DASHBOARD_URLS[key];
+    }
+    if (typeof window.appUrl === "function") {
+        return window.appUrl(fallbackPath);
+    }
+    return fallbackPath;
+}
 
 function roleBadge(role) {
     const r = (role || "").toUpperCase();
@@ -17,20 +28,121 @@ function roleBadge(role) {
     return `<span style="padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:#f1f5f9;color:#475569;">Employee</span>`;
 }
 
+function approvalStatusBadge(status) {
+    const s = (status || "APPROVED").toUpperCase();
+    if (s === "PENDING") {
+        return `<span style="padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:#fef3c7;color:#92400e;">Pending</span>`;
+    }
+    if (s === "REJECTED") {
+        return `<span style="padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:#fee2e2;color:#991b1b;">Rejected</span>`;
+    }
+    return `<span style="padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:#dcfce7;color:#166534;">Approved</span>`;
+}
+
 function statusBadge(isActive) {
     return isActive
         ? `<span style="padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:#dcfce7;color:#166534;">Active</span>`
         : `<span style="padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:#fee2e2;color:#991b1b;">Inactive</span>`;
 }
 
-async function loadEmployees() {
-    const tbody = document.getElementById("employeesTableBody");
+function renderPendingApprovalsTable(list) {
+    const tbody = document.getElementById("pendingApprovalsTableBody");
     if (!tbody) return;
 
-    tbody.innerHTML = `<tr><td colspan="8" class="table-empty">Loading employees...</td></tr>`;
+    const pendingUsers = (list || []).filter(
+        (u) => (u.approval_status || "").toUpperCase() === "PENDING"
+    );
+
+    if (!pendingUsers.length) {
+        tbody.innerHTML = `<tr><td colspan="7" class="table-empty">No pending registration requests.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = pendingUsers
+        .map((u) => {
+            const empName = u.full_name || [u.first_name, u.last_name].filter(Boolean).join(" ") || u.username;
+            const empId = u.employee_id || u.username || "—";
+            const email = u.email || "—";
+            const encodedUser = encodeURIComponent(JSON.stringify(u));
+
+            return `<tr>
+                <td><strong>${escapeHtml(empName)}</strong></td>
+                <td>${escapeHtml(empId)}</td>
+                <td>${escapeHtml(email)}</td>
+                <td>${escapeHtml(u.username || "—")}</td>
+                <td>${escapeHtml(u.date_joined || "—")}</td>
+                <td>${approvalStatusBadge(u.approval_status)}</td>
+                <td style="white-space:nowrap;">
+                    <button type="button" class="primary-button" style="padding:4px 10px;font-size:12px;margin-right:4px;"
+                            onclick="reviewApprovalRequest('${encodedUser}', 'approve')">Approve</button>
+                    <button type="button" style="padding:4px 10px;font-size:12px;border-radius:6px;border:1.5px solid #fecaca;background:#fef2f2;color:#b91c1c;cursor:pointer;"
+                            onclick="reviewApprovalRequest('${encodedUser}', 'reject')">Reject</button>
+                </td>
+            </tr>`;
+        })
+        .join("");
+}
+
+async function reviewApprovalRequest(encodedUser, decision) {
+    const u = JSON.parse(decodeURIComponent(encodedUser));
+    const empName = u.full_name || [u.first_name, u.last_name].filter(Boolean).join(" ") || u.username;
+    const empId = u.employee_id || u.username || "—";
+    const verb = decision === "approve" ? "approve" : "reject";
+
+    const reviewPrompt =
+        `Review Registration Request:\n` +
+        `• Employee Name: ${empName}\n` +
+        `• Employee ID: ${empId}\n` +
+        `• Official Email: ${u.email || "—"}\n` +
+        `• Username: ${u.username || "—"}\n` +
+        `• Registration Date: ${u.date_joined || "—"}\n` +
+        `• Current Status: ${u.approval_status || "PENDING"}\n\n` +
+        `Do you want to ${verb.toUpperCase()} this account?`;
+
+    if (!confirm(reviewPrompt)) return;
+
+    const url =
+        decision === "approve"
+            ? resolveEmployeeUrl("approveEmployee", "/api/employees/approve/")
+            : resolveEmployeeUrl("rejectEmployee", "/api/employees/reject/");
 
     try {
-        const response = await fetch(window.DASHBOARD_URLS.employeesList || window.appUrl("/api/employees/"), {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken"),
+                "X-Requested-With": "XMLHttpRequest",
+            },
+            credentials: "same-origin",
+            body: JSON.stringify({ id: u.id }),
+        });
+
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+            throw new Error(result.message || `Failed to ${verb} account.`);
+        }
+
+        alert(result.message || `Account ${verb}d.`);
+        loadEmployees();
+    } catch (error) {
+        console.error("reviewApprovalRequest error:", error);
+        alert(error.message || `Failed to ${verb} account.`);
+    }
+}
+
+async function loadEmployees() {
+    const tbody = document.getElementById("employeesTableBody");
+    const pendingTbody = document.getElementById("pendingApprovalsTableBody");
+    if (!tbody) return;
+
+    tbody.innerHTML = `<tr><td colspan="9" class="table-empty">Loading employees...</td></tr>`;
+    if (pendingTbody) {
+        pendingTbody.innerHTML = `<tr><td colspan="7" class="table-empty">Loading registration requests...</td></tr>`;
+    }
+
+    try {
+        const response = await fetch(resolveEmployeeUrl("employeesList", "/api/employees/"), {
             credentials: "same-origin",
             headers: { "X-Requested-With": "XMLHttpRequest" },
         });
@@ -42,10 +154,14 @@ async function loadEmployees() {
 
         const data = await response.json();
         allEmployeesCache = Array.isArray(data) ? data : data.results || [];
+        renderPendingApprovalsTable(allEmployeesCache);
         renderEmployeesTable(allEmployeesCache);
     } catch (error) {
         console.error("loadEmployees error:", error);
-        tbody.innerHTML = `<tr><td colspan="8" class="table-empty" style="color:#ef4444;">${escapeHtml(error.message)}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="table-empty" style="color:#ef4444;">${escapeHtml(error.message)}</td></tr>`;
+        if (pendingTbody) {
+            pendingTbody.innerHTML = `<tr><td colspan="7" class="table-empty" style="color:#ef4444;">${escapeHtml(error.message)}</td></tr>`;
+        }
     }
 }
 
@@ -58,8 +174,10 @@ function filterEmployeesTable() {
             const name = `${u.first_name || ""} ${u.last_name || ""}`.toLowerCase();
             return (
                 (u.username || "").toLowerCase().includes(q) ||
+                (u.employee_id || "").toLowerCase().includes(q) ||
                 name.includes(q) ||
-                (u.email || "").toLowerCase().includes(q)
+                (u.email || "").toLowerCase().includes(q) ||
+                (u.approval_status || "").toLowerCase().includes(q)
             );
         })
     );
@@ -70,7 +188,7 @@ function renderEmployeesTable(list) {
     if (!tbody) return;
 
     if (!list.length) {
-        tbody.innerHTML = `<tr><td colspan="8" class="table-empty">No employees found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="table-empty">No employees found.</td></tr>`;
         return;
     }
 
@@ -78,14 +196,16 @@ function renderEmployeesTable(list) {
         .map((u) => {
             const fullName = [u.first_name, u.last_name].filter(Boolean).join(" ") || "—";
             const email = u.email || "—";
+            const empId = u.employee_id || u.username || "";
             const encodedUser = encodeURIComponent(JSON.stringify(u));
             const encodedName = encodeURIComponent(u.username || "");
 
             return `<tr>
-                <td><strong>${escapeHtml(u.username || "")}</strong></td>
+                <td><strong>${escapeHtml(empId)}</strong></td>
                 <td>${escapeHtml(fullName)}</td>
                 <td>${escapeHtml(email)}</td>
                 <td>${roleBadge(u.role)}</td>
+                <td>${approvalStatusBadge(u.approval_status)}</td>
                 <td>${statusBadge(!!u.is_active)}</td>
                 <td>${escapeHtml(u.date_joined || "—")}</td>
                 <td>${escapeHtml(u.last_login || "Never")}</td>
@@ -176,10 +296,9 @@ async function saveEmployee(event) {
     btn.textContent = "Saving...";
 
     try {
-        // Use create or update URL based on whether id exists
         const url = id
-            ? (window.DASHBOARD_URLS.updateEmployee || window.appUrl("/api/employees/update/"))
-            : (window.DASHBOARD_URLS.createEmployee || window.appUrl("/api/employees/create/"));
+            ? resolveEmployeeUrl("updateEmployee", "/api/employees/update/")
+            : resolveEmployeeUrl("createEmployee", "/api/employees/create/");
 
         const response = await fetch(url, {
             method: "POST",
@@ -214,7 +333,7 @@ async function toggleEmployeeStatus(userId, username) {
 
     try {
         const response = await fetch(
-            window.DASHBOARD_URLS.toggleEmployeeStatus || window.appUrl("/api/employees/toggle-status/"),
+            resolveEmployeeUrl("toggleEmployeeStatus", "/api/employees/toggle-status/"),
             {
                 method: "POST",
                 headers: {
@@ -244,7 +363,7 @@ async function deleteEmployee(userId, username) {
     if (!confirm(`Delete user "${username}" permanently?\nThis cannot be undone.`)) return;
 
     try {
-        const response = await fetch(window.DASHBOARD_URLS.deleteEmployee || window.appUrl("/api/employees/delete/"), {
+        const response = await fetch(resolveEmployeeUrl("deleteEmployee", "/api/employees/delete/"), {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -290,3 +409,4 @@ window.closeEmployeeModal = closeEmployeeModal;
 window.saveEmployee = saveEmployee;
 window.toggleEmployeeStatus = toggleEmployeeStatus;
 window.deleteEmployee = deleteEmployee;
+window.reviewApprovalRequest = reviewApprovalRequest;
