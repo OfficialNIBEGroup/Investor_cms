@@ -1876,7 +1876,7 @@ def upload_dashboard(request):
     role = profile.role
 
     if role == 'CLIENT':
-        return redirect('https://www.nibelimited.com')
+        return redirect('home')
 
     full_name = request.user.get_full_name().strip()
     display_name = full_name if full_name else request.user.username
@@ -2284,7 +2284,7 @@ def dashboard_login(request):
 
             if user.profile.role == 'CLIENT':
                 login(request, user)
-                return redirect('https://www.nibelimited.com')
+                return redirect('home')
 
             login(request, user)
 

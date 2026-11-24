@@ -26,14 +26,22 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-temporary-key-
 if not DEBUG and SECRET_KEY == 'django-insecure-temporary-key-change-this':
     raise RuntimeError('Set DJANGO_SECRET_KEY to a unique production secret.')
 
-# Security settings for production
-SECURE_SSL_REDIRECT = False
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
 
-ALLOWED_HOSTS = [host.strip() for host in os.environ.get(
-    'DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1'
-).split(',') if host.strip()]
+def _csv_env(name, default=''):
+    return [item.strip() for item in os.environ.get(name, default).split(',') if item.strip()]
+
+
+# Always accept the live hosts, even if production .env is stale.
+# A missing host here is Django's HTML 400 "Bad Request" page.
+REQUIRED_ALLOWED_HOSTS = [
+    'www.nibelimited.com',
+    'nibelimited.com',
+    '.nibelimited.com',
+    '200.97.168.12',
+    'localhost',
+    '127.0.0.1',
+]
+ALLOWED_HOSTS = list(dict.fromkeys(_csv_env('DJANGO_ALLOWED_HOSTS') + REQUIRED_ALLOWED_HOSTS))
 
 
 # Application definition
@@ -50,6 +58,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -125,30 +134,45 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
-# This app is mounted at /CMS on the production VPS. Keep local development at /.
-FORCE_SCRIPT_NAME = os.environ.get(
-    'DJANGO_FORCE_SCRIPT_NAME', '/CMS' if not DEBUG else ''
-).rstrip('/') or None
-STATIC_URL = f'{FORCE_SCRIPT_NAME}/static/' if FORCE_SCRIPT_NAME else '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+# App serves at domain root. Ignore a leftover /CMS value from the old VPS .env
+# so CSS/JS URLs stay /static/... instead of /CMS/static/...
+_raw_script = os.environ.get('DJANGO_FORCE_SCRIPT_NAME', '').strip().rstrip('/')
+if _raw_script.upper() in ('', '/', 'CMS', '/CMS'):
+    FORCE_SCRIPT_NAME = None
+else:
+    FORCE_SCRIPT_NAME = _raw_script
 
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
+# Serve files from static/ even if collectstatic has not been run on the VPS.
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = DEBUG
 
-MEDIA_URL = f'{FORCE_SCRIPT_NAME}/media/' if FORCE_SCRIPT_NAME else '/media/'
+MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Comma-separated HTTPS origins, for example https://investors.example.com.
-CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.environ.get(
-    'DJANGO_CSRF_TRUSTED_ORIGINS', ''
-).split(',') if origin.strip()]
+REQUIRED_CSRF_ORIGINS = [
+    'https://www.nibelimited.com',
+    'https://nibelimited.com',
+    'http://www.nibelimited.com',
+    'http://nibelimited.com',
+    'https://200.97.168.12',
+    'http://200.97.168.12',
+]
+CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(
+    _csv_env('DJANGO_CSRF_TRUSTED_ORIGINS') + REQUIRED_CSRF_ORIGINS
+))
 
-# Enable these after HTTPS has been configured in Nginx.
+# Keep HTTP on nibelimited.com working. Do not force HTTPS until both hosts have certs
+# and you explicitly set DJANGO_SECURE_SSL_REDIRECT=True.
 SECURE_SSL_REDIRECT = os.environ.get('DJANGO_SECURE_SSL_REDIRECT', 'False').lower() == 'true'
 SESSION_COOKIE_SECURE = not DEBUG and SECURE_SSL_REDIRECT
 CSRF_COOKIE_SECURE = not DEBUG and SECURE_SSL_REDIRECT
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
 
 
 # Email
