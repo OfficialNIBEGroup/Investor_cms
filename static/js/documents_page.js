@@ -116,56 +116,49 @@ function getFilteredDocuments() {
 /* Table rendering                                                     */
 /* ------------------------------------------------------------------ */
 function buildDocumentRow(doc) {
-    const row = document.createElement("tr");
-    const title = doc.title || "Untitled Document";
+  const row = document.createElement("tr");
+  const title = doc.title || "Untitled Document";
+  const fileHref = doc.pdf_file || doc.external_url || "";
 
-    let documentLink = escapeHtml(title);
-    if (doc.pdf_file) {
-        documentLink = `
-            <a href="${escapeHtml(doc.pdf_file)}" target="_blank" rel="noopener noreferrer">
-                ${escapeHtml(title)}
-            </a>`;
-    } else if (doc.external_url) {
-        documentLink = `
-            <a href="${escapeHtml(doc.external_url)}" target="_blank" rel="noopener noreferrer">
-                ${escapeHtml(title)}
-            </a>`;
-    }
+  const viewCell = fileHref
+    ? `<a href="${escapeHtml(fileHref)}" target="_blank" rel="noopener noreferrer" class="view-doc-link">View</a>`
+    : `<span style="color:#94a3b8;">—</span>`;
 
-    const section = getSectionDisplayName(doc.section);
-    const financialYear = doc.financial_year || "-";
-    const date =
-        doc.date ||
-        doc.release_date ||
-        doc.disclosure_date ||
-        doc.meeting_date ||
-        doc.created_at ||
-        "-";
+  const section = getSectionDisplayName(doc.section);
+  const financialYear = doc.financial_year || "-";
+  const date =
+    doc.date ||
+    doc.release_date ||
+    doc.disclosure_date ||
+    doc.meeting_date ||
+    doc.created_at ||
+    "-";
 
-    const isPublished =
-        doc.published === true || doc.published === "true" || doc.published === 1;
-    const statusBadge = isPublished
-        ? `<span class="status-badge published">Published</span>`
-        : `<span class="status-badge unpublished">Unpublished</span>`;
+  const isPublished =
+    doc.published === true || doc.published === "true" || doc.published === 1;
+  const statusBadge = isPublished
+    ? `<span class="status-badge published">Published</span>`
+    : `<span class="status-badge unpublished">Unpublished</span>`;
 
-    row.innerHTML = `
-        <td>${documentLink}</td>
-        <td>${escapeHtml(section)}</td>
-        <td>${escapeHtml(financialYear)}</td>
-        <td>${escapeHtml(date)}</td>
-        <td>${statusBadge}</td>
-        <td>
-            <div class="document-actions">
-                <button type="button" class="action-btn edit-btn"
-                        onclick="openEditModal(${doc.id}, '${escapeHtml(doc.section)}')"
-                        title="Edit document">✎ Edit</button>
-                <button type="button" class="action-btn delete-btn"
-                        onclick="deleteDocument(${doc.id}, '${escapeHtml(doc.section)}')"
-                        title="Delete document">🗑 Delete</button>
-            </div>
-        </td>
-    `;
-    return row;
+  row.innerHTML = `
+    <td>${escapeHtml(title)}</td>
+    <td>${viewCell}</td>
+    <td>${escapeHtml(section)}</td>
+    <td>${escapeHtml(financialYear)}</td>
+    <td>${escapeHtml(date)}</td>
+    <td>${statusBadge}</td>
+    <td>
+      <div class="document-actions">
+        <button type="button" class="action-btn edit-btn"
+                onclick="openEditModal(${doc.id}, '${escapeHtml(doc.section)}')"
+                title="Edit document">✎ Edit</button>
+        <button type="button" class="action-btn delete-btn"
+                onclick="deleteDocument(${doc.id}, '${escapeHtml(doc.section)}')"
+                title="Delete document">🗑 Delete</button>
+      </div>
+    </td>
+  `;
+  return row;
 }
 
 function updateDocumentsPagination(totalFiltered) {
@@ -410,7 +403,7 @@ function buildEditFields(section, doc) {
                     { value: "Q2", label: "Q2" },
                     { value: "Q3", label: "Q3" },
                     { value: "Q4", label: "Q4" },
-                    { value: "Annual", label: "Annual" },
+                    
                 ],
                 true
             )
@@ -435,7 +428,7 @@ function buildEditFields(section, doc) {
                     { value: "Q2", label: "Q2" },
                     { value: "Q3", label: "Q3" },
                     { value: "Q4", label: "Q4" },
-                    { value: "Annual", label: "Annual" },
+                   
                 ],
                 section === "shareholding_pattern"
             )

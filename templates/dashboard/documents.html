@@ -39,35 +39,37 @@
 
         <div class="table-container">
             <table>
-                <thead>
-                    <tr>
-                        <th>Document</th>
-                        <th>Section</th>
-                        <th>
-                            <div>
-                                <select id="documentYearFilter" class="table-filter-select">
-                                    <option value="all">Financial Year</option>
-                                </select>
-                            </div>
-                        </th>
-                        <th>Date</th>
-                        <th>
-                            <div style="display: flex; align-items: center; gap: 6px;">
-                                <select id="documentStatusFilter" class="table-filter-select">
-                                    <option value="all">Status</option>
-                                    <option value="published">Published</option>
-                                    <option value="unpublished">Unpublished</option>
-                                </select>
-                            </div>
-                        </th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="documentsTableBody">
-                    <tr>
-                        <td colspan="6" class="table-empty">Loading documents...</td>
-                    </tr>
-                </tbody>
+                    <thead>
+              <tr>
+                <th>Title</th>
+                <th>View</th>
+                <th>Section</th>
+                <th>
+                  <div>
+                    <select id="documentYearFilter" class="table-filter-select">
+                      <option value="all">Financial Year</option>
+                    </select>
+                  </div>
+                </th>
+                <th>Date</th>
+                <th>
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <select id="documentStatusFilter" class="table-filter-select">
+                      <option value="all">Status</option>
+                      <option value="published">Published</option>
+                      <option value="unpublished">Unpublished</option>
+                    </select>
+                  </div>
+                </th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="documentsTableBody">
+              <tr>
+                <td colspan="7" class="table-empty">Loading documents...</td>
+              </tr>
+            </tbody>
+                
             </table>
         </div>
 

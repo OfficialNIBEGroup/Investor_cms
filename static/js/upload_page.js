@@ -27,26 +27,63 @@ function showSectionFields(section) {
         dynamicFields.appendChild(createSelect("Financial Year", "financial_year", financialYearOptions, true));
     }
 
-    /* 2. Financial Results */
-    else if (section === "financial_result") {
-        dynamicFields.appendChild(createField("Document Title", "title", "text", true));
-        dynamicFields.appendChild(createSelect("Financial Year", "financial_year", financialYearOptions, true));
-        dynamicFields.appendChild(
-            createSelect(
-                "Quarter",
-                "quarter",
-                [
-                    { value: "Q1", label: "Q1" },
-                    { value: "Q2", label: "Q2" },
-                    { value: "Q3", label: "Q3" },
-                    { value: "Q4", label: "Q4" },
-                    { value: "Annual", label: "Annual" },
-                ],
-                true
-            )
-        );
-        dynamicFields.appendChild(createField("Release Date", "release_date", "date", true));
-    }
+   /* 2. Financial Results */
+  else if (section === "financial_result") {
+    dynamicFields.appendChild(createField("Document Title", "title", "text", true));
+    dynamicFields.appendChild(createSelect("Financial Year", "financial_year", financialYearOptions, true));
+    dynamicFields.appendChild(
+      createSelect(
+        "Quarter",
+        "quarter",
+        [
+          { value: "Q1", label: "Q1" },
+          { value: "Q2", label: "Q2" },
+          { value: "Q3", label: "Q3" },
+          { value: "Q4", label: "Q4" },
+        ],
+        true
+      )
+    );
+    dynamicFields.appendChild(createField("Release Date", "release_date", "date", true));
+  }
+
+  /* 5. Corporate Governance */
+  else if (section === "corporate_governance") {
+    dynamicFields.appendChild(createField("Document Title", "title", "text", true));
+    dynamicFields.appendChild(createSelect("Financial Year", "financial_year", financialYearOptions, true));
+    dynamicFields.appendChild(
+      createSelect(
+        "Quarter",
+        "quarter",
+        [
+          { value: "Q1", label: "Q1" },
+          { value: "Q2", label: "Q2" },
+          { value: "Q3", label: "Q3" },
+          { value: "Q4", label: "Q4" },
+        ],
+        true
+      )
+    );
+  }
+
+  /* 6. Shareholding Pattern */
+  else if (section === "shareholding_pattern") {
+    dynamicFields.appendChild(createField("Document Title", "title", "text", true));
+    dynamicFields.appendChild(createSelect("Financial Year", "financial_year", financialYearOptions, true));
+    dynamicFields.appendChild(
+      createSelect(
+        "Quarter",
+        "quarter",
+        [
+          { value: "Q1", label: "Q1" },
+          { value: "Q2", label: "Q2" },
+          { value: "Q3", label: "Q3" },
+          { value: "Q4", label: "Q4" },
+        ],
+        true
+      )
+    );
+  }
 
     /* 3. Annual Returns */
     else if (section === "annual_return") {

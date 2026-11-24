@@ -79,7 +79,7 @@ class FinancialResult(DocumentBase):
             ("Q2", "Q2"),
             ("Q3", "Q3"),
             ("Q4", "Q4"),
-            ("Annual", "Annual"),
+        
         ]
     )
 
@@ -242,6 +242,9 @@ class AuditLog(models.Model):
         ("uploaded", "Uploaded"),
         ("edited", "Edited"),
         ("deleted", "Deleted"),
+        ("registered", "Account Registered"),
+        ("approved", "Account Approved"),
+        ("rejected", "Account Rejected"),
     ]
 
     document_title = models.CharField(max_length=255)
@@ -521,43 +524,51 @@ for _pdf_model in PDF_SOURCE_MODELS:
 # Roles: ADMIN, EMPLOYEE, CLIENT
 
 class Profile(models.Model):
-    """
-    Extra information for every User.
-    Main purpose: store the ROLE of the user.
-    """
-
-    # Choices for the role field
     ROLE_CHOICES = (
-        ('ADMIN', 'Admin'),         # Full power (manage employees + documents)
-        ('EMPLOYEE', 'Employee'),   # Can upload / edit / delete documents
-        ('CLIENT', 'Client'),       # Outside user (currently no dashboard access)
+        ('ADMIN', 'Admin'),
+        ('EMPLOYEE', 'Employee'),
+        ('CLIENT', 'Client'),
     )
 
-    # One-to-One link with Django User
-    # related_name='profile' → you can do request.user.profile
+    APPROVAL_STATUS_CHOICES = (
+        ('PENDING', 'Pending'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+    )
+
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
         related_name='profile'
     )
 
-    # The actual role
+    employee_id = models.CharField(
+        max_length=50,
+        unique=True,
+        blank=True,
+        null=True
+    )
+
     role = models.CharField(
         max_length=20,
         choices=ROLE_CHOICES,
-        default='EMPLOYEE'          # New users are Employee by default
+        default='EMPLOYEE'
     )
 
-    # Optional fields you can use later
+    approval_status = models.CharField(
+        max_length=20,
+        choices=APPROVAL_STATUS_CHOICES,
+        default='APPROVED'
+    )
+
     phone = models.CharField(max_length=15, blank=True, null=True)
     department = models.CharField(max_length=100, blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} → {self.get_role_display()}"
+        return f"{self.user.username} → {self.get_role_display()} ({self.get_approval_status_display()})"
 
-    # ---------- Helper properties (very useful in views & templates) ----------
     @property
     def is_admin(self):
         return self.role == 'ADMIN'
@@ -570,6 +581,9 @@ class Profile(models.Model):
     def is_client(self):
         return self.role == 'CLIENT'
 
+    @property
+    def is_approved(self):
+        return self.approval_status == 'APPROVED'
 
 # ---------- Auto create Profile when a new User is created ----------
 @receiver(post_save, sender=User)
